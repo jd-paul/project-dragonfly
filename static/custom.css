@@ -20,9 +20,9 @@
   height: 100vh;
 }
 
-.vcenter-item{
-    display: flex;
-    align-items: center;
+.vcenter-item {
+  display: flex;
+  align-items: center;
 }
 
 /*
@@ -45,6 +45,7 @@ p.cover-text {
   padding-bottom: 30px;
   border-radius: 15%;
 }
+
 .cover-card-block {
   opacity: 1
 }
@@ -82,13 +83,13 @@ ul.errorlist {
  */
 .profile-image {
   width: 120px;
-  clear:both;
-  float:left;
+  clear: both;
+  float: left;
 }
 
 .profile-text {
-  overflow:hidden;
-  padding-left:20px
+  overflow: hidden;
+  padding-left: 20px
 }
 
 h3.profile-title {
@@ -109,6 +110,7 @@ h3.profile-title {
   text-decoration: none;
   color: #0d6efd;
 }
+
 .content a:hover {
   text-decoration: underline;
   color: #0d6efd;

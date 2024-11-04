@@ -1,23 +1,38 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block body %}
-  <div class="container vh-100">
-    <div class="row h-100">
-      <div class="col-12 my-auto">
-        <div class="card cover-card offset-sm-2 offset-md-4 offset-lg-7">
-          <h1 class="cover-heading">Task Manager</h1>
-          <p class="cover-text">A task manager application by Team <i>Insert team name here (or revise this home screen as you see fit)</i></p>
-          <p>
-            <a href='{% url 'sign_up' %}' class="btn btn-lg btn-secondary">
-              Sign up
-            </a>
-          </p>
-          <p>
-            <a href='{% url 'log_in' %}' class="btn btn-lg btn-secondary">
-              Log in
-            </a>
-          </p>
+<div class="container-fluid vh-100 position-relative"
+  style="background-image: url('{% static 'images/tuition.jpg' %}'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+  <div class="overlay"
+    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1;">
+  </div>
+
+  <div class="row h-100 justify-content-center align-items-center" style="position: relative; z-index: 2;">
+    <div class="col-12 col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <h1 class="card-title text-center">Code Tutors Manager</h1>
+          <h2 class="card-title text-center">Log in</h2>
+          <form method="post" action="{% url 'log_in' %}">
+            {% csrf_token %}
+            <div class="form-group mt-2">
+              <label for="username">Username</label>
+              <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+            <div class="form-group mt-2">
+              <label for="password">Password</label>
+              <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <div class="text-center">
+              <button type="submit" class="btn btn-primary btn-block mt-3">Log In</button>
+            </div>
+          </form>
+          <div class="text-center mt-3">
+            <p>Don't have an account? <a href='{% url 'sign_up' %}'>Sign up</a></p>
+          </div>
         </div>
       </div>
     </div>
   </div>
+</div>
 {% endblock %}

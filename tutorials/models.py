@@ -3,6 +3,13 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from libgravatar import Gravatar
 
+
+""" This might be unneccessary, but I'm going to keep it for now. It's unused code """
+class UserType(models.TextChoices):
+    TUTOR = 'Tutor', 'Tutor'
+    ADMIN = 'Admin', 'Admin'
+    STUDENT = 'Student', 'Student'
+
 class User(AbstractUser):
     """Model used for user authentication, and team member related information."""
 
@@ -11,9 +18,11 @@ class User(AbstractUser):
         unique=True,
         validators=[RegexValidator(
             regex=r'^@\w{3,}$',
-            message='Username must consist of @ followed by at least three alphanumericals'
-        )]
+            message='Username must start with @ followed by at least three alphanumeric characters (letters, numbers, or underscore).'
+        )],
+        help_text='Enter a username starting with "@" followed by at least three alphanumeric characters.',
     )
+
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
     email = models.EmailField(unique=True, blank=False)
