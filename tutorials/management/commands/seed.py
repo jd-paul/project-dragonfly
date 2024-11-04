@@ -1,17 +1,14 @@
 from django.core.management.base import BaseCommand, CommandError
-
 from tutorials.models import User
-
 import pytz
 from faker import Faker
 from random import randint, random
 
 user_fixtures = [
-    {'username': '@johndoe', 'email': 'john.doe@example.org', 'first_name': 'John', 'last_name': 'Doe'},
-    {'username': '@janedoe', 'email': 'jane.doe@example.org', 'first_name': 'Jane', 'last_name': 'Doe'},
-    {'username': '@charlie', 'email': 'charlie.johnson@example.org', 'first_name': 'Charlie', 'last_name': 'Johnson'},
+    {'username': '@johndoe', 'email': 'john.doe@example.org', 'first_name': 'John', 'last_name': 'Doe', 'user_type': 'Admin'},
+    {'username': '@janedoe', 'email': 'jane.doe@example.org', 'first_name': 'Jane', 'last_name': 'Doe', 'user_type': 'Admin'},
+    {'username': '@charlie', 'email': 'charlie.johnson@example.org', 'first_name': 'Charlie', 'last_name': 'Johnson', 'user_type': 'Student'},
 ]
-
 
 class Command(BaseCommand):
     """Build automation command to seed the database."""
@@ -37,7 +34,7 @@ class Command(BaseCommand):
 
     def generate_random_users(self):
         user_count = User.objects.count()
-        while  user_count < self.USER_COUNT:
+        while user_count < self.USER_COUNT:
             print(f"Seeding user {user_count}/{self.USER_COUNT}", end='\r')
             self.generate_user()
             user_count = User.objects.count()
@@ -48,8 +45,18 @@ class Command(BaseCommand):
         last_name = self.faker.last_name()
         email = create_email(first_name, last_name)
         username = create_username(first_name, last_name)
-        self.try_create_user({'username': username, 'email': email, 'first_name': first_name, 'last_name': last_name})
-       
+
+        # Determine user type based on random chance
+        user_type = self.assign_user_type()
+
+        self.try_create_user({
+            'username': username,
+            'email': email,
+            'first_name': first_name,
+            'last_name': last_name,
+            'user_type': user_type
+        })
+
     def try_create_user(self, data):
         try:
             self.create_user(data)
@@ -63,7 +70,18 @@ class Command(BaseCommand):
             password=Command.DEFAULT_PASSWORD,
             first_name=data['first_name'],
             last_name=data['last_name'],
+            user_type=data['user_type']  # Set user type here
         )
+
+    def assign_user_type(self):
+        """Assign a user type with 90% chance for Student, 5% for Tutor, and 5% for Admin."""
+        rand_num = random()
+        if rand_num < 0.9:
+            return 'Student'  # 90% chance
+        elif rand_num < 0.95:
+            return 'Tutor'    # 5% chance
+        else:
+            return 'Admin'    # 5% chance
 
 def create_username(first_name, last_name):
     return '@' + first_name.lower() + last_name.lower()
