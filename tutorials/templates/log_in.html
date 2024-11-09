@@ -1,14 +1,51 @@
 {% extends 'base_content.html' %}
+{% load static %} <!-- Load static files -->
+
 {% block content %}
-<div class="container">
-  <div class="row">
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 100vh; display: flex; flex-direction: column; justify-content: center;">
+  <div class="row w-100">
     <div class="col-sm-12 col-md-6 offset-md-3">
-      <h1>Log in</h1>
-      <form action="{% url 'log_in' %}" method="post">
+      <form action="{% url 'log_in' %}" method="post" class="form-signin">
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ next }}">
-        {% include 'partials/bootstrap_form.html' with form=form %}
-        <input type="submit" value="Log in" class="btn btn-primary">
+
+        <h1 class="h1 mb-3 font-weight-normal">Coding Tutor</h1>
+        <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+
+        <!-- Username Field -->
+        <label for="inputUsername" class="sr-only">Username</label>
+        <input type="text" id="inputUsername" name="username" class="form-control" placeholder="Username (e.g. @name)"
+          required autofocus value="{{ form.username.value }}" pattern="^@[\w]+$"
+          title="Username must start with '@' and contain only letters, numbers, and underscores">
+
+        <!-- Password Field -->
+        <label for="inputPassword" class="sr-only">Password</label>
+        <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required
+          value="{{ form.password.value }}">
+
+        <!-- Remember Me Checkbox -->
+        <div class="checkbox mb-3">
+          <label>
+            <input type="checkbox" name="remember_me" {% if form.remember_me.value %}checked{% endif %}> Remember me
+          </label>
+        </div>
+
+        <!-- Submit Button -->
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+
+        <!-- Error Messages -->
+        {% if form.errors %}
+        <div class="alert alert-danger mt-3">
+          <ul>
+            {% for field in form %}
+            {% for error in field.errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
       </form>
     </div>
   </div>

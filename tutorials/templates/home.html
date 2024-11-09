@@ -40,13 +40,15 @@
       </ol>
       <div class="carousel-inner">
         <div class="carousel-item active">
-          <img class="first-slide"
-            src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" alt="First slide">
+          <img class="first-slide img-fluid mx-auto" src="{% static 'images/tuition.jpg' %}" alt="First slide"
+            style="max-width: 100%; height: auto; filter: brightness(30%);">
+
+
           <div class="container">
             <div class="carousel-caption text-left">
               <h1>Welcome to Coding Tutors.</h1>
               <p>Created by Ahmed, Anahita, Juri, TK, Paul.</p>
-              <p><a class="btn btn-lg btn-primary" href="#" role="button">Log in</a></p>
+              <p><a class="btn btn-lg btn-primary" href="{% url 'log_in' %}" role="button">Log in</a></p>
             </div>
           </div>
         </div>
@@ -95,38 +97,30 @@
     <div class="container marketing">
 
       <!-- Three columns of text below the carousel -->
+      <h1 class="text-center mb-5">Our Satisfied Customers</h1>
       <div class="row">
         <div class="col-lg-4">
-          <img class="rounded-circle"
-            src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="
-            alt="Generic placeholder image" width="140" height="140">
-          <h2>Heading</h2>
-          <p>Donec sed odio dui. Etiam porta sem malesuada magna
-            mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit.
-            Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent
-            commodo cursus magna.</p>
+          <img class="rounded-circle mb-1" src="{% static 'images/person-a.jpg' %}" alt="Student" width="140"
+            height="140">
+          <h2>Joel F. Campbell</h2>
+          <p>"Code Tutors' support in JavaScript and web development was invaluable; I created my first interactive
+            website and gained the skills to enhance it further."</p>
           <p><a class="btn btn-secondary" href="#" role="button">View details »</a></p>
         </div><!-- /.col-lg-4 -->
         <div class="col-lg-4">
-          <img class="rounded-circle"
-            src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="
-            alt="Generic placeholder image" width="140" height="140">
-          <h2>Heading</h2>
-          <p>Duis mollis, est non commodo luctus, nisi erat porttitor
-            ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus
-            sit amet fermentum. Fusce dapibus, tellus ac cursus commodo, tortor
-            mauris condimentum nibh.</p>
+          <img class="rounded-circle mb-1" src="{% static 'images/person-b.jpg' %}" alt="Student" width="140"
+            height="140">
+          <h2>Nash I. Shookler</h2>
+          <p>"With Code Tutors' guidance in C++ and data structures, I finally understood complex algorithms and
+            improved my problem-solving skills for technical interviews."</p>
           <p><a class="btn btn-secondary" href="#" role="button">View details »</a></p>
         </div><!-- /.col-lg-4 -->
         <div class="col-lg-4">
-          <img class="rounded-circle"
-            src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="
-            alt="Generic placeholder image" width="140" height="140">
-          <h2>Heading</h2>
-          <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis
-            in, egestas eget quam. Vestibulum id ligula porta felis euismod semper.
-            Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum
-            nibh, ut fermentum massa justo sit amet risus.</p>
+          <img class="rounded-circle mb-1" src="{% static 'images/person-c.jpg' %}" alt="Student" width="140"
+            height="140">
+          <h2>Marl D. Bennett</h2>
+          <p>"Code Tutors made learning Python so much easier; their structured approach helped me go from a beginner to
+            building my own projects confidently."</p>
           <p><a class="btn btn-secondary" href="#" role="button">View details »</a></p>
         </div><!-- /.col-lg-4 -->
       </div><!-- /.row -->
@@ -138,17 +132,17 @@
 
       <div class="row featurette">
         <div class="col-md-7">
-          <h2 class="featurette-heading">First featurette heading. <span class="text-muted">It'll blow your mind.</span>
+          <h2 class="featurette-heading">Why Coding Tutors? <span class="text-muted">We will blow your mind.</span>
           </h2>
-          <p class="lead">Donec ullamcorper nulla non metus auctor
-            fringilla. Vestibulum id ligula porta felis euismod semper. Praesent
-            commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus,
-            tellus ac cursus commodo.</p>
+          <p class="lead">At Code Tutors, we empower learners of all levels to excel in programming through personalized
+            guidance and expert support. Whether you're diving into Python, mastering JavaScript, or exploring data
+            science, our experienced tutors are here to help you every step of the way. With hands-on learning and
+            real-world projects, we make coding engaging and practical, helping you build confidence and skills that
+            last.</p>
         </div>
         <div class="col-md-5">
-          <img class="featurette-image img-fluid mx-auto" data-src="holder.js/500x500/auto" alt="500x500"
-            style="width: 500px; height: 500px;"
-            src="data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22500%22%20height%3D%22500%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20500%20500%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_193114ec70d%20text%20%7B%20fill%3A%23AAAAAA%3Bfont-weight%3Abold%3Bfont-family%3AArial%2C%20Helvetica%2C%20Open%20Sans%2C%20sans-serif%2C%20monospace%3Bfont-size%3A25pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_193114ec70d%22%3E%3Crect%20width%3D%22500%22%20height%3D%22500%22%20fill%3D%22%23EEEEEE%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%22184.13333129882812%22%20y%3D%22261.4%22%3E500x500%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E"
+          <img class="featurette-image img-fluid mx-auto" alt="500x500"
+            style="width: 500px; height: 500px; object-fit: cover;" src="{% static 'images/tuition.jpg' %}"
             data-holder-rendered="true">
         </div>
       </div>
@@ -157,16 +151,16 @@
 
       <div class="row featurette">
         <div class="col-md-7 order-md-2">
-          <h2 class="featurette-heading">Oh yeah, it's that good. <span class="text-muted">See for yourself.</span></h2>
-          <p class="lead">Donec ullamcorper nulla non metus auctor
-            fringilla. Vestibulum id ligula porta felis euismod semper. Praesent
-            commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus,
-            tellus ac cursus commodo.</p>
+          <h2 class="featurette-heading">Just look at the results. <span class="text-muted">See for yourself.</span>
+          </h2>
+          <p class="lead">Our students have gone on to develop impressive web applications, solve complex algorithms,
+            and build machine learning models. Coding Tutors has been instrumental in helping them achieve their career
+            goals, providing personalized guidance and expert instruction every step of the way.</p>
+
         </div>
         <div class="col-md-5 order-md-1">
-          <img class="featurette-image img-fluid mx-auto" data-src="holder.js/500x500/auto" alt="500x500"
-            style="width: 500px; height: 500px;"
-            src="data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22500%22%20height%3D%22500%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20500%20500%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_193114ec70e%20text%20%7B%20fill%3A%23AAAAAA%3Bfont-weight%3Abold%3Bfont-family%3AArial%2C%20Helvetica%2C%20Open%20Sans%2C%20sans-serif%2C%20monospace%3Bfont-size%3A25pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_193114ec70e%22%3E%3Crect%20width%3D%22500%22%20height%3D%22500%22%20fill%3D%22%23EEEEEE%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%22184.13333129882812%22%20y%3D%22261.4%22%3E500x500%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E"
+          <img class="featurette-image img-fluid mx-auto" alt="500x500"
+            style="width: 500px; height: 500px; object-fit: cover;" src="{% static 'images/tuition.jpg' %}"
             data-holder-rendered="true">
         </div>
       </div>
@@ -175,16 +169,15 @@
 
       <div class="row featurette">
         <div class="col-md-7">
-          <h2 class="featurette-heading">And lastly, this one. <span class="text-muted">Checkmate.</span></h2>
-          <p class="lead">Donec ullamcorper nulla non metus auctor
-            fringilla. Vestibulum id ligula porta felis euismod semper. Praesent
-            commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus,
-            tellus ac cursus commodo.</p>
+          <h2 class="featurette-heading">The final step in your coding journey. <span class="text-muted">We'll get you
+              there.</span></h2>
+          <p class="lead">From beginner to expert, our tailored tutoring sessions ensure you master the skills that
+            matter most. Whether you're building apps, diving into data science, or exploring new programming languages,
+            Code Tutors equips you with the tools and knowledge to succeed.</p>
         </div>
         <div class="col-md-5">
-          <img class="featurette-image img-fluid mx-auto" data-src="holder.js/500x500/auto" alt="500x500"
-            style="width: 500px; height: 500px;"
-            src="data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22500%22%20height%3D%22500%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20500%20500%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_193114ec70e%20text%20%7B%20fill%3A%23AAAAAA%3Bfont-weight%3Abold%3Bfont-family%3AArial%2C%20Helvetica%2C%20Open%20Sans%2C%20sans-serif%2C%20monospace%3Bfont-size%3A25pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_193114ec70e%22%3E%3Crect%20width%3D%22500%22%20height%3D%22500%22%20fill%3D%22%23EEEEEE%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%22184.13333129882812%22%20y%3D%22261.4%22%3E500x500%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E"
+          <img class="featurette-image img-fluid mx-auto" alt="500x500"
+            style="width: 500px; height: 500px; object-fit: cover;" src="{% static 'images/tuition.jpg' %}"
             data-holder-rendered="true">
         </div>
       </div>
@@ -199,7 +192,7 @@
     <!-- FOOTER -->
     <footer class="container">
       <p class="float-right"><a href="#">Back to top</a></p>
-      <p>© 2017-2018 Company, Inc. · <a href="#">Privacy</a> · <a href="#">Terms</a></p>
+      <p>© 2023-2024 Code Tutors, Inc. · <a href="#">Privacy</a> · <a href="#">Terms</a></p>
     </footer>
   </main>
 
