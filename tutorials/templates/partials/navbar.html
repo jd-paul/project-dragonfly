@@ -1,16 +1,29 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3" style="background-color: #262B2B; color: white;">
-  <div class="container">
-    <h4><a class="navbar-brand" href="{% url 'dashboard' %}">
-        Code Tutors - Task Manager ({{ user.user_type }})
-      </a></h4>
-    <button class="navbar-toggler p-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"
-      style="width: 50px; height: 50px;">
-      <span class="navbar-toggler-icon" style="width: 30px; height: 3px;"></span>
-    </button>
-
-    {% if user.is_authenticated %}
+{% if user.is_authenticated %}
+<nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
+  <a class="navbar-brand" href="{% url 'dashboard' %}">Coding Tutors - <b>{{ user.user_type }} view</b></a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
+    aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarCollapse">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Link</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link disabled" href="#">Disabled</a>
+      </li>
+    </ul>
     {% include 'partials/menu.html' %}
-    {% endif %}
   </div>
 </nav>
+
+<!-- <form class="form-inline mt-2 mt-md-0">
+  <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+  <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+</form> -->
+
+{% endif %}
