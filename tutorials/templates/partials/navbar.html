@@ -2,6 +2,8 @@
 <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
   {% if user.user_type == 'ADMIN' %}
     <a class="navbar-brand" href="{% url 'admin_dashboard' %}">Coding Tutors - <b>{{ user.user_type }} view</b></a>
+  {% elif user.user_type == 'TUTOR' %}
+    <a class="navbar-brand" href="{% url 'tutor_dashboard' %}">Coding Tutors - <b>{{ user.user_type }} view</b></a>
   {% else %}
     <a class="navbar-brand" href="{% url 'dashboard' %}">Coding Tutors - <b>{{ user.user_type }} view</b></a>
   {% endif %}

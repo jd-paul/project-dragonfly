@@ -1,12 +1,7 @@
 {% extends 'base_content.html' %}
 {% block content %}
 <div class="container">
-  <div class="row">
-    <div class="col-12">
-      <h1>Welcome to your dashboard, {{ user.username }}</h1>
-      <p>Admin Dashboard Overview</p>
-    </div>
-  </div>
+  {% include 'partials/_welcome_message.html' with overview_text="Admin Dashboard Overview" %}
   <div class="row mt-4">
     <!-- Tutors Allocation Section -->
     <div class="col-12">

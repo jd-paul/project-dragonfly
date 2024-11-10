@@ -17,11 +17,13 @@ from django.http import HttpResponseForbidden
 def dashboard(request):
     """Display the current user's dashboard."""
     if request.user.user_type == 'ADMIN':
-        return redirect('admin_dashboard') 
+        return redirect('admin_dashboard')
+    elif request.user.user_type == 'TUTOR':
+        return redirect('tutor_dashboard'); 
     current_user = request.user
     return render(request, 'dashboard.html', {'user': current_user})
 
-@login_required
+@login_required 
 def admin_dashboard(request):
     """Display the admin dashboard, accessible only by admins."""
     
@@ -29,6 +31,15 @@ def admin_dashboard(request):
         return HttpResponseForbidden("You do not have permission to access this page.")
     
     return render(request, 'admin_dashboard.html', {'user': request.user})
+
+@login_required
+def tutor_dashboard(request):
+    """Display the tutor dashboard, accessible only by tutors."""
+    
+    if request.user.user_type != UserType.TUTOR:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    
+    return render(request, 'tutor_dashboard.html', {'user': request.user})
 
 @login_prohibited
 def home(request):
@@ -87,6 +98,8 @@ class LogInView(LoginProhibitedMixin, View):
             # Redirect based on user type
             if user.user_type == UserType.ADMIN:
                 return redirect('admin_dashboard')
+            elif user.user_type == UserType.TUTOR:
+                return redirect('tutor_dashboard')
             return redirect(self.next)
         messages.add_message(request, messages.ERROR, "The credentials provided were invalid!")
         return self.render()
