@@ -16,7 +16,8 @@ from django.http import HttpResponseForbidden
 @login_required
 def dashboard(request):
     """Display the current user's dashboard."""
-
+    if request.user.user_type == 'ADMIN':
+        return redirect('admin_dashboard') 
     current_user = request.user
     return render(request, 'dashboard.html', {'user': current_user})
 
@@ -83,6 +84,9 @@ class LogInView(LoginProhibitedMixin, View):
         user = form.get_user()
         if user is not None:
             login(request, user)
+            # Redirect based on user type
+            if user.user_type == UserType.ADMIN:
+                return redirect('admin_dashboard')
             return redirect(self.next)
         messages.add_message(request, messages.ERROR, "The credentials provided were invalid!")
         return self.render()
