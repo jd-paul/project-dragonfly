@@ -10,7 +10,8 @@ from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from tutorials.forms import LogInForm, PasswordForm, UserForm, SignUpForm
 from tutorials.helpers import login_prohibited
-
+from tutorials.models import UserType
+from django.http import HttpResponseForbidden
 
 @login_required
 def dashboard(request):
@@ -19,6 +20,14 @@ def dashboard(request):
     current_user = request.user
     return render(request, 'dashboard.html', {'user': current_user})
 
+@login_required
+def admin_dashboard(request):
+    """Display the admin dashboard, accessible only by admins."""
+    
+    if request.user.user_type != UserType.ADMIN:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    
+    return render(request, 'admin_dashboard.html', {'user': request.user})
 
 @login_prohibited
 def home(request):
