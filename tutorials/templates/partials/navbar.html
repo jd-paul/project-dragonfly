@@ -1,8 +1,8 @@
 {% if user.is_authenticated %}
 <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
-  {% if user.user_type == 'ADMIN' %}
+  {% if user.user_type == 'Admin' %}
     <a class="navbar-brand" href="{% url 'admin_dashboard' %}">Coding Tutors - <b>{{ user.user_type }} view</b></a>
-  {% elif user.user_type == 'TUTOR' %}
+  {% elif user.user_type == 'Tutor' %}
     <a class="navbar-brand" href="{% url 'tutor_dashboard' %}">Coding Tutors - <b>{{ user.user_type }} view</b></a>
   {% else %}
     <a class="navbar-brand" href="{% url 'dashboard' %}">Coding Tutors - <b>{{ user.user_type }} view</b></a>
