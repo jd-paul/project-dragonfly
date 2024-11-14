@@ -20,6 +20,8 @@ def dashboard(request):
         return redirect('admin_dashboard')
     elif request.user.user_type == 'TUTOR':
         return redirect('tutor_dashboard'); 
+    elif request.user.user_type == 'STUDENT':
+        return redirect('student_dashboard'); 
     current_user = request.user
     return render(request, 'dashboard.html', {'user': current_user})
 
@@ -40,6 +42,15 @@ def tutor_dashboard(request):
         return HttpResponseForbidden("You do not have permission to access this page.")
     
     return render(request, 'tutor_dashboard.html', {'user': request.user})
+
+@login_required
+def student_dashboard(request):
+    """Display the student dashboard, accessible only by students."""
+    
+    if request.user.user_type != UserType.STUDENT:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    
+    return render(request, 'student_dashboard.html', {'user': request.user})
 
 @login_prohibited
 def home(request):
@@ -100,6 +111,8 @@ class LogInView(LoginProhibitedMixin, View):
                 return redirect('admin_dashboard')
             elif user.user_type == UserType.TUTOR:
                 return redirect('tutor_dashboard')
+            elif user.user_type == UserType.STUDENT:
+                return redirect('student_dashboard')
             return redirect(self.next)
         messages.add_message(request, messages.ERROR, "The credentials provided were invalid!")
         return self.render()

@@ -4,6 +4,8 @@
     <a class="navbar-brand" href="{% url 'admin_dashboard' %}">Coding Tutors - <b>{{ user.user_type }} view</b></a>
   {% elif user.user_type == 'Tutor' %}
     <a class="navbar-brand" href="{% url 'tutor_dashboard' %}">Coding Tutors - <b>{{ user.user_type }} view</b></a>
+  {% elif user.user_type == 'Student' %}
+    <a class="navbar-brand" href="{% url 'student_dashboard' %}">Coding Tutors - <b>{{ user.user_type }} view</b></a>
   {% else %}
     <a class="navbar-brand" href="{% url 'dashboard' %}">Coding Tutors - <b>{{ user.user_type }} view</b></a>
   {% endif %}
