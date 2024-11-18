@@ -1,6 +1,15 @@
 {% extends 'base_content.html' %}
 {% block content %}
 <div class="container">
-  {% include 'partials/_welcome_message.html' with overview_text="User Dashboard Overview" %}
+{% include 'partials/_welcome_message.html' with overview_text="User Dashboard Overview" %}
+
+{% if user.user_type == 'Admin' %}
+    {% include 'partials/dashboard/admin_dashboard.html' %}
+{% elif user.user_type == 'Tutor' %}
+    {% include 'partials/dashboard/tutor_dashboard.html' %}
+{% else %}
+    {% include 'partials/dashboard/student_dashboard.html' %}
+{% endif %}
+
 </div>
 {% endblock %}

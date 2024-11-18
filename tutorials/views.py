@@ -12,45 +12,43 @@ from tutorials.forms import LogInForm, PasswordForm, UserForm, SignUpForm
 from tutorials.helpers import login_prohibited
 from tutorials.models import UserType
 from django.http import HttpResponseForbidden
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .helpers import admin_required, tutor_required, student_required
 
 @login_required
 def dashboard(request):
     """Display the current user's dashboard."""
-    if request.user.user_type == 'ADMIN':
-        return redirect('admin_dashboard')
-    elif request.user.user_type == 'TUTOR':
-        return redirect('tutor_dashboard'); 
-    elif request.user.user_type == 'STUDENT':
-        return redirect('student_dashboard'); 
-    current_user = request.user
-    return render(request, 'dashboard.html', {'user': current_user})
+    user = request.user
+    template_name = 'dashboard.html'
+    return render(request, template_name, {'user': user})
 
-@login_required 
-def admin_dashboard(request):
-    """Display the admin dashboard, accessible only by admins."""
+# @login_required 
+# def admin_dashboard(request):
+#     """Display the admin dashboard, accessible only by admins."""
     
-    if request.user.user_type != UserType.ADMIN:
-        return HttpResponseForbidden("You do not have permission to access this page.")
+#     if request.user.user_type != UserType.ADMIN:
+#         return HttpResponseForbidden("You do not have permission to access this page.")
     
-    return render(request, 'admin_dashboard.html', {'user': request.user})
+#     return render(request, 'admin_dashboard.html', {'user': request.user})
 
-@login_required
-def tutor_dashboard(request):
-    """Display the tutor dashboard, accessible only by tutors."""
+# @login_required
+# def tutor_dashboard(request):
+#     """Display the tutor dashboard, accessible only by tutors."""
     
-    if request.user.user_type != UserType.TUTOR:
-        return HttpResponseForbidden("You do not have permission to access this page.")
+#     if request.user.user_type != UserType.TUTOR:
+#         return HttpResponseForbidden("You do not have permission to access this page.")
     
-    return render(request, 'tutor_dashboard.html', {'user': request.user})
+#     return render(request, 'tutor_dashboard.html', {'user': request.user})
 
-@login_required
-def student_dashboard(request):
-    """Display the student dashboard, accessible only by students."""
+# @login_required
+# def student_dashboard(request):
+#     """Display the student dashboard, accessible only by students."""
     
-    if request.user.user_type != UserType.STUDENT:
-        return HttpResponseForbidden("You do not have permission to access this page.")
+#     if request.user.user_type != UserType.STUDENT:
+#         return HttpResponseForbidden("You do not have permission to access this page.")
     
-    return render(request, 'student_dashboard.html', {'user': request.user})
+#     return render(request, 'student_dashboard.html', {'user': request.user})
 
 @login_prohibited
 def home(request):
@@ -86,6 +84,7 @@ class LoginProhibitedMixin:
             return self.redirect_when_logged_in_url
 
 
+
 class LogInView(LoginProhibitedMixin, View):
     """Display login screen and handle user login."""
 
@@ -106,13 +105,6 @@ class LogInView(LoginProhibitedMixin, View):
         user = form.get_user()
         if user is not None:
             login(request, user)
-            # Redirect based on user type
-            if user.user_type == UserType.ADMIN:
-                return redirect('admin_dashboard')
-            elif user.user_type == UserType.TUTOR:
-                return redirect('tutor_dashboard')
-            elif user.user_type == UserType.STUDENT:
-                return redirect('student_dashboard')
             return redirect(self.next)
         messages.add_message(request, messages.ERROR, "The credentials provided were invalid!")
         return self.render()
