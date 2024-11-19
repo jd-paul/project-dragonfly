@@ -1,7 +1,7 @@
 {% extends 'base_content.html' %}
 {% block content %}
 <div class="container">
-{% include 'partials/_welcome_message.html' with overview_text="User Dashboard Overview" %}
+{% include 'partials/_welcome_message.html' %}
 
 {% if user.user_type == 'Admin' %}
     {% include 'partials/dashboard/admin_dashboard.html' %}
