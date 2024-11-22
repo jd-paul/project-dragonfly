@@ -107,10 +107,14 @@ class Frequency(models.TextChoices):
     SIX_DAYS = '6 per week'
     SEVEN_DAYS = '7 per week'
 
-
-class Day(models.Model):
-    day_name = models.CharField(max_length=20)
-
+class DayChoices(models.TextChoices):
+    MONDAY = 'Monday', 'Monday'
+    TUESDAY = 'Tuesday', 'Tuesday'
+    WEDNESDAY = 'Wednesday', 'Wednesday'
+    THURSDAY = 'Thursday', 'Thursday'
+    FRIDAY = 'Friday', 'Friday'
+    SATURDAY = 'Saturday', 'Saturday'
+    SUNDAY = 'Sunday', 'Sunday'
 
 class StudentRequest(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='requests')
@@ -127,13 +131,19 @@ class Enrollment(models.Model):
 
 
 class EnrollmentDays(models.Model):
-    day_name =  models.ForeignKey(Day, on_delete=models.CASCADE, related_name='enrollments')
+    day_name = models.CharField(
+        max_length=10,
+        choices=DayChoices.choices,
+        help_text='Day of the week for the enrollment.',
+    )
     enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, related_name='days')
 
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['day_name', 'enrollment'], name='unique_day_enrollment')
         ]
+
+
 
 class Invoice(models.Model):
     enrollment = models.OneToOneField(Enrollment, on_delete=models.CASCADE, related_name='invoice')
