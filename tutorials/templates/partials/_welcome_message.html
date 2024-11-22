@@ -1,8 +1,51 @@
 <!-- _welcome_message.html -->
-<div class="row">
+
+<head>
+  <style>
+    .sidebar {
+      height: 100vh;
+      /* Full height */
+      width: 80px;
+      /* Fixed width */
+      position: fixed;
+      /* Fixed on the left */
+      top: 0;
+      left: 0;
+      background-color: #f8f9fa;
+      /* Light gray background */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: start;
+      padding-top: 20px;
+      /* Add space at the top */
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+      /* Subtle shadow for distinction */
+    }
+
+    .profile-picture {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      /* Makes it circular */
+      background-color: #e9ecef;
+      /* Light gray placeholder */
+    }
+  </style>
+</head>
+
+<div class="sidebar mt-10">
+  <div class="profile-picture" style="position: relative; z-index: 1;"></div>
+</div>
+
+<!-- Main Content -->
+<div class="container" style="margin-left: 90px;">
+  <!-- _welcome_message.html -->
+  <div class="row">
     <div class="col-12">
-      <h1>Welcome to your dashboard, {{ user.username }}</h1>
+      <h1>Hello, {{ user.first_name }}</h1>
+      <h3 class="h5">{{ user.first_name }} {{ user.last_name }}</h3>
       <p>{{ overview_text }}</p>
     </div>
   </div>
-  
+</div>

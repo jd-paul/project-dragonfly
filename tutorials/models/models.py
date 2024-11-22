@@ -118,7 +118,6 @@ class StudentRequest(models.Model):
     duration = models.TimeField()
     term = models.CharField(max_length=60, choices=Term.choices)
     frequency = models.CharField(max_length=20, choices=Frequency.choices)
-    
 
 class Enrollment(models.Model):
     approved_request = models.ForeignKey(StudentRequest, on_delete=models.CASCADE, related_name='enrollments')

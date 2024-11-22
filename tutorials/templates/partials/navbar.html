@@ -1,7 +1,7 @@
 {% if user.is_authenticated %}
-<nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
-  
-    <a class="navbar-brand" href="{% url 'dashboard' %}">Coding Tutors - <b>{{ user.user_type }} view</b></a>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4" style="z-index: 10; height: 60px;">
+
+  <a class="navbar-brand" href="{% url 'dashboard' %}">Coding Tutors - <b>{{ user.user_type }} view</b></a>
 
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
     aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
