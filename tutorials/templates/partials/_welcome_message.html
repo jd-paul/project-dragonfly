@@ -3,24 +3,20 @@
 <head>
   <style>
     .sidebar {
-      height: 100vh;
-      /* Full height */
-      width: 80px;
-      /* Fixed width */
+      height: calc(100vh - 4rem);
+      /* Full height minus navbar height */
+      width: 10rem;
       position: fixed;
-      /* Fixed on the left */
-      top: 0;
+      top: 4rem;
+      /* Push below the navbar */
       left: 0;
       background-color: #f8f9fa;
-      /* Light gray background */
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: start;
       padding-top: 20px;
-      /* Add space at the top */
-      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-      /* Subtle shadow for distinction */
+      box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
     }
 
     .profile-picture {
@@ -34,8 +30,27 @@
   </style>
 </head>
 
+<!-- There is a navbar on top. How do I make it so that the profile picture just sits right underneath the navbar? -->
+
 <div class="sidebar mt-10">
-  <div class="profile-picture" style="position: relative; z-index: 1;"></div>
+  <div class="profile-picture mb-2" style="position: relative; z-index: 1;"></div>
+  <b>
+    <p class="mb-4" style="color: #454d56; list-style: none; padding: 0; margin: 0;"> {{ user.username }} </p>
+  </b>
+
+  <ul style="list-style: none; padding: 1rem; margin: 0; text-align: center; width: 100%;">
+    <li style="margin-bottom: 1rem;">
+      <a href="#" class="btn btn-light btn-block" style="line-height: 1.2; background-color: #E6EAEF;">Students</a>
+    </li>
+    <li style="margin-bottom: 1rem;">
+      <a href="#" class="btn btn-light btn-block" style="line-height: 1.2; background-color: #E6EAEF;">Tutors</a>
+    </li>
+    <li style="margin-bottom: 1rem;">
+      <a href="#" class="btn btn-light btn-block" style="line-height: 1.2; background-color: #E6EAEF;">Applications</a>
+    </li>
+  </ul>
+
+
 </div>
 
 <!-- Main Content -->
