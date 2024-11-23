@@ -23,39 +23,11 @@ def dashboard(request):
     template_name = 'dashboard.html'
     return render(request, template_name, {'user': user})
 
-# @login_required 
-# def admin_dashboard(request):
-#     """Display the admin dashboard, accessible only by admins."""
-    
-#     if request.user.user_type != UserType.ADMIN:
-#         return HttpResponseForbidden("You do not have permission to access this page.")
-    
-#     return render(request, 'admin_dashboard.html', {'user': request.user})
-
-# @login_required
-# def tutor_dashboard(request):
-#     """Display the tutor dashboard, accessible only by tutors."""
-    
-#     if request.user.user_type != UserType.TUTOR:
-#         return HttpResponseForbidden("You do not have permission to access this page.")
-    
-#     return render(request, 'tutor_dashboard.html', {'user': request.user})
-
-# @login_required
-# def student_dashboard(request):
-#     """Display the student dashboard, accessible only by students."""
-    
-#     if request.user.user_type != UserType.STUDENT:
-#         return HttpResponseForbidden("You do not have permission to access this page.")
-    
-#     return render(request, 'student_dashboard.html', {'user': request.user})
-
 @login_prohibited
 def home(request):
     """Display the application's start/home screen."""
 
     return render(request, 'home.html')
-
 
 class LoginProhibitedMixin:
     """Mixin that redirects when a user is logged in."""
