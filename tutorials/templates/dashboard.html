@@ -1,5 +1,6 @@
 {% extends 'base_content.html' %}
 {% block content %}
+
 <head>
     <style>
         body {
@@ -8,13 +9,16 @@
         }
 
         .layout {
-            display: flex; /* Enable flexbox layout */
-            height: calc(100vh - 4rem); /* Full viewport height minus navbar height */
+            display: flex;
+            /* Enable flexbox layout */
+            height: calc(100vh - 4rem);
+            /* Full viewport height minus navbar height */
             position: relative;
         }
 
         .sidebar {
-            width: 10rem; /* Fixed width */
+            width: 10rem;
+            /* Fixed width */
             background-color: #F5F5F5;
             display: flex;
             flex-direction: column;
@@ -33,9 +37,11 @@
         }
 
         .content {
-            flex: 1; /* Automatically occupy remaining horizontal space */
+            flex: 1;
+            /* Automatically occupy remaining horizontal space */
             padding: 1.5rem 2rem;
-            overflow: auto; /* Ensure content scrolls if it overflows */
+            overflow: auto;
+            /* Ensure content scrolls if it overflows */
         }
     </style>
 </head>
@@ -58,8 +64,9 @@
                     style="line-height: 1.2; background-color: #E6EAEF;">Tutors</a>
             </li>
             <li style="margin-bottom: 1rem;">
-                <a href="#" class="btn btn-light btn-block"
+                <a href="{% url 'admin_manage-applications' %}" class="btn btn-light btn-block"
                     style="line-height: 1.2; background-color: #E6EAEF;">Applications</a>
+            </li>
             </li>
         </ul>
     </div>

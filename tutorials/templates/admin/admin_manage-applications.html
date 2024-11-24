@@ -1,0 +1,9 @@
+{% if user.is_authenticated %}
+{% if user.user_type == 'Admin' %}
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'admin_manage-applications' %}">
+        Manage Applications
+    </a>
+</li>
+{% endif %}
+{% endif %}

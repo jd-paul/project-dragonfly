@@ -1,20 +1,19 @@
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
+from django.http import HttpResponseForbidden
 from tutorials.forms import LogInForm, PasswordForm, UserForm, SignUpForm
 from tutorials.helpers import login_prohibited
 from tutorials.models import UserType
-from django.http import HttpResponseForbidden
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
 from .helpers import admin_required, tutor_required, student_required
+
 
 @login_required
 def dashboard(request):
@@ -139,7 +138,6 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
         messages.add_message(self.request, messages.SUCCESS, "Profile updated!")
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
 
-
 class SignUpView(LoginProhibitedMixin, FormView):
     """Display the sign up screen and handle sign ups."""
 
@@ -154,3 +152,18 @@ class SignUpView(LoginProhibitedMixin, FormView):
 
     def get_success_url(self):
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
+
+
+# # Helper functions
+# def is_admin(user):
+#     return user.is_admin()
+
+# # Admin views
+# @login_required  # Ensures the user must be logged in
+# @user_passes_test(is_admin)  # Ensures the user is an admin
+# def manage_applications(request):
+#     return render(request, 'admin/manage-applications.html')
+
+# Admin views
+def manage_applications(request):
+    return render(request, 'admin/manage-applications.html')
