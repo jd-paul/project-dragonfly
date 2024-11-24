@@ -10,11 +10,14 @@ from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from tutorials.forms import LogInForm, PasswordForm, UserForm, SignUpForm
 from tutorials.helpers import login_prohibited
-from tutorials.models import UserType
+from tutorials.models import UserType, Tutor
 from django.http import HttpResponseForbidden
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .helpers import admin_required, tutor_required, student_required
+from django.utils.decorators import method_decorator
+from django.shortcuts import get_object_or_404
+
 
 @login_required
 def dashboard(request):
@@ -182,3 +185,42 @@ class SignUpView(LoginProhibitedMixin, FormView):
 
     def get_success_url(self):
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
+    
+
+def admin_required(view_func):
+    """Ensure only admin users can access the view."""
+    def wrap(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('login')  # Redirect to regular login page if not logged in
+        if request.user.user_type != UserType.ADMIN:
+            return redirect('login')  # Redirect to regular login page if not admin
+        return function(request, *args, **kwargs)
+    return wrap
+
+@method_decorator([login_required, admin_required], name='dispatch')
+class TutorSignupsView(View):
+    """Display a list of pending tutor sign-up requests for admin approval."""
+
+    template_name = 'tutor_signups.html'
+
+    def get(self, request):
+        # Fetch all users with the tutor role but without approval
+        pending_tutors = Tutor.objects.filter(user__is_active=False)
+        return render(request, self.template_name, {'pending_tutors': pending_tutors})
+
+    def post(self, request):
+        """Handle approval or rejection of tutor sign-ups."""
+        tutor_id = request.POST.get('tutor_id')
+        action = request.POST.get('action')
+
+        tutor = get_object_or_404(Tutor, id=tutor_id)
+
+        if action == 'approve':
+            tutor.user.is_active = True
+            tutor.user.save()
+            messages.success(request, f"Tutor {tutor.user.full_name()} approved.")
+        elif action == 'reject':
+            tutor.user.delete()  # Deletes the user and the linked tutor
+            messages.success(request, f"Tutor request rejected.")
+
+        return redirect('tutor_signups')
