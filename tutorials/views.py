@@ -163,7 +163,7 @@ def is_admin(user):
 @user_passes_test(is_admin)
 def manage_applications(request):
     print(f"User: {request.user}, User type: {request.user.user_type}")
-    return render(request, 'admin/admin_manage-applications.html')
+    return render(request, 'admin/manage-applications.html')
 
 @method_decorator(login_required, name='dispatch')
 @method_decorator(user_passes_test(is_admin), name='dispatch')

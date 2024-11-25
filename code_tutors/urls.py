@@ -32,6 +32,6 @@ urlpatterns = [
 
     # Admin views
     path('tutor-signups/', views.TutorSignupsView.as_view(), name='tutor_signups'),
-    path('admin_manage-applications/', views.manage_applications, name='admin_manage-applications'),
+    path('manage-applications/', views.manage_applications, name='manage-applications'),
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

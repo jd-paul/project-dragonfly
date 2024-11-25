@@ -1,16 +1,12 @@
 from django.core.validators import RegexValidator
-from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from datetime import timedelta
-import random
-import datetime
+from libgravatar import Gravatar
 
 class UserType(models.TextChoices):
     TUTOR = 'Tutor', 'Tutor'
     ADMIN = 'Admin', 'Admin'
     STUDENT = 'Student', 'Student'
-
 
 class User(AbstractUser):
     """Model used for user authentication, and team member related information."""
@@ -37,9 +33,6 @@ class User(AbstractUser):
         help_text='Select the type of user.'
     )
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
     class Meta:
         """Model options."""
         ordering = ['last_name', 'first_name']
@@ -58,35 +51,17 @@ class User(AbstractUser):
         """Return a URL to a miniature version of the user's gravatar."""
         return self.gravatar(size=60)
 
-    def is_admin(self):
-        """Check if the user is an admin."""
-        return self.user_type == UserType.ADMIN
-
-    def is_tutor(self):
-        """Check if the user is a tutor."""
-        return self.user_type == UserType.TUTOR
-
-    def is_student(self):
-        """Check if the user is a student."""
-        return self.user_type == UserType.STUDENT
-
 
 class Admin(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
 
 class Tutor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
 
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
 
 class SkillLevel(models.TextChoices):
@@ -99,9 +74,6 @@ class Skill(models.Model):
     language = models.CharField(max_length=150, blank=False)
     level = models.CharField(max_length=15, choices=SkillLevel.choices)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['language', 'level'], name='unique_language_level')
@@ -111,9 +83,6 @@ class Skill(models.Model):
 class TutorSkill(models.Model):
     tutor = models.ForeignKey(Tutor, on_delete=models.CASCADE, related_name='skills')
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE, related_name='tutors')
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         constraints = [
@@ -140,8 +109,6 @@ class Frequency(models.TextChoices):
 
 class Day(models.Model):
     day_name = models.CharField(max_length=20)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
 
 class StudentRequest(models.Model):
@@ -151,39 +118,28 @@ class StudentRequest(models.Model):
     term = models.CharField(max_length=60, choices=Term.choices)
     frequency = models.CharField(max_length=20, choices=Frequency.choices)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
 class Enrollment(models.Model):
     approved_request = models.ForeignKey(StudentRequest, on_delete=models.CASCADE, related_name='enrollments')
     tutor = models.ForeignKey(Tutor, on_delete=models.CASCADE, related_name='enrollments')
     start_time = models.DateTimeField()
     status = models.CharField(max_length=50, choices=[('ongoing', 'Ongoing'), ('completed', 'Completed')])
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
 
 class EnrollmentDays(models.Model):
-    day_name = models.ForeignKey(Day, on_delete=models.CASCADE, related_name='enrollments')
+    day_name =  models.ForeignKey(Day, on_delete=models.CASCADE, related_name='enrollments')
     enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, related_name='days')
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['day_name', 'enrollment'], name='unique_day_enrollment')
         ]
 
-
 class Invoice(models.Model):
     enrollment = models.OneToOneField(Enrollment, on_delete=models.CASCADE, related_name='invoice')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    issued_date = models.DateTimeField(default=timezone.now, editable=False)
+    issued_date = models.DateTimeField()
     payment_status = models.CharField(max_length=50, choices=[('paid', 'Paid'), ('unpaid', 'Unpaid')])
-    due_date = models.DateTimeField(default=timezone.now, editable=False)
+    due_date = models.DateTimeField()
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+# add created and modified date to every table
+
