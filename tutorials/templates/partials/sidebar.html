@@ -1,0 +1,66 @@
+<head>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .layout {
+            display: flex;
+            /* Enable flexbox layout */
+            height: calc(100vh - 4rem);
+            /* Full viewport height minus navbar height */
+            position: relative;
+        }
+
+        .sidebar {
+            width: 10rem;
+            /* Fixed width */
+            background-color: #F5F5F5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: start;
+            padding-top: 20px;
+            box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+            z-index: 5;
+        }
+
+        .profile-picture {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #ebeef2;
+        }
+
+        .content {
+            flex: 1;
+            /* Automatically occupy remaining horizontal space */
+            padding: 1.5rem 2rem;
+            overflow: auto;
+            /* Ensure content scrolls if it overflows */
+        }
+    </style>
+</head>
+
+<div class="sidebar">
+    <div class="profile-picture mb-2"></div>
+    <b>
+        <p class="mb-4" style="color: #454d56; list-style: none; padding: 0; margin: 0;">{{ user.username }}</p>
+    </b>
+
+    <ul style="list-style: none; padding: 1rem; margin: 0; text-align: center; width: 100%;">
+        <li style="margin-bottom: 0.7rem;">
+            <a href="{% url 'admin_manage-applications' %}" class="btn btn-light btn-block"
+                style="line-height: 1.2; background-color: #E6EAEF;">Applications</a>
+        </li>
+        <li style="margin-bottom: 0.7rem;">
+            <a href="{% url 'tutor_signups' %}" class="btn btn-light btn-block"
+                style="line-height: 1.2; background-color: #E6EAEF;">MGMT Tutor</a>
+        </li>
+        <li style="margin-bottom: 0.7rem;">
+            <a href="#" class="btn btn-light btn-block" style="line-height: 1.2; background-color: #E6EAEF;">MGMT
+                Student</a>
+        </li>
+    </ul>
+</div>
