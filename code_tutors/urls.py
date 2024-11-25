@@ -29,9 +29,9 @@ urlpatterns = [
     path('password/', views.PasswordView.as_view(), name='password'),
     path('profile/', views.ProfileUpdateView.as_view(), name='profile'),
     path('sign_up/', views.SignUpView.as_view(), name='sign_up'),
-    
+
     # Admin views
+    path('tutor-signups/', views.TutorSignupsView.as_view(), name='tutor_signups'),
     path('admin_manage-applications/', views.manage_applications, name='admin_manage-applications'),
-    # path('manage-applications/', views.manage_applications, name='admin_manage_applications'),  # Correct path for manage-applications
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -2,17 +2,20 @@
     <style>
         /* Primary card */
         .card-primary {
-            border-left: 5px solid #007bff; /* Primary color for the card */
+            border-left: 5px solid #007bff;
+            /* Primary color for the card */
         }
 
         /* Success card */
         .card-success {
-            border-left: 5px solid #28a745; /* Success color for the card */
+            border-left: 5px solid #28a745;
+            /* Success color for the card */
         }
 
         /* Warning card */
         .card-warning {
-            border-left: 5px solid #ffc107; /* Warning color for the card */
+            border-left: 5px solid #ffc107;
+            /* Warning color for the card */
         }
     </style>
 </head>
@@ -20,6 +23,8 @@
 <div>
     <h1>Hello, {{ user.first_name }}</h1>
     <h3 class="h5">{{ user.first_name }} {{ user.last_name }}</h3>
+    <li><a href="{% url 'tutor_signups' %}">Tutor Sign-Ups</a></li>
+
 
     <div class="container-fluid" style="padding: 0; margin: 0;">
         <div class="row g-1">

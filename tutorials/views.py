@@ -4,16 +4,15 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from django.http import HttpResponseForbidden
+from django.utils.decorators import method_decorator
 from tutorials.forms import LogInForm, PasswordForm, UserForm, SignUpForm
 from tutorials.helpers import login_prohibited
-from tutorials.models import UserType
-from .helpers import admin_required, tutor_required, student_required
-
+from tutorials.models import UserType, Tutor
+from django.core.exceptions import PermissionDenied
 
 @login_required
 def dashboard(request):
@@ -152,11 +151,43 @@ class SignUpView(LoginProhibitedMixin, FormView):
     def get_success_url(self):
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
 
-def is_admin(user):
-    return user.user_type == UserType.ADMIN
 
+# Helper functions
+def is_admin(user):
+    if user.user_type == UserType.ADMIN:
+        return True
+    raise PermissionDenied
+
+# Admin View
 @login_required
 @user_passes_test(is_admin)
 def manage_applications(request):
     print(f"User: {request.user}, User type: {request.user.user_type}")
     return render(request, 'admin/admin_manage-applications.html')
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(user_passes_test(is_admin), name='dispatch')
+class TutorSignupsView(View):
+    """Display a list of pending tutor sign-up requests for admin approval."""
+    template_name = 'admin/tutor_signups.html'
+
+    def get(self, request):
+        # Fetch all users with the tutor role but without approval
+        pending_tutors = Tutor.objects.filter(user__is_active=False)
+        return render(request, self.template_name, {'pending_tutors': pending_tutors})  # Corrected context dictionary key
+
+    def post(self, request):
+        """Handle approval or rejection of tutor sign-ups."""
+        tutor_id = request.POST.get('tutor_id')
+        action = request.POST.get('action')
+        tutor = get_object_or_404(Tutor, id=tutor_id)
+        
+        if action == 'approve':
+            tutor.user.is_active = True
+            tutor.user.save()
+            messages.success(request, f"Tutor {tutor.user.full_name()} approved.")
+        elif action == 'reject':
+            tutor.user.delete()  # Deletes the user and the linked tutor
+            messages.success(request, f"Tutor request rejected.")
+        
+        return redirect('tutor_signups')  # Corrected redirect
