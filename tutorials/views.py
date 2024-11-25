@@ -25,7 +25,6 @@ def dashboard(request):
 @login_prohibited
 def home(request):
     """Display the application's start/home screen."""
-
     return render(request, 'home.html')
 
 class LoginProhibitedMixin:
@@ -153,17 +152,11 @@ class SignUpView(LoginProhibitedMixin, FormView):
     def get_success_url(self):
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
 
+def is_admin(user):
+    return user.user_type == UserType.ADMIN
 
-# # Helper functions
-# def is_admin(user):
-#     return user.is_admin()
-
-# # Admin views
-# @login_required  # Ensures the user must be logged in
-# @user_passes_test(is_admin)  # Ensures the user is an admin
-# def manage_applications(request):
-#     return render(request, 'admin/manage-applications.html')
-
-# Admin views
+@login_required
+@user_passes_test(is_admin)
 def manage_applications(request):
-    return render(request, 'admin/manage-applications.html')
+    print(f"User: {request.user}, User type: {request.user.user_type}")
+    return render(request, 'admin/admin_manage-applications.html')
