@@ -45,30 +45,53 @@
             font-weight: bold;
             text-decoration: underline;
         }
+
+        ul {
+            list-style: none;
+            padding: 1rem;
+            margin: 0;
+            text-align: center;
+            width: 100%;
+        }
+
+        li {
+            margin-bottom: 0.7rem;
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .btn-block {
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-bottom: 5.5%;
+        }
     </style>
 </head>
 
 <div class="sidebar">
-    <div class="profile-picture mb-2"></div>
+    <div class="profile-picture mb-2" style="background-color: #08b1c5;"></div>
     <b>
-        <p class="mb-3" style="color: #454d56; list-style: none; padding: 0; margin: 0;">{{ user.username }}</p>
+        <p class="mb-3" style="color: #434B51; list-style: none; padding: 0; margin: 0;">{{ user.username }}</p>
     </b>
 
-    <ul style="list-style: none; padding: 1rem; margin: 0; text-align: center; width: 100%;">
-        <li style="margin-bottom: 0.7rem;">
+    <ul>
+        <li>
             <a href="{% url 'dashboard' %}"
                 class="btn btn-dark btn-block {% if request.path == '/dashboard/' %}active-tab{% endif %}"
                 style="line-height: 1.2;">Dashboard</a>
         </li>
-        <li style="margin-bottom: 0.7rem;">
+        <li>
+            <a href="{% url 'manage_tutors' %}"
+                class="btn btn-dark btn-block {% if request.path == '/manage_tutors/' %}active-tab{% endif %}"
+                style="line-height: 1.2;">Tutors</a>
+        </li>
+        <li>
             <a href="{% url 'manage_applications' %}"
                 class="btn btn-dark btn-block {% if request.path == '/manage_applications/' %}active-tab{% endif %}"
                 style="line-height: 1.2;">Applications</a>
-        </li>
-        <li style="margin-bottom: 0.7rem;">
-            <a href="{% url 'tutor_signups' %}"
-                class="btn btn-dark btn-block {% if request.path == '/tutor_signups/' %}active-tab{% endif %}"
-                style="line-height: 1.2;">Tutor Signups</a>
         </li>
     </ul>
 </div>

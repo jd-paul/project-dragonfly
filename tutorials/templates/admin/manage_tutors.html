@@ -1,0 +1,241 @@
+{% extends 'base_content.html' %}
+{% block content %}
+
+<head>
+    <style>
+        /* Primary card */
+        .card-primary {
+            border-left: 5px solid #0092ff;
+            /* Primary color for the card */
+        }
+
+        /* Success card */
+        .card-success {
+            border-left: 5px solid #28a745;
+            /* Success color for the card */
+        }
+
+        /* Warning card */
+        .card-warning {
+            border-left: 5px solid #ffc107;
+            /* Warning color for the card */
+        }
+
+        .card-danger {
+            border-left: 5px solid #e54d56;
+            /* Warning color for the card */
+        }
+
+        /* General Pagination Styling */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 0;
+        }
+
+        .page-item {
+            border-radius: 0.25rem;
+            margin: 0;
+        }
+
+        .page-link {
+            border: 1px solid #0092ff;
+            padding: 8px 15px;
+            font-size: 14px;
+            color: #0092ff;
+            background-color: #fff;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .page-link:hover,
+        .page-link:focus {
+            background-color: #0092ff;
+            color: white;
+            border-color: #0056b3;
+        }
+
+        .page-item.active .page-link {
+            background-color: #0092ff;
+            color: white;
+            border-color: #0092ff;
+        }
+
+        .page-item.disabled .page-link {
+            color: #6c757d;
+            background-color: #e0e0e0;
+            border-color: #ddd;
+        }
+
+        .pagination .page-item {
+            border-radius: 5rem;
+        }
+
+        .pagination .page-link {
+            border-radius: 5rem;
+        }
+    </style>
+</head>
+
+<div class="layout">
+    <!-- Sidebar -->
+    {% include 'partials/sidebar.html' %}
+
+    <!-- Main Content -->
+    <div class="content" style="background-color: #F0F0F0;">
+        <h2>Pending Student Lesson Applications</h2>
+        <h5 class="h5">{{ user.first_name }} {{ user.last_name }}</h5>
+
+
+        <!-- Quick dashboard information -->
+        <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
+            <div class="row g-1">
+                <!-- Card 1 (Primary) -->
+                <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2">
+                    <div class="card card-primary shadow-sm py-2 w-100">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Tutors in the system
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">52</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 (Success) -->
+                <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2">
+                    <div class="card card-success shadow-sm py-2 w-100">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Tutor sign-ups to approve
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">52</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3 (Warning) -->
+                <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2">
+                    <div class="card card-danger shadow-sm py-2 w-100">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Tutor / Student requests pending
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">52</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tutor sign-ups. -->
+        <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
+            <h3>Tutors in the system</h3>
+
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>User Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tutor in tutors %}
+                    <tr>
+                        <td>{{ tutor.username }}</td>
+                        <td>{{ tutor.email }}</td>
+                        <td>{{ tutor.first_name }}</td>
+                        <td>{{ tutor.last_name }}</td>
+                        <td>{{ tutor.user_type }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">No tutors found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if is_paginated %}
+            <nav class="d-flex justify-content-center">
+                <div>
+                    <ul class="pagination">
+                        <!-- Previous Button -->
+                        <li class="page-item {% if not tutors.has_previous %}disabled{% endif %}">
+                            <a class="page-link"
+                                href="{% if tutors.has_previous %}?page={{ tutors.previous_page_number }}{% else %}#{% endif %}"
+                                aria-label="Previous">
+                                <span aria-hidden="true">&laquo; Prev</span>
+                            </a>
+                        </li>
+
+                        <!-- Page Numbers -->
+                        {% for num in tutors.paginator.page_range %}
+                        {% if tutors.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+
+                        <!-- Next Button -->
+                        <li class="page-item {% if not tutors.has_next %}disabled{% endif %}">
+                            <a class="page-link"
+                                href="{% if tutors.has_next %}?page={{ tutors.next_page_number }}{% else %}#{% endif %}"
+                                aria-label="Next">
+                                <span aria-hidden="true">Next &raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            {% endif %}
+
+
+        </div>
+
+
+
+        <!-- Tutor sign-ups. -->
+        <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
+            <h3>Pending Tutor Sign-Ups</h3>
+
+            {% if messages %}
+            <ul>
+                {% for message in messages %}
+                <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            {% if pending_tutors %}
+            <ul>
+                {% for tutor in pending_tutors %}
+                <li>
+                    <strong>{{ tutor.user.full_name }}</strong> - {{ tutor.user.email }}
+                    <form method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="tutor_id" value="{{ tutor.id }}">
+                        <button type="submit" name="action" value="approve">Approve</button>
+                        <button type="submit" name="action" value="reject">Reject</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>No pending tutor requests.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

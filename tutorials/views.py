@@ -13,6 +13,11 @@ from tutorials.forms import LogInForm, PasswordForm, UserForm, SignUpForm
 from tutorials.helpers import login_prohibited
 from tutorials.models import UserType, Tutor
 from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator
+
+from .models import User
+from .models import UserType
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 @login_required
 def dashboard(request):
@@ -161,33 +166,52 @@ def is_admin(user):
 # Admin View
 @login_required
 @user_passes_test(is_admin)
-def manage_applications(request):
+def ManageApplications(request):
     print(f"User: {request.user}, User type: {request.user.user_type}")
     return render(request, 'admin/manage_applications.html')
 
 @method_decorator(login_required, name='dispatch')
 @method_decorator(user_passes_test(is_admin), name='dispatch')
-class TutorSignupsView(View):
+class ManageTutors(View):
     """Display a list of pending tutor sign-up requests for admin approval."""
-    template_name = 'admin/tutor_signups.html'
+    template_name = 'admin/manage_tutors.html'
+    paginate_by = 5
 
-    def get(self, request):
-        # Fetch all users with the tutor role but without approval
-        pending_tutors = Tutor.objects.filter(user__is_active=False)
-        return render(request, self.template_name, {'pending_tutors': pending_tutors})  # Corrected context dictionary key
+    def get_queryset(self):
+        """Filter for tutors."""
+        return User.objects.filter(user_type=UserType.TUTOR)
+
+    def get(self, request, *args, **kwargs):
+        """Display the list of tutors with pagination."""
+        tutors_by_type = self.get_queryset()
+        paginator = Paginator(tutors_by_type, self.paginate_by)
+        page = request.GET.get('page', 1)
+
+        try:
+            tutors = paginator.page(page)
+        except PageNotAnInteger:
+            tutors = paginator.page(1)
+        except EmptyPage:
+            tutors = paginator.page(paginator.num_pages)
+
+        context = {
+            'tutors': tutors,
+            'is_paginated': paginator.num_pages > 1,
+        }
+        return render(request, self.template_name, context)
 
     def post(self, request):
         """Handle approval or rejection of tutor sign-ups."""
         tutor_id = request.POST.get('tutor_id')
         action = request.POST.get('action')
         tutor = get_object_or_404(Tutor, id=tutor_id)
-        
+
         if action == 'approve':
             tutor.user.is_active = True
             tutor.user.save()
-            messages.success(request, f"Tutor {tutor.user.full_name()} approved.")
+            messages.success(request, f"Tutor {tutor.user.get_full_name()} approved.")
         elif action == 'reject':
-            tutor.user.delete()  # Deletes the user and the linked tutor
-            messages.success(request, f"Tutor request rejected.")
-        
-        return redirect('tutor_signups')  # Corrected redirect
+            tutor.user.delete()
+            messages.success(request, "Tutor request rejected.")
+
+        return redirect('manage_tutors')
