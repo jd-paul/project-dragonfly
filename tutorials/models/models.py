@@ -1,6 +1,7 @@
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 from libgravatar import Gravatar
 
 class UserType(models.TextChoices):
@@ -24,6 +25,8 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
     email = models.EmailField(unique=True, blank=False)
+    created_at = models.DateTimeField(null=True, blank=True, default=timezone.now)
+    updated_at = models.DateTimeField(null=True, blank=True, default=timezone.now)
 
     # Add a field for user type
     user_type = models.CharField(

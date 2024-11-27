@@ -194,9 +194,12 @@ class ManageTutors(View):
         except EmptyPage:
             tutors = paginator.page(paginator.num_pages)
 
+        tutor_count = tutors_by_type.count()
+
         context = {
             'tutors': tutors,
             'is_paginated': paginator.num_pages > 1,
+            'tutor_count': tutor_count  # Pass the count to the template
         }
         return render(request, self.template_name, context)
 

@@ -86,7 +86,7 @@
 
     <!-- Main Content -->
     <div class="content" style="background-color: #F0F0F0;">
-        <h2>Pending Student Lesson Applications</h2>
+        <h2>Tutor Management Page</h2>
         <h5 class="h5">{{ user.first_name }} {{ user.last_name }}</h5>
 
 
@@ -100,7 +100,7 @@
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                 Tutors in the system
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">52</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ tutor_count }}</div>
                         </div>
                     </div>
                 </div>
@@ -112,7 +112,7 @@
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                 Tutor sign-ups to approve
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">52</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">To be added</div>
                         </div>
                     </div>
                 </div>
@@ -124,7 +124,7 @@
                             <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
                                 Tutor / Student requests pending
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">52</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">To be added</div>
                         </div>
                     </div>
                 </div>
@@ -143,6 +143,8 @@
                         <th>First Name</th>
                         <th>Last Name</th>
                         <th>User Type</th>
+                        <th>Created at</th>
+                        <th>Updated at</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -153,6 +155,8 @@
                         <td>{{ tutor.first_name }}</td>
                         <td>{{ tutor.last_name }}</td>
                         <td>{{ tutor.user_type }}</td>
+                        <td>{{ tutor.created_at }}</td>
+                        <td>{{ tutor.updated_at }}</td>
                     </tr>
                     {% empty %}
                     <tr>
