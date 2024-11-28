@@ -117,7 +117,7 @@ class StudentRequest(models.Model):
         limit_choices_to={'user_type': UserType.STUDENT}
     )
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE, related_name='requests')
-    duration = models.TimeField()
+    duration = models.DurationField()
     first_term = models.CharField(max_length=60, choices=Term.choices)
     frequency = models.CharField(max_length=20, choices=Frequency.choices)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -34,5 +34,8 @@ urlpatterns = [
     # Admin views
     path('manage_tutors/', views.ManageTutors.as_view(), name='manage_tutors'),
     path('manage_applications/', views.ManageApplications, name='manage_applications'),
+
+    #Student views
+    path('request_lesson/', views.RequestLesson.as_view(), name = 'request_lesson')
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

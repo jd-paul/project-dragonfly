@@ -91,6 +91,11 @@
                     style="line-height: 1.2;">Manage Tutors</a>
             </li>
             <li>
+                <a href="{% url 'manage_students' %}"
+                    class="btn btn-dark btn-block {% if request.path == '/manage_students/' %}active-tab{% endif %}"
+                    style="line-height: 1.2;">Manage Students</a>
+            </li>
+            <li>
                 <a href="{% url 'manage_applications' %}"
                     class="btn btn-dark btn-block {% if request.path == '/manage_applications/' %}active-tab{% endif %}"
                     style="line-height: 1.2;">Manage Applications</a>
@@ -104,6 +109,11 @@
             </li>
         <!-- Student Specific Sidebar -->
         {% elif user.user_type == 'Student' %}
+            <li>
+                <a href="{% url 'request_lesson' %}"
+                    class="btn btn-dark btn-block {% if request.path == '/request_lesson/' %}active-tab{% endif %}"
+                    style="line-height: 1.2;">Request Lesson</a>
+            </li>
             <li>
                 <a href=""
                     class="btn btn-dark btn-block "

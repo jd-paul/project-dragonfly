@@ -9,7 +9,7 @@ from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from django.utils.decorators import method_decorator
-from tutorials.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TutorSignUpForm
+from tutorials.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TutorSignUpForm, StudentRequestForm
 from tutorials.helpers import login_prohibited
 from tutorials.models import UserType
 from django.core.exceptions import PermissionDenied
@@ -218,6 +218,35 @@ class ManageTutors(View):
             messages.success(request, "Tutor request rejected.")
 
         return redirect('manage_tutors')
+    
+#Student View
+
+class RequestLesson(LoginRequiredMixin, FormView):
+    """Display the requests screen and handle requests."""
+
+    form_class = StudentRequestForm
+    template_name = "request_lesson.html"
+    login_url = 'login'  # Redirect to login page if not authenticated
+
+    def get(self, request, *args, **kwargs):
+        # Check if the logged-in user is a student
+        if not (request.user.is_authenticated and request.user.user_type == 'Student'):
+            return redirect('dashboard')  # Redirect non-student users to the dashboard
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        # Check if the logged-in user is a student
+        if not (request.user.is_authenticated and request.user.user_type == 'Student'):
+            return redirect('dashboard')  # Redirect non-student users to the dashboard
+        return super().post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        self.object = form.save()
+        login(self.request, self.object)
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
 
 class TutorSignUpView(LoginProhibitedMixin, FormView):
     """Display the tutor sign up screen and handle sign ups."""
