@@ -160,7 +160,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="text-center">No tutors found</td>
+                        <td colspan="7" class="text-center">No tutors found</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -226,7 +226,7 @@
             <ul>
                 {% for tutor in pending_tutors %}
                 <li>
-                    <strong>{{ tutor.user.full_name }}</strong> - {{ tutor.user.email }}
+                    <strong>{{ tutor.full_name }}</strong> - {{ tutor.email }}
                     <form method="post" style="display:inline;">
                         {% csrf_token %}
                         <input type="hidden" name="tutor_id" value="{{ tutor.id }}">

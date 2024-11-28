@@ -20,9 +20,6 @@ class Command(BaseCommand):
             Skill,  # No dependencies, but needs to be deleted before Tutor
             SkillLevel,  # No dependencies, but delete before TutorSkill
             Day,  # No dependencies
-            Student,  # FK to User
-            Tutor,  # FK to User
-            Admin,  # FK to User
             UserType,  # Can be deleted after User
             User,  # Finally, delete User
         ]
