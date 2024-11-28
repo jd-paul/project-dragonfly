@@ -29,6 +29,7 @@ urlpatterns = [
     path('password/', views.PasswordView.as_view(), name='password'),
     path('profile/', views.ProfileUpdateView.as_view(), name='profile'),
     path('sign_up/', views.SignUpView.as_view(), name='sign_up'),
+    path('become_a_tutor/', views.TutorSignUpView.as_view(), name='tutor_signup'),
 
     # Admin views
     path('manage_tutors/', views.ManageTutors.as_view(), name='manage_tutors'),

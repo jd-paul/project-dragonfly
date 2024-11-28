@@ -2,7 +2,9 @@
 from django import forms
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
-from .models import User
+from .models import User, Skill, TutorSkill, UserType
+from django.core.exceptions import ValidationError
+
 
 class LogInForm(forms.Form):
     """Form enabling registered users to log in."""
@@ -107,4 +109,42 @@ class SignUpForm(NewPasswordMixin, forms.ModelForm):
             email=self.cleaned_data.get('email'),
             password=self.cleaned_data.get('new_password'),
         )
+        return user
+
+class TutorSignUpForm(forms.ModelForm):
+    skills = forms.ModelMultipleChoiceField(
+        queryset=Skill.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=True,
+        label="Skills"
+    )
+    price_per_hour = forms.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        required=True,
+        label="Price per hour",
+        min_value=0.00,
+    )
+
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email']
+    
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.user_type = UserType.TUTOR  # Mark the user as a tutor
+        if commit:
+            user.save()
+        
+        # Save the tutor's skills and price
+        skills = self.cleaned_data['skills']
+        price_per_hour = self.cleaned_data['price_per_hour']
+        
+        for skill in skills:
+            TutorSkill.objects.create(
+                tutor=user,
+                skill=skill,
+                price_per_hour=price_per_hour
+            )
+        
         return user

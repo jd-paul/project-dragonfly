@@ -9,7 +9,7 @@ from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from django.utils.decorators import method_decorator
-from tutorials.forms import LogInForm, PasswordForm, UserForm, SignUpForm
+from tutorials.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TutorSignUpForm
 from tutorials.helpers import login_prohibited
 from tutorials.models import UserType
 from django.core.exceptions import PermissionDenied
@@ -218,3 +218,24 @@ class ManageTutors(View):
             messages.success(request, "Tutor request rejected.")
 
         return redirect('manage_tutors')
+
+class TutorSignUpView(LoginProhibitedMixin, FormView):
+    """Display the tutor sign up screen and handle sign ups."""
+    
+    form_class = TutorSignUpForm
+    template_name = "tutor_sign_up.html"
+    redirect_when_logged_in_url = settings.REDIRECT_URL_WHEN_LOGGED_IN
+
+    def form_valid(self, form):
+        # Save the user and set their type as TUTOR
+        self.object = form.save()
+        self.object.user_type = UserType.TUTOR
+        self.object.save()
+        
+        # Optionally send a confirmation email or handle other tutor-specific logic
+        
+        login(self.request, self.object)
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('tutor_dashboard')  # Redirect to tutor dashboard after successful signup
