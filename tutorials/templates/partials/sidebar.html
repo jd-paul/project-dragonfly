@@ -83,15 +83,32 @@
                 class="btn btn-dark btn-block {% if request.path == '/dashboard/' %}active-tab{% endif %}"
                 style="line-height: 1.2;">Dashboard</a>
         </li>
-        <li>
-            <a href="{% url 'manage_tutors' %}"
-                class="btn btn-dark btn-block {% if request.path == '/manage_tutors/' %}active-tab{% endif %}"
-                style="line-height: 1.2;">Tutors</a>
-        </li>
-        <li>
-            <a href="{% url 'manage_applications' %}"
-                class="btn btn-dark btn-block {% if request.path == '/manage_applications/' %}active-tab{% endif %}"
-                style="line-height: 1.2;">Applications</a>
-        </li>
+        <!-- Admin Specific Sidebar -->
+        {% if user.user_type == 'Admin' %}
+            <li>
+                <a href="{% url 'manage_tutors' %}"
+                    class="btn btn-dark btn-block {% if request.path == '/manage_tutors/' %}active-tab{% endif %}"
+                    style="line-height: 1.2;">Manage Tutors</a>
+            </li>
+            <li>
+                <a href="{% url 'manage_applications' %}"
+                    class="btn btn-dark btn-block {% if request.path == '/manage_applications/' %}active-tab{% endif %}"
+                    style="line-height: 1.2;">Manage Applications</a>
+            </li>
+        <!-- Tutor Specific Sidebar -->
+        {% elif user.user_type == 'Tutor' %}
+            <li>
+                <a href=""
+                    class="btn btn-dark btn-block "
+                    style="line-height: 1.2;">Tutor Sidebar placeholder</a>
+            </li>
+        <!-- Student Specific Sidebar -->
+        {% elif user.user_type == 'Student' %}
+            <li>
+                <a href=""
+                    class="btn btn-dark btn-block "
+                    style="line-height: 1.2;">Student Sidebar placeholder</a>
+            </li>
+        {% endif %}
     </ul>
 </div>
