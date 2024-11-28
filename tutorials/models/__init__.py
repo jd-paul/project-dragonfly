@@ -2,9 +2,6 @@
 
 from .models import User
 from .models import UserType
-from .models import Admin
-from .models import Tutor
-from .models import Student
 from .models import Skill
 from .models import TutorSkill
 from .models import SkillLevel

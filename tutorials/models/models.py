@@ -1,8 +1,9 @@
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MinValueValidator
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
 from libgravatar import Gravatar
+from django.core.exceptions import ValidationError
 
 class UserType(models.TextChoices):
     TUTOR = 'Tutor', 'Tutor'
@@ -55,18 +56,6 @@ class User(AbstractUser):
         return self.gravatar(size=60)
 
 
-class Admin(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-
-class Tutor(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-
-class Student(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-
 class SkillLevel(models.TextChoices):
     BEGINNER = 'Beginner', 'Beginner'
     INTERMEDIATE = 'Intermediate', 'Intermediate'
@@ -84,8 +73,20 @@ class Skill(models.Model):
 
 
 class TutorSkill(models.Model):
-    tutor = models.ForeignKey(Tutor, on_delete=models.CASCADE, related_name='skills')
+    tutor =  models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='skills',
+        limit_choices_to={'user_type': UserType.TUTOR}
+    )
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE, related_name='tutors')
+    price_per_hour = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        default=0.00,
+        help_text='Enter the hourly price for this skill.',
+    )
 
     class Meta:
         constraints = [
@@ -102,12 +103,6 @@ class Term(models.TextChoices):
 class Frequency(models.TextChoices):
     WEEKLY = 'weekly'
     BI_WEEKLY = 'bi-weekly'
-    TWO_DAYS = '2 per week'
-    THREE_DAYS = '3 per week'
-    FOUR_DAYS = '4 per week'
-    FIVE_DAYS = '5 per week'
-    SIX_DAYS = '6 per week'
-    SEVEN_DAYS = '7 per week'
 
 
 class Day(models.Model):
@@ -115,17 +110,31 @@ class Day(models.Model):
 
 
 class StudentRequest(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='requests')
+    student = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='requests',
+        limit_choices_to={'user_type': UserType.STUDENT}
+    )
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE, related_name='requests')
     duration = models.TimeField()
-    term = models.CharField(max_length=60, choices=Term.choices)
+    first_term = models.CharField(max_length=60, choices=Term.choices)
     frequency = models.CharField(max_length=20, choices=Frequency.choices)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class Enrollment(models.Model):
     approved_request = models.ForeignKey(StudentRequest, on_delete=models.CASCADE, related_name='enrollments')
-    tutor = models.ForeignKey(Tutor, on_delete=models.CASCADE, related_name='enrollments')
+    current_term = models.CharField(max_length=60, choices=Term.choices)
+    tutor =models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='enrollments',
+        limit_choices_to={'user_type': UserType.TUTOR}
+    )
     start_time = models.DateTimeField()
-    status = models.CharField(max_length=50, choices=[('ongoing', 'Ongoing'), ('completed', 'Completed')])
+    status = models.CharField(max_length=50, choices=[('ongoing', 'Ongoing'), ('terminated', 'Terminated')])
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at =  models.DateTimeField(auto_now=True)
 
 
 class EnrollmentDays(models.Model):
@@ -144,5 +153,12 @@ class Invoice(models.Model):
     payment_status = models.CharField(max_length=50, choices=[('paid', 'Paid'), ('unpaid', 'Unpaid')])
     due_date = models.DateTimeField()
 
-# add created and modified date to every table
+    def clean(self):
+        super().clean()
+        if(self.issued_date >= self.due_date):
+            raise ValidationError({'due_date': 'Due date should be after the issued date.'})
 
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+    

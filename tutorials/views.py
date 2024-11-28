@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.utils.decorators import method_decorator
 from tutorials.forms import LogInForm, PasswordForm, UserForm, SignUpForm
 from tutorials.helpers import login_prohibited
-from tutorials.models import UserType, Tutor
+from tutorials.models import UserType
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 
@@ -207,14 +207,14 @@ class ManageTutors(View):
         """Handle approval or rejection of tutor sign-ups."""
         tutor_id = request.POST.get('tutor_id')
         action = request.POST.get('action')
-        tutor = get_object_or_404(Tutor, id=tutor_id)
+        tutor = get_object_or_404(User, id=tutor_id, user_type=UserType.TUTOR)
 
         if action == 'approve':
-            tutor.user.is_active = True
-            tutor.user.save()
-            messages.success(request, f"Tutor {tutor.user.get_full_name()} approved.")
+            tutor.is_active = True
+            tutor.save()
+            messages.success(request, f"Tutor {tutor.get_full_name()} approved.")
         elif action == 'reject':
-            tutor.user.delete()
+            tutor.delete()
             messages.success(request, "Tutor request rejected.")
 
         return redirect('manage_tutors')
