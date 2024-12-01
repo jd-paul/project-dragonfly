@@ -1,0 +1,207 @@
+{% extends 'base_content.html' %}
+{% block content %}
+
+<head>
+    <style>
+        /* Primary card */
+        .card-primary {
+            border-left: 5px solid #0092ff;
+        }
+
+        /* Success card */
+        .card-success {
+            border-left: 5px solid #28a745;
+        }
+
+        /* Warning card */
+        .card-warning {
+            border-left: 5px solid #ffc107;
+        }
+
+        .card-danger {
+            border-left: 5px solid #e54d56;
+        }
+
+        /* General Pagination Styling */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 0;
+        }
+
+        .page-item {
+            border-radius: 0.25rem;
+            margin: 0;
+        }
+
+        .page-link {
+            border: 1px solid #0092ff;
+            padding: 8px 15px;
+            font-size: 14px;
+            color: #0092ff;
+            background-color: #fff;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .page-link:hover,
+        .page-link:focus {
+            background-color: #0092ff;
+            color: white;
+            border-color: #0056b3;
+        }
+
+        .page-item.active .page-link {
+            background-color: #0092ff;
+            color: white;
+            border-color: #0092ff;
+        }
+
+        .page-item.disabled .page-link {
+            color: #6c757d;
+            background-color: #e0e0e0;
+            border-color: #ddd;
+        }
+
+        .pagination .page-item {
+            border-radius: 5rem;
+        }
+
+        .pagination .page-link {
+            border-radius: 5rem;
+        }
+    </style>
+</head>
+
+<div class="layout">
+    {% include 'partials/sidebar.html' %}
+
+    <div class="content" style="background-color: #F0F0F0;">
+        <h2>Student Management Page</h2>
+        <h5 class="h5">{{ user.first_name }} {{ user.last_name }}</h5>
+
+        <!-- Quick dashboard information -->
+        <!-- Quick dashboard information -->
+        <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
+            <div class="row g-1">
+                <!-- Card 1 (Primary) -->
+                <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2">
+                    <div class="card card-primary shadow-sm py-2 w-100">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Students in the system
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ student_count }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 (Success) -->
+                <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2">
+                    <div class="card card-success shadow-sm py-2 w-100">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Applications to approve
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">To be added</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3 (Warning) -->
+                <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2">
+                    <div class="card card-danger shadow-sm py-2 w-100">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Invoices to approve
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">To be added</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Students in the system -->
+        <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
+            <h3>Students in the system</h3>
+
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>User Type</th>
+                        <th>Created at</th>
+                        <th>Updated at</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student.username }}</td>
+                        <td>{{ student.email }}</td>
+                        <td>{{ student.first_name }}</td>
+                        <td>{{ student.last_name }}</td>
+                        <td>{{ student.user_type }}</td>
+                        <td>{{ student.created_at }}</td>
+                        <td>{{ student.updated_at }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">No students found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if is_paginated %}
+                <nav class="d-flex justify-content-center">
+                    <ul class="pagination">
+                        <!-- Previous Page Link -->
+                        <li class="page-item {% if not students.has_previous %}disabled{% endif %}">
+                            <a class="page-link"
+                            href="{% if students.has_previous %}?page={{ students.previous_page_number }}{% else %}#{% endif %}">
+                                &laquo; Prev
+                            </a>
+                        </li>
+
+                        <!-- Page Numbers with Ellipsis -->
+                        {% for num in students.paginator.page_range %}
+                            {% if num == 1 or num == students.paginator.num_pages or num >= students.number|add:"-2" and num <= students.number|add:"2" %}
+                                {% if students.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% elif num == students.number|add:"-3" or num == students.number|add:"3" %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">…</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        <!-- Next Page Link -->
+                        <li class="page-item {% if not students.has_next %}disabled{% endif %}">
+                            <a class="page-link"
+                            href="{% if students.has_next %}?page={{ students.next_page_number }}{% else %}#{% endif %}">
+                                Next &raquo;
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

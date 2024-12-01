@@ -218,8 +218,66 @@ class ManageTutors(View):
             messages.success(request, "Tutor request rejected.")
 
         return redirect('manage_tutors')
-    
-#Student View
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(user_passes_test(is_admin), name='dispatch')
+class ManageStudents(View):
+    """Display a list of pending student sign-up requests for admin approval."""
+    template_name = 'admin/manage_students.html'
+    paginate_by = 15
+
+    def get_queryset(self):
+        """Retrieve the list of students."""
+        return User.objects.filter(user_type=UserType.STUDENT)
+
+    def get(self, request, *args, **kwargs):
+        """Display the list of students with pagination."""
+        students_by_type = self.get_queryset()
+        paginator = Paginator(students_by_type, self.paginate_by)
+        page = request.GET.get('page', 1)
+
+        try:
+            students = paginator.page(page)
+        except PageNotAnInteger:
+            students = paginator.page(1)
+        except EmptyPage:
+            students = paginator.page(paginator.num_pages)
+
+        context = {
+            'students': students,
+            'is_paginated': paginator.num_pages > 1,
+            'student_count': students_by_type.count()  # Pass the count to the template
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        """Handle approval or rejection of student sign-ups."""
+        student_id = request.POST.get('student_id')
+        action = request.POST.get('action')
+
+        if not student_id or not action:
+            messages.error(request, "Invalid action or student ID.")
+            return redirect('manage_students')
+
+        student = get_object_or_404(User, id=student_id, user_type=UserType.STUDENT)
+
+        if action == 'approve':
+            student.is_active = True
+            student.save()
+            messages.success(request, f"Student {student.get_full_name()} approved.")
+        elif action == 'reject':
+            student.delete()
+            messages.success(request, "Student request rejected.")
+        else:
+            messages.error(request, "Invalid action provided.")
+
+        return redirect('manage_students')
+
+"""
+Student View Functions
+"""
+
+# Student View
 
 class RequestLesson(LoginRequiredMixin, FormView):
     """Display the requests screen and handle requests."""

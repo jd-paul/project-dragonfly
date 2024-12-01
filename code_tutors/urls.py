@@ -33,6 +33,7 @@ urlpatterns = [
 
     # Admin views
     path('manage_tutors/', views.ManageTutors.as_view(), name='manage_tutors'),
+    path('manage_students/', views.ManageStudents.as_view(), name='manage_students'),
     path('manage_applications/', views.ManageApplications, name='manage_applications'),
 
     #Student views
