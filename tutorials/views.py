@@ -181,7 +181,7 @@ def ManageApplications(request):
 class ManageTutors(View):
     """Display a list of pending tutor sign-up requests for admin approval."""
     template_name = 'admin/manage_tutors.html'
-    paginate_by = 5
+    paginate_by = 15
 
     def get_queryset(self):
         """Filter for tutors."""
