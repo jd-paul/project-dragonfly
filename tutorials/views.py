@@ -339,16 +339,43 @@ class RequestLesson(View):
             # Check if student has already requested the same course
             if StudentRequest.objects.filter(student=request.user, skill=skill).exists():
                 messages.error(request, 'You have already requested this course.')
-                return redirect('offered_skill_list')
+                return redirect('your_requests')
             
             student_request = form.save(commit=False)
             student_request.student = request.user
             student_request.skill = skill
             student_request.save()
-            return redirect('offered_skill_list')  # todo change
+            return redirect('your_requests') 
 
         context = { 'skill': skill, 'form': form, }
         return render(request, self.template_name, context)
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(user_passes_test(is_student), name='dispatch')
+class YourRequestsView(View):
+    template_name = 'student/your_requests.html'
+
+    def get(self, request):
+        
+        student_requests = StudentRequest.objects.filter(student=request.user)
+        for student_request in student_requests:
+            student_request.is_accepted = student_request.enrollments.exists()
+        context = {
+            'student_requests': student_requests
+        }
+        return render(request, self.template_name, context)
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(user_passes_test(is_student), name='dispatch')
+class DeleteYourRequestView(View):
+    def post(self, request, student_request_id):
+        student_request = get_object_or_404(StudentRequest, id=student_request_id, student=request.user)
+        if not student_request.enrollments.exists():
+            student_request.delete()
+            messages.success(request, 'Your request has been deleted.')
+        else:
+            messages.error(request, 'You cannot delete this request as it has been accepted by a tutor.')
+        return redirect('your_requests')
 
 
 class TutorSignUpView(LoginProhibitedMixin, FormView):

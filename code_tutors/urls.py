@@ -39,5 +39,7 @@ urlpatterns = [
     #Student views
     path('offered_skill_list/', views.SkillListView.as_view(), name = 'offered_skill_list'),
     path('student_request_form/<int:skill_id>/', views.RequestLesson.as_view(), name = 'student_request_form'),
+    path('your_requests/', views.YourRequestsView.as_view(), name = 'your_requests'),
+    path('delete_your_request/<int:student_request_id>/', views.DeleteYourRequestView.as_view(), name = 'delete_your_request'),
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

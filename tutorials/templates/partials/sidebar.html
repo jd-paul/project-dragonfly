@@ -113,7 +113,9 @@
                 style="line-height: 1.2;">Request Lesson</a>
         </li>
         <li>
-            <a href="" class="btn btn-dark btn-block " style="line-height: 1.2;">Student Sidebar placeholder</a>
+            <a href="{% url 'your_requests' %}"
+                class="btn btn-dark btn-block {% if request.path == '/your_requests/' %}active-tab{% endif %}"
+                style="line-height: 1.2;">Manage Your Requests</a>
         </li>
         {% endif %}
     </ul>
