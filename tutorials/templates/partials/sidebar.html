@@ -108,8 +108,8 @@
         <!-- Student Specific Sidebar -->
         {% elif user.user_type == 'Student' %}
         <li>
-            <a href="{% url 'request_lesson' %}"
-                class="btn btn-dark btn-block {% if request.path == '/request_lesson/' %}active-tab{% endif %}"
+            <a href="{% url 'offered_skill_list' %}"
+                class="btn btn-dark btn-block {% if request.path == '/offered_skill_list/' %}active-tab{% endif %}"
                 style="line-height: 1.2;">Request Lesson</a>
         </li>
         <li>

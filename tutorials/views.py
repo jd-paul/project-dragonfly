@@ -11,7 +11,8 @@ from django.urls import reverse
 from django.utils.decorators import method_decorator
 from tutorials.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TutorSignUpForm, StudentRequestForm
 from tutorials.helpers import login_prohibited
-from tutorials.models import UserType
+from datetime import timedelta, timezone
+from tutorials.models import UserType, Skill, SkillLevel, StudentRequest, Invoice
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 
@@ -163,6 +164,11 @@ def is_admin(user):
         return True
     raise PermissionDenied
 
+def is_student(user):
+    if user.user_type == UserType.STUDENT:
+        return True
+    raise PermissionDenied
+
 # Admin View
 @login_required
 @user_passes_test(is_admin)
@@ -277,34 +283,73 @@ class ManageStudents(View):
 Student View Functions
 """
 
-# Student View
+@method_decorator(login_required, name='dispatch')
+@method_decorator(user_passes_test(is_student), name='dispatch')
+class SkillListView(View):
+    """Display a list of offered skills to student."""
 
-class RequestLesson(LoginRequiredMixin, FormView):
-    """Display the requests screen and handle requests."""
+    template_name = 'student/offered_skill_list.html'
+    paginate_by = 10
 
-    form_class = StudentRequestForm
-    template_name = "request_lesson.html"
-    login_url = 'login'  # Redirect to login page if not authenticated
+    def get(self, request):
+        query = request.GET.get('q', '')
+        level = request.GET.get('level', '')
+        skills = Skill.objects.all()
 
-    def get(self, request, *args, **kwargs):
-        # Check if the logged-in user is a student
-        if not (request.user.is_authenticated and request.user.user_type == 'Student'):
-            return redirect('dashboard')  # Redirect non-student users to the dashboard
-        return super().get(request, *args, **kwargs)
+        if query:
+            skills = skills.filter(language__icontains=query)
+        if level:
+            skills = skills.filter(level=level)
 
-    def post(self, request, *args, **kwargs):
-        # Check if the logged-in user is a student
-        if not (request.user.is_authenticated and request.user.user_type == 'Student'):
-            return redirect('dashboard')  # Redirect non-student users to the dashboard
-        return super().post(request, *args, **kwargs)
+        paginator = Paginator(skills, self.paginate_by)
+        page = request.GET.get('page', 1)
 
-    def form_valid(self, form):
-        self.object = form.save()
-        login(self.request, self.object)
-        return super().form_valid(form)
+        try:
+            skills_page = paginator.page(page)
+        except PageNotAnInteger:
+            skills_page = paginator.page(1)
+        except EmptyPage:
+            skills_page = paginator.page(paginator.num_pages)
 
-    def get_success_url(self):
-        return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
+        context = {
+            'skills': skills_page,
+            'query': query,
+            'current_level': level,
+            'levels': SkillLevel.choices,
+            'is_paginated': paginator.num_pages > 1,
+        }
+        return render(request, self.template_name, context)
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(user_passes_test(is_student), name='dispatch')
+class RequestLesson(View):
+    """Handle student's course request."""
+
+    template_name = 'student/student_request_form.html'
+
+    def get(self, request, skill_id):
+        skill = get_object_or_404(Skill, id=skill_id)
+        form = StudentRequestForm()
+        return render(request, self.template_name, {'form': form, 'skill': skill})
+
+    def post(self, request, skill_id):
+        skill = get_object_or_404(Skill, id=skill_id)
+        form = StudentRequestForm(request.POST)
+        if form.is_valid():
+            # Check if student has already requested the same course
+            if StudentRequest.objects.filter(student=request.user, skill=skill).exists():
+                messages.error(request, 'You have already requested this course.')
+                return redirect('offered_skill_list')
+            
+            student_request = form.save(commit=False)
+            student_request.student = request.user
+            student_request.skill = skill
+            student_request.save()
+            return redirect('offered_skill_list')  # todo change
+
+        context = { 'skill': skill, 'form': form, }
+        return render(request, self.template_name, context)
+
 
 class TutorSignUpView(LoginProhibitedMixin, FormView):
     """Display the tutor sign up screen and handle sign ups."""
