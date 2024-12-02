@@ -17,6 +17,7 @@ from django.core.paginator import Paginator
 
 from .models import User
 from .models import UserType
+from .models import StudentRequest
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 @login_required
@@ -163,13 +164,9 @@ def is_admin(user):
         return True
     raise PermissionDenied
 
-# Admin View
-@login_required
-@user_passes_test(is_admin)
-def ManageApplications(request):
-    print(f"User: {request.user}, User type: {request.user.user_type}")
-    return render(request, 'admin/manage_applications.html')
-
+"""
+Admin View Functions
+"""
 @method_decorator(login_required, name='dispatch')
 @method_decorator(user_passes_test(is_admin), name='dispatch')
 class ManageTutors(View):
@@ -272,6 +269,62 @@ class ManageStudents(View):
             messages.error(request, "Invalid action provided.")
 
         return redirect('manage_students')
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(user_passes_test(is_admin), name='dispatch')
+class ManageApplications(View):
+    """Display and manage pending student requests for admin approval."""
+    template_name = 'admin/manage_applications.html'
+    paginate_by = 15
+
+    def get_queryset(self):
+        """Retrieve the list of student requests."""
+        return StudentRequest.objects.select_related('student', 'skill').order_by('-created_at')
+
+    def get(self, request, *args, **kwargs):
+        """Display the list of student requests with pagination."""
+        requests = self.get_queryset()
+        paginator = Paginator(requests, self.paginate_by)
+        page = request.GET.get('page', 1)
+
+        try:
+            student_requests = paginator.page(page)
+        except PageNotAnInteger:
+            student_requests = paginator.page(1)
+        except EmptyPage:
+            student_requests = paginator.page(paginator.num_pages)
+
+        context = {
+            'student_requests': student_requests,
+            'is_paginated': paginator.num_pages > 1,
+            'request_count': requests.count()  # Total count of student requests
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        """Handle approval or rejection of student requests."""
+        request_id = request.POST.get('request_id')
+        action = request.POST.get('action')
+
+        if not request_id or not action:
+            messages.error(request, "Invalid action or request ID.")
+            return redirect('manage_applications')
+
+        student_request = get_object_or_404(StudentRequest, id=request_id)
+
+        if action == 'approve':
+            # Handle approval logic (customize as needed)
+            student_request.student.is_active = True
+            student_request.student.save()
+            messages.success(request, f"Request for {student_request.student.get_full_name()} approved.")
+        elif action == 'reject':
+            # Handle rejection logic
+            student_request.delete()
+            messages.success(request, "Student request rejected.")
+        else:
+            messages.error(request, "Invalid action provided.")
+
+        return redirect('manage_applications')
 
 """
 Student View Functions

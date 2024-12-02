@@ -34,7 +34,7 @@ urlpatterns = [
     # Admin views
     path('manage_tutors/', views.ManageTutors.as_view(), name='manage_tutors'),
     path('manage_students/', views.ManageStudents.as_view(), name='manage_students'),
-    path('manage_applications/', views.ManageApplications, name='manage_applications'),
+    path('manage_applications/', views.ManageApplications.as_view(), name='manage_applications'),
 
     #Student views
     path('request_lesson/', views.RequestLesson.as_view(), name = 'request_lesson')
