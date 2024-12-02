@@ -1,4 +1,5 @@
 """Unit tests for the User model."""
+from decimal import Decimal
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 from  django.db.utils import IntegrityError
@@ -105,17 +106,16 @@ class StudentRequestModelTestCase(TestCase):
         )
 
     def test_student_request_creation(self):
-        duration = time(hour=1, minute=30)
         student_request = StudentRequest.objects.create(
             student=self.student,
             skill=self.skill,
-            duration=duration,
+            duration=90,
             first_term=Term.SEPTEMBER_CHRISTMAS,
             frequency=Frequency.WEEKLY
         )
         self.assertEqual(student_request.student, self.student)
         self.assertEqual(student_request.skill, self.skill)
-        self.assertEqual(student_request.duration, duration)
+        self.assertEqual(student_request.duration, 90)
         self.assertEqual(student_request.first_term, Term.SEPTEMBER_CHRISTMAS)
         self.assertEqual(student_request.frequency, Frequency.WEEKLY)
 
@@ -124,7 +124,7 @@ class StudentRequestModelTestCase(TestCase):
         student_request = StudentRequest.objects.create(
             student=self.student,
             skill=self.skill,
-            duration=time(hour=1, minute=30),
+            duration=90,
             first_term=Term.SEPTEMBER_CHRISTMAS,
             frequency=Frequency.WEEKLY
         )
@@ -156,7 +156,7 @@ class EnrollmentModelTestCase(TestCase):
         self.student_request = StudentRequest.objects.create(
             student=self.student,
             skill=self.skill,
-            duration=time(hour=1),
+            duration=90,
             first_term=Term.SEPTEMBER_CHRISTMAS,
             frequency=Frequency.WEEKLY
         )
@@ -175,6 +175,7 @@ class EnrollmentModelTestCase(TestCase):
         enrollment = Enrollment.objects.create(
             approved_request=self.student_request,
             current_term=Term.JANUARY_EASTER, # can be different from term in student request
+            week_count=12,
             tutor=self.tutor,
             start_time=start_time,
             status='ongoing'
@@ -189,6 +190,7 @@ class EnrollmentModelTestCase(TestCase):
         enrollment = Enrollment.objects.create(
             approved_request=self.student_request,
             current_term=Term.JANUARY_EASTER, 
+            week_count=12,
             tutor=self.tutor,
             start_time=timezone.now(),
             status='ongoing'
@@ -224,7 +226,7 @@ class EnrollmentDaysModelTestCase(TestCase):
         self.student_request = StudentRequest.objects.create(
             student=self.student,
             skill=self.skill,
-            duration=time(hour=1),
+            duration=90,
             first_term=Term.SEPTEMBER_CHRISTMAS,
             frequency=Frequency.WEEKLY
         )
@@ -241,6 +243,7 @@ class EnrollmentDaysModelTestCase(TestCase):
         self.enrollment = Enrollment.objects.create(
             approved_request=self.student_request,
             current_term=Term.JANUARY_EASTER, 
+            week_count=12,
             tutor=self.tutor,
             start_time=timezone.now(),
             status='ongoing'
@@ -293,7 +296,7 @@ class InvoiceModelTestCase(TestCase):
         self.student_request = StudentRequest.objects.create(
             student=self.student,
             skill=self.skill,
-            duration=time(hour=1),
+            duration=90,
             first_term=Term.SEPTEMBER_CHRISTMAS,
             frequency=Frequency.WEEKLY
         )
@@ -306,16 +309,23 @@ class InvoiceModelTestCase(TestCase):
             password='password1234',
             user_type=UserType.TUTOR
             )
+
+        self.tutor_skill =TutorSkill.objects.create(
+            tutor = self.tutor,
+            skill = self.skill,
+            price_per_hour = 55.00
+        )
         
         self.enrollment = Enrollment.objects.create(
             approved_request=self.student_request,
             current_term=Term.JANUARY_EASTER,
+            week_count=12,
             tutor=self.tutor,
             start_time=timezone.now() + timedelta(days=15),
             status='ongoing'
         )
 
-    def test_valid_invoice_creation(self):
+    def test_invoice_creation(self):
         issued_date = timezone.now()
         due_date = self.enrollment.start_time
         invoice = Invoice.objects.create(
@@ -332,6 +342,33 @@ class InvoiceModelTestCase(TestCase):
         self.assertEqual(invoice.due_date, due_date)
         self.assertEqual(invoice.issued_date, issued_date)
     
+    def test_subtotal_calculation(self):
+        issued_date = timezone.now()
+        due_date = self.enrollment.start_time
+        invoice = Invoice.objects.create(
+            enrollment = self.enrollment,
+            amount = 0.00,
+            issued_date = issued_date,
+            payment_status = 'unpaid',
+            due_date = due_date
+        )
+
+        frequency_map = {
+            Frequency.WEEKLY: 1,
+            Frequency.BI_WEEKLY: 0.5,
+        }
+        frequency_as_num = frequency_map.get(self.enrollment.approved_request.frequency)
+        
+        expected_subtotal = (
+            Decimal(self.enrollment.week_count) *
+            Decimal(frequency_as_num) *
+            Decimal(self.enrollment.approved_request.duration/ Decimal('60')) *
+            Decimal(self.tutor_skill.price_per_hour)
+        )
+
+        self.assertEqual(invoice.subtotal, expected_subtotal)
+        self.assertEqual(invoice.subtotal, 990)
+
     def test_due_date_cannot_be_before_issued_date(self):
         issued_date = timezone.now() + timedelta(days=15)
         due_date = timezone.now()
@@ -363,3 +400,4 @@ class InvoiceModelTestCase(TestCase):
                 payment_status = 'unpaid',
                 due_date = due_date
             )
+

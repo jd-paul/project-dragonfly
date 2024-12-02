@@ -1,4 +1,5 @@
-from django.core.validators import RegexValidator, MinValueValidator
+from decimal import Decimal
+from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
@@ -117,7 +118,7 @@ class StudentRequest(models.Model):
         limit_choices_to={'user_type': UserType.STUDENT}
     )
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE, related_name='requests')
-    duration = models.DurationField()
+    duration = models.IntegerField()
     first_term = models.CharField(max_length=60, choices=Term.choices)
     frequency = models.CharField(max_length=20, choices=Frequency.choices)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -131,6 +132,7 @@ class Enrollment(models.Model):
         related_name='enrollments',
         limit_choices_to={'user_type': UserType.TUTOR}
     )
+    week_count = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(13)])
     start_time = models.DateTimeField()
     status = models.CharField(max_length=50, choices=[('ongoing', 'Ongoing'), ('terminated', 'Terminated')])
     created_at = models.DateTimeField(auto_now_add=True)
@@ -153,6 +155,20 @@ class Invoice(models.Model):
     payment_status = models.CharField(max_length=50, choices=[('paid', 'Paid'), ('unpaid', 'Unpaid')])
     due_date = models.DateTimeField()
 
+    @property
+    def subtotal(self):
+        self.week_count = self.enrollment.week_count
+        self.frequency = self.enrollment.approved_request.frequency
+        self.duration = self.enrollment.approved_request.duration
+        self.tutor_skill = self.enrollment.tutor.skills.get(skill=self.enrollment.approved_request.skill)
+        self.price_per_hour = self.tutor_skill.price_per_hour
+        frequency_map = {
+            Frequency.WEEKLY: 1,
+            Frequency.BI_WEEKLY: 0.5,
+        }
+        return Decimal(self.week_count) * Decimal(frequency_map.get(self.frequency)) * Decimal(self.duration/Decimal('60')) * Decimal(self.price_per_hour)
+
+    
     def clean(self):
         super().clean()
         if(self.issued_date >= self.due_date):
@@ -161,4 +177,3 @@ class Invoice(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
-    
