@@ -1,10 +1,16 @@
 from django.core.management.base import BaseCommand
-from tutorials.models import User
+from tutorials.models import (
+    User, UserType, Skill, SkillLevel, TutorSkill,
+    StudentRequest, Term, Frequency, Enrollment,
+    EnrollmentDays, Day, Invoice
+)
 from django.utils import timezone
 from faker import Faker
 from datetime import timedelta
 import random
-
+from django.db import transaction
+from decimal import Decimal
+from datetime import time
 
 user_fixtures = [
     {'username': '@johndoe', 'email': 'john.doe@duck_admin.com', 'first_name': 'John', 'last_name': 'Doe', 'user_type': 'Admin'},
@@ -14,7 +20,7 @@ user_fixtures = [
 
 class Command(BaseCommand):
     """Build automation command to seed the database."""
-    USER_COUNT = 300
+    USER_COUNT = 50
     DEFAULT_PASSWORD = 'Password123'
     help = 'Seeds the database with sample data'
 
@@ -23,15 +29,40 @@ class Command(BaseCommand):
         self.faker = Faker('en_GB')
         self.existing_emails = set()
         self.existing_usernames = set()
+        self.tutors = []
+        self.students = []
+        self.skills = []
+        
+    def clear_data(self):
+        """Clear existing data."""
+        self.stdout.write('\nClearing existing data...')
+
+        User.objects.all().delete()
+        TutorSkill.objects.all().delete()
+        StudentRequest.objects.all().delete()
+        Enrollment.objects.all().delete()
+        EnrollmentDays.objects.all().delete()
+        Invoice.objects.all().delete()
+
+        self.stdout.write('\nExisting data cleared.')
 
     def handle(self, *args, **options):
-        User.objects.all().delete()
+        self.clear_data()
+
         self.create_users()
-        self.users = User.objects.all()
+        self.create_skills()
+        self.create_tutor_skills()
+        self.create_student_requests()
+       
+
+        self.stdout.write('\nSeeding complete.')
 
     def create_users(self):
         self.generate_user_fixtures()
         self.generate_random_users()
+
+        self.tutors = list(User.objects.filter(user_type=UserType.TUTOR))
+        self.students = list(User.objects.filter(user_type=UserType.STUDENT))
 
     def generate_user_fixtures(self):
         for data in user_fixtures:
@@ -55,11 +86,11 @@ class Command(BaseCommand):
         username = self.create_unique_username(first_name, last_name)
         user_type = self.assign_user_type()
 
-        if (user_type == 'Student'):
+        if (user_type == UserType.STUDENT):
             email = self.create_unique_email(first_name, last_name, "@student.com")
-        elif (user_type == 'Tutor'):
+        elif (user_type == UserType.TUTOR):
             email = self.create_unique_email(first_name, last_name, "@tutor.com")
-        elif (user_type == 'Admin'):
+        elif (user_type == UserType.ADMIN):
             email = self.create_unique_email(first_name, last_name, "@admin.com")
         
         self.try_create_user({
@@ -143,3 +174,81 @@ class Command(BaseCommand):
 
         self.existing_emails.add(email)
         return email
+
+    def create_skills(self):
+        self.stdout.write('Creating skills...')
+
+        languages = [
+            'Java', 'Python', 'JavaScript', 'Scala', 'Ruby', 'Go', 'C++', 'C', 'Swift', 'Perl', 'Rust',
+        ]
+        levels = [SkillLevel.BEGINNER, SkillLevel.INTERMEDIATE, SkillLevel.ADVANCED]
+        self.skills = []
+
+        for language in languages:
+            for level in levels:
+                skill, created = Skill.objects.get_or_create(language=language, level=level)
+                self.skills.append(skill)
+
+                if created:
+                    self.stdout.write(f'Created skill: {skill.language} ({skill.level})')
+                else:
+                    self.stdout.write(f'Skill already exists: {skill.language} ({skill.level})')
+
+    def create_tutor_skills(self):
+        self.stdout.write('Assigning skills to tutors...')
+
+        if not self.tutors:
+            self.stdout.write(('No tutors found to assign skills to.'))
+            return
+
+        for tutor in self.tutors:
+            assigned_skills = random.sample(self.skills, k=random.randint(3, 5))  # Each tutor gets 3-5 random skills
+            for skill in assigned_skills:
+                tutor_skill_data = {
+                    'tutor': tutor,
+                    'skill': skill,
+                    'price_per_hour': self.generate_hourly_price() 
+                }
+            
+                try:
+                    with transaction.atomic():
+                        TutorSkill.objects.create(**tutor_skill_data)
+                        self.stdout.write(f'Assigned: {skill.language} ({skill.level}) to {tutor.username}')
+                    
+                except Exception as e:
+                        self.stdout.write(f'Could not assign {skill.language} ({skill.level}) to {tutor.username}: {e}')
+
+    def generate_hourly_price(self):
+        price = Decimal(random.uniform(20, 150)).quantize(Decimal('0.01'))
+        return price
+
+    def create_student_requests(self):
+        self.stdout.write('Creating student requests...')
+
+        if not self.students:
+            self.stdout.write(('No students found to assign requests to.'))
+            return
+        
+        durations = [30, 60, 90]
+        terms = [Term.SEPTEMBER_CHRISTMAS, Term.JANUARY_EASTER, Term.MAY_JULY]
+        frequencies = [Frequency.WEEKLY, Frequency.BI_WEEKLY]
+        
+       
+        for student in self.students:
+            requested_skills = random.sample(self.skills, k=random.randint(1, 3))
+            for skill in requested_skills:
+                student_request_data = {
+                    'student': student,
+                    'skill': skill,
+                    'duration': random.choice(durations),
+                    'first_term': random.choice(terms),
+                    'frequency': random.choice(frequencies)
+                }
+                try:
+                    with transaction.atomic():
+                        StudentRequest.objects.create(**student_request_data)
+                        self.stdout.write(f'Student: {student.username} requested: {skill.language} ({skill.level})')
+                    
+                except Exception as e:
+                        self.stdout.write(f'Error: {e}')
+
