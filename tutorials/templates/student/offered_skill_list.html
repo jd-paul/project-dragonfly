@@ -119,7 +119,7 @@
                     <tr>
                         <td>{{ skill.language }}</td>
                         <td>{{ skill.get_level_display }}</td>
-                        <td><a href="" class="btn btn-success">Request</a></td>  <!--  {% url 'student_request_form' skill.id %} -->
+                        <td><a href="{% url 'student_request_form' skill.id %}" class="btn btn-success">Request</a></td> 
                     </tr>
                     {% empty %}
                     <tr>

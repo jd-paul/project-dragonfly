@@ -155,7 +155,7 @@ from .models import StudentRequest, Skill, SkillLevel
 class StudentRequestForm(forms.ModelForm):
     class Meta:
         model = StudentRequest
-        exclude = ['skill_name', 'level', 'duration', 'first_term', 'frequency']
+        exclude = ['student', 'skill']
         widgets = {
             'duration': forms.NumberInput(attrs={'min': 10}),
             'first_term': forms.Select(),
