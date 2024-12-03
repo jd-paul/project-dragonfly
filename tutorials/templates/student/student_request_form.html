@@ -1,0 +1,19 @@
+{% extends 'base_content.html' %}
+{% load widget_tweaks %}
+{% block content %}
+
+<div class="layout">
+    {% include 'partials/sidebar.html' %}
+
+    <div class="content" style="background-color: #F0F0F0;">
+        <h2>Request Lesson for {{ skill.language }} ({{ skill.get_level_display }})</h2>
+
+        <form method="post">
+            {% csrf_token %}
+            {% include 'partials/bootstrap_form.html' %}
+            <button type="submit" class="btn btn-primary">Submit Request</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
