@@ -11,13 +11,11 @@ from django.urls import reverse
 from django.utils.decorators import method_decorator
 from tutorials.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TutorSignUpForm, StudentRequestForm
 from tutorials.helpers import login_prohibited
-from tutorials.models import UserType
+from tutorials.models import User
+from tutorials.models import UserType, PendingTutor, TutorSkill
 from django.core.exceptions import PermissionDenied
-from django.core.paginator import Paginator
-
-from .models import User
-from .models import UserType
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import HttpResponse
 
 @login_required
 def dashboard(request):
@@ -179,7 +177,7 @@ class ManageTutors(View):
 
     def get_queryset(self):
         """Filter for tutors."""
-        return User.objects.filter(user_type=UserType.TUTOR)
+        return PendingTutor.objects.filter(is_approved=False)
 
     def get(self, request, *args, **kwargs):
         """Display the list of tutors with pagination."""
@@ -207,18 +205,30 @@ class ManageTutors(View):
         """Handle approval or rejection of tutor sign-ups."""
         tutor_id = request.POST.get('tutor_id')
         action = request.POST.get('action')
-        tutor = get_object_or_404(User, id=tutor_id, user_type=UserType.TUTOR)
+        pending_tutor = get_object_or_404(PendingTutor, id=tutor_id)
 
         if action == 'approve':
-            tutor.is_active = True
-            tutor.save()
-            messages.success(request, f"Tutor {tutor.get_full_name()} approved.")
+            # Move data from PendingTutor to actual models
+            user = pending_tutor.user
+            user.is_active = True
+            user.save()
+
+            for skill in pending_tutor.skills.all():
+                TutorSkill.objects.create(tutor=user, skill=skill, price_per_hour=pending_tutor.price_per_hour)
+
+            pending_tutor.is_approved = True
+            pending_tutor.save()
+            messages.success(request, f"Tutor {user.get_full_name()} approved.")
+
         elif action == 'reject':
-            tutor.delete()
+            # Reject the tutor by deleting the pending application
+            pending_tutor.delete()
             messages.success(request, "Tutor request rejected.")
 
         return redirect('manage_tutors')
-    
+def manage_students(request):
+    return HttpResponse("Manage Students page coming soon!")
+
 #Student View
 
 class RequestLesson(LoginRequiredMixin, FormView):
@@ -248,6 +258,7 @@ class RequestLesson(LoginRequiredMixin, FormView):
     def get_success_url(self):
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
 
+
 class TutorSignUpView(LoginProhibitedMixin, FormView):
     """Display the tutor sign up screen and handle sign ups."""
     
@@ -257,13 +268,16 @@ class TutorSignUpView(LoginProhibitedMixin, FormView):
 
     def form_valid(self, form):
         # Save the user and set their type as TUTOR
-        self.object = form.save()
-        self.object.user_type = UserType.TUTOR
-        self.object.save()
+        user = form.save()
+        user.user_type = UserType.TUTOR
+        user.save()
         
-        # Optionally send a confirmation email or handle other tutor-specific logic
+        # Save the tutor's skill and hourly price in PendingTutor
+        skill = form.cleaned_data['skill']  # assuming 'skill' is a field in the form
+        price_per_hour = form.cleaned_data['price_per_hour']  # assuming 'price_per_hour' is a field in the form
+        PendingTutor.objects.create(user=user, skill=skill, price_per_hour=price_per_hour)
         
-        login(self.request, self.object)
+        login(self.request, user)
         return super().form_valid(form)
 
     def get_success_url(self):

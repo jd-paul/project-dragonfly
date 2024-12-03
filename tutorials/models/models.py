@@ -162,3 +162,21 @@ class Invoice(models.Model):
         self.full_clean()
         super().save(*args, **kwargs)
     
+class PendingTutor(models.Model):
+    """Model to store pending tutor applications before admin approval."""
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    skill = models.ForeignKey(Skill, on_delete=models.CASCADE, related_name='pending_tutors')
+    price_per_hour = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        default=0.00,
+        help_text='Enter the hourly price for this skill.',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_approved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Pending Tutor: {self.user.full_name()}"
