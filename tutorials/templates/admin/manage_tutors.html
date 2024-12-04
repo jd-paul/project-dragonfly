@@ -1,110 +1,111 @@
 {% extends 'base_content.html' %}
-
 {% block content %}
-  <div class="container mt-4">
-    <h1 class="text-center">Manage Pending Tutors</h1>
 
-    <!-- Display success/error messages -->
-    {% if messages %}
-      <div class="alert alert-{{ message.tags }} mt-4">
-        {% for message in messages %}
-          <div>{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
+<div class="layout">
+    {% include 'partials/sidebar.html' %}
 
-    <div class="row">
-      <div class="col-12">
-        <p class="lead">Total Pending Tutors: <strong>{{ tutor_count }}</strong></p>
+    <div class="content" style="background-color: #F0F0F0;">
+        <h2>Manage Pending Tutors</h2>
 
-        {% if tutors %}
-          <div class="table-responsive">
-            <table class="table table-bordered table-hover">
-              <thead class="thead-dark">
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Skills</th>
-                  <th>Hourly Rate</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for tutor in tutors %}
-                  <tr>
-                    <td>{{ tutor.user.get_full_name }}</td>
-                    <td>{{ tutor.user.email }}</td>
-                    <td>
-                      {% for skill in tutor.skills.all %}
-                        <span class="badge badge-info">{{ skill.name }}</span>
-                      {% endfor %}
-                    </td>
-                    <td>{{ tutor.price_per_hour }} USD</td>
-                    <td>
-                      <form method="post" style="display:inline;">
-                        {% csrf_token %}
-                        <input type="hidden" name="tutor_id" value="{{ tutor.id }}">
-                        <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">
-                          <i class="fas fa-check-circle"></i> Approve
-                        </button>
-                      </form>
-                      <form method="post" style="display:inline;">
-                        {% csrf_token %}
-                        <input type="hidden" name="tutor_id" value="{{ tutor.id }}">
-                        <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">
-                          <i class="fas fa-times-circle"></i> Reject
-                        </button>
-                      </form>
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
 
-          <!-- Pagination Controls -->
-          <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center">
-              {% if tutors.has_previous %}
-                <li class="page-item">
-                  <a class="page-link" href="?page=1" aria-label="First">
-                    <span aria-hidden="true">&laquo;&laquo;</span>
-                  </a>
-                </li>
-                <li class="page-item">
-                  <a class="page-link" href="?page={{ tutors.previous_page_number }}" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                  </a>
-                </li>
-              {% endif %}
+        <!-- Pending Tutors Table -->
+        <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
 
-              {% for num in tutors.paginator.page_range %}
-                {% if tutors.number == num %}
-                  <li class="page-item active">
-                    <span class="page-link">{{ num }}</span>
-                  </li>
-                {% else %}
-                  <li class="page-item">
-                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                  </li>
-                {% endif %}
-              {% endfor %}
+            <!-- Display success/error messages -->
+            {% if messages %}
+                <div class="alert alert-{{ message.tags }} mt-4">
+                    {% for message in messages %}
+                        <div>{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
 
-              {% if tutors.has_next %}
-                <li class="page-item">
-                  <a class="page-link" href="?page={{ tutors.next_page_number }}" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                  </a>
-                </li>
-                <li class="page-item">
-                  <a class="page-link" href="?page={{ tutors.paginator.num_pages }}" aria-label="Last">
-                    <span aria-hidden="true">&raquo;&raquo;</span>
-                  </a>
-                </li>
-              {% endif %}
-            </ul>
-          </nav>
+            {% if tutors %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Skills</th>
+                                <th>Hourly Rate</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tutor in tutors %}
+                                <tr>
+                                    <td>{{ tutor.user.get_full_name }}</td>
+                                    <td>{{ tutor.user.email }}</td>
+                                    <td>
+                                        {% for skill in tutor.skills.all %}
+                                            <span class="badge badge-info">{{ skill.name }}</span>
+                                        {% endfor %}
+                                    </td>
+                                    <td>{{ tutor.price_per_hour }} GBP</td>
+                                    <td>
+                                        <!-- Approve Button -->
+                                        <form method="post" style="display:inline;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="tutor_id" value="{{ tutor.id }}">
+                                            <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">
+                                                <i class="fas fa-check-circle"></i> Approve
+                                            </button>
+                                        </form>
+                                        <!-- Reject Button -->
+                                        <form method="post" style="display:inline;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="tutor_id" value="{{ tutor.id }}">
+                                            <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-times-circle"></i> Reject
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if is_paginated %}
+                <nav class="d-flex justify-content-center">
+                    <ul class="pagination">
+                        <!-- Previous Page Link -->
+                        <li class="page-item {% if not tutors.has_previous %}disabled{% endif %}">
+                            <a class="page-link"
+                            href="{% if tutors.has_previous %}?page={{ tutors.previous_page_number }}{% else %}#{% endif %}">
+                                &laquo; Prev
+                            </a>
+                        </li>
 
+                        <!-- Page Numbers with Ellipsis -->
+                        {% for num in tutors.paginator.page_range %}
+                            {% if num == 1 or num == tutors.paginator.num_pages or num >= tutors.number|add:"-2" and num <= tutors.number|add:"2" %}
+                                {% if tutors.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% elif num == tutors.number|add:"-3" or num == tutors.number|add:"3" %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">…</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        <!-- Next Page Link -->
+                        <li class="page-item {% if not tutors.has_next %}disabled{% endif %}">
+                            <a class="page-link"
+                            href="{% if tutors.has_next %}?page={{ tutors.next_page_number }}{% else %}#{% endif %}">
+                                Next &raquo;
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            {% endif %}
         {% else %}
           <p>No pending tutor applications at the moment.</p>
         {% endif %}
