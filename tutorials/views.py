@@ -3,22 +3,16 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from tutorials.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TutorSignUpForm, StudentRequestForm
 from tutorials.helpers import login_prohibited
-from tutorials.models import UserType
-from django.core.exceptions import PermissionDenied
-from django.core.paginator import Paginator
-
-from .models import User
-from .models import UserType
-from .models import StudentRequest
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from tutorials.models import User, UserType, Skill, SkillLevel, StudentRequest, PendingTutor, TutorSkill
 
 @login_required
 def dashboard(request):
@@ -164,19 +158,31 @@ def is_admin(user):
         return True
     raise PermissionDenied
 
+def is_student(user):
+    if user.user_type == UserType.STUDENT:
+        return True
+    raise PermissionDenied
+
 """
 Admin View Functions
 """
+
+@login_required
+@user_passes_test(is_admin)
+def ManageApplications(request):
+    print(f"User: {request.user}, User type: {request.user.user_type}")
+    return render(request, 'admin/manage_applications.html')
+
 @method_decorator(login_required, name='dispatch')
 @method_decorator(user_passes_test(is_admin), name='dispatch')
 class ManageTutors(View):
     """Display a list of pending tutor sign-up requests for admin approval."""
     template_name = 'admin/manage_tutors.html'
-    paginate_by = 5
+    paginate_by = 15
 
     def get_queryset(self):
         """Filter for tutors."""
-        return User.objects.filter(user_type=UserType.TUTOR)
+        return PendingTutor.objects.filter(is_approved=False)
 
     def get(self, request, *args, **kwargs):
         """Display the list of tutors with pagination."""
@@ -204,14 +210,24 @@ class ManageTutors(View):
         """Handle approval or rejection of tutor sign-ups."""
         tutor_id = request.POST.get('tutor_id')
         action = request.POST.get('action')
-        tutor = get_object_or_404(User, id=tutor_id, user_type=UserType.TUTOR)
+        pending_tutor = get_object_or_404(PendingTutor, id=tutor_id)
 
         if action == 'approve':
-            tutor.is_active = True
-            tutor.save()
-            messages.success(request, f"Tutor {tutor.get_full_name()} approved.")
+            # Move data from PendingTutor to actual models
+            user = pending_tutor.user
+            user.is_active = True
+            user.save()
+
+            for skill in pending_tutor.skills.all():
+                TutorSkill.objects.create(tutor=user, skill=skill, price_per_hour=pending_tutor.price_per_hour)
+
+            pending_tutor.is_approved = True
+            pending_tutor.save()
+            messages.success(request, f"Tutor {user.get_full_name()} approved.")
+
         elif action == 'reject':
-            tutor.delete()
+            # Reject the tutor by deleting the pending application
+            pending_tutor.delete()
             messages.success(request, "Tutor request rejected.")
 
         return redirect('manage_tutors')
@@ -330,34 +346,101 @@ class ManageApplications(View):
 Student View Functions
 """
 
-# Student View
+@method_decorator(login_required, name='dispatch')
+@method_decorator(user_passes_test(is_student), name='dispatch')
+class SkillListView(View):
+    """Display a list of offered skills to student."""
 
-class RequestLesson(LoginRequiredMixin, FormView):
-    """Display the requests screen and handle requests."""
+    template_name = 'student/offered_skill_list.html'
+    paginate_by = 10
 
-    form_class = StudentRequestForm
-    template_name = "request_lesson.html"
-    login_url = 'login'  # Redirect to login page if not authenticated
+    def get(self, request):
+        query = request.GET.get('q', '')
+        level = request.GET.get('level', '')
+        skills = Skill.objects.all()
 
-    def get(self, request, *args, **kwargs):
-        # Check if the logged-in user is a student
-        if not (request.user.is_authenticated and request.user.user_type == 'Student'):
-            return redirect('dashboard')  # Redirect non-student users to the dashboard
-        return super().get(request, *args, **kwargs)
+        if query:
+            skills = skills.filter(language__icontains=query)
+        if level:
+            skills = skills.filter(level=level)
 
-    def post(self, request, *args, **kwargs):
-        # Check if the logged-in user is a student
-        if not (request.user.is_authenticated and request.user.user_type == 'Student'):
-            return redirect('dashboard')  # Redirect non-student users to the dashboard
-        return super().post(request, *args, **kwargs)
+        paginator = Paginator(skills, self.paginate_by)
+        page = request.GET.get('page', 1)
 
-    def form_valid(self, form):
-        self.object = form.save()
-        login(self.request, self.object)
-        return super().form_valid(form)
+        try:
+            skills_page = paginator.page(page)
+        except PageNotAnInteger:
+            skills_page = paginator.page(1)
+        except EmptyPage:
+            skills_page = paginator.page(paginator.num_pages)
 
-    def get_success_url(self):
-        return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
+        context = {
+            'skills': skills_page,
+            'query': query,
+            'current_level': level,
+            'levels': SkillLevel.choices,
+            'is_paginated': paginator.num_pages > 1,
+        }
+        return render(request, self.template_name, context)
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(user_passes_test(is_student), name='dispatch')
+class RequestLesson(View):
+    """Handle student's course request."""
+
+    template_name = 'student/student_request_form.html'
+
+    def get(self, request, skill_id):
+        skill = get_object_or_404(Skill, id=skill_id)
+        form = StudentRequestForm()
+        return render(request, self.template_name, {'form': form, 'skill': skill})
+
+    def post(self, request, skill_id):
+        skill = get_object_or_404(Skill, id=skill_id)
+        form = StudentRequestForm(request.POST)
+        if form.is_valid():
+            # Check if student has already requested the same course
+            if StudentRequest.objects.filter(student=request.user, skill=skill).exists():
+                messages.error(request, 'You have already requested this course.')
+                return redirect('your_requests')
+            
+            student_request = form.save(commit=False)
+            student_request.student = request.user
+            student_request.skill = skill
+            student_request.save()
+            return redirect('your_requests') 
+
+        context = { 'skill': skill, 'form': form, }
+        return render(request, self.template_name, context)
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(user_passes_test(is_student), name='dispatch')
+class YourRequestsView(View):
+    template_name = 'student/your_requests.html'
+
+    def get(self, request):
+        
+        student_requests = StudentRequest.objects.filter(student=request.user)
+        for student_request in student_requests:
+            student_request.is_accepted = student_request.enrollments.exists()
+        context = {
+            'student_requests': student_requests
+        }
+        return render(request, self.template_name, context)
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(user_passes_test(is_student), name='dispatch')
+class DeleteYourRequestView(View):
+    def post(self, request, student_request_id):
+        student_request = get_object_or_404(StudentRequest, id=student_request_id, student=request.user)
+        if not student_request.enrollments.exists():
+            student_request.delete()
+            messages.success(request, 'Your request has been deleted.')
+        else:
+            messages.error(request, 'You cannot delete this request as it has been accepted already.')
+        return redirect('your_requests')
+
+
 
 class TutorSignUpView(LoginProhibitedMixin, FormView):
     """Display the tutor sign up screen and handle sign ups."""
@@ -368,13 +451,16 @@ class TutorSignUpView(LoginProhibitedMixin, FormView):
 
     def form_valid(self, form):
         # Save the user and set their type as TUTOR
-        self.object = form.save()
-        self.object.user_type = UserType.TUTOR
-        self.object.save()
+        user = form.save()
+        user.user_type = UserType.TUTOR
+        user.save()
         
-        # Optionally send a confirmation email or handle other tutor-specific logic
+        # Save the tutor's skill and hourly price in PendingTutor
+        skill = form.cleaned_data['skill']  # assuming 'skill' is a field in the form
+        price_per_hour = form.cleaned_data['price_per_hour']  # assuming 'price_per_hour' is a field in the form
+        PendingTutor.objects.create(user=user, skill=skill, price_per_hour=price_per_hour)
         
-        login(self.request, self.object)
+        login(self.request, user)
         return super().form_valid(form)
 
     def get_success_url(self):

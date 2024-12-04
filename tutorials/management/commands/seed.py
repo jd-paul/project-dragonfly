@@ -20,7 +20,7 @@ user_fixtures = [
 
 class Command(BaseCommand):
     """Build automation command to seed the database."""
-    USER_COUNT = 50
+    USER_COUNT = 300
     DEFAULT_PASSWORD = 'Password123'
     help = 'Seeds the database with sample data'
 
@@ -40,6 +40,7 @@ class Command(BaseCommand):
         User.objects.all().delete()
         TutorSkill.objects.all().delete()
         StudentRequest.objects.all().delete()
+        Day.objects.all().delete()
         Enrollment.objects.all().delete()
         EnrollmentDays.objects.all().delete()
         Invoice.objects.all().delete()
@@ -53,7 +54,7 @@ class Command(BaseCommand):
         self.create_skills()
         self.create_tutor_skills()
         self.create_student_requests()
-       
+        self.create_days()
 
         self.stdout.write('\nSeeding complete.')
 
@@ -259,3 +260,17 @@ class Command(BaseCommand):
                         self.stdout.write(f'Student: {student.username} requested: {skill.language} ({skill.level})')
                 except Exception as e:
                     self.stdout.write(self.style.ERROR(f'Error creating request for {student.username}: {e}'))
+
+    def create_days(self):
+        self.stdout.write('Creating days...')
+
+        day_names = [
+            'Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'
+        ]
+
+        for day_name in day_names:
+                day, created = Day.objects.get_or_create(day_name=day_name)
+                if created:
+                    self.stdout.write(f'Created day: {day_name}')
+                else:
+                    self.stdout.write(f'Day already exists: {day_name}')

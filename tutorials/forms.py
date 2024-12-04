@@ -153,66 +153,19 @@ from django import forms
 from .models import StudentRequest, Skill, SkillLevel
 
 class StudentRequestForm(forms.ModelForm):
-    # Field to type the skill name
-    skill_name = forms.CharField(
-        max_length=100,
-        required=True,
-        label="Skill Name",
-        widget=forms.TextInput(attrs={'placeholder': 'Enter skill name'})
-    )
-    
-    # Field to select the skill level
-    level = forms.ChoiceField(
-        choices=SkillLevel.choices,
-        required=True,
-        label="Skill Level"
-    )
-
-    # Other fields from StudentRequest
-    duration = forms.DurationField(
-        widget=forms.TextInput(attrs={'placeholder': 'Length of each session e.g., 2:30', 'type': 'text'}),
-        label="Lesson Duration",
-        help_text="Specify the duration as HH:MM or HH:MM:SS"
-    )
-    first_term = forms.ChoiceField(
-        choices=StudentRequest._meta.get_field('first_term').choices,
-        label="Preferred Term"
-    )
-    frequency = forms.ChoiceField(
-        choices=StudentRequest._meta.get_field('frequency').choices,
-        label="Frequency"
-    )
-
     class Meta:
         model = StudentRequest
-        fields = ['skill_name', 'level', 'duration', 'first_term', 'frequency']
+        exclude = ['student', 'skill']
+        widgets = {
+            'duration': forms.NumberInput(attrs={'min': 10}),
+            'first_term': forms.Select(),
+            'frequency': forms.Select(),
+        }
+        labels = {
+            'duration': '(in minutes)',
+        }
+        help_texts = {
+            'duration': 'Please enter the duration in minutes e.g. 75',
+        }
 
-    def clean(self):
-        """Ensure that a skill name and skill level are provided."""
-        cleaned_data = super().clean()
-        skill_name = cleaned_data.get('skill_name')
-        level = cleaned_data.get('level')
-
-        if not skill_name or not level:
-            raise forms.ValidationError("Both skill name and level must be provided.")
-
-        return cleaned_data
-
-    def save(self, commit=True):
-        """Override the save method to create a new Skill and associate it with the StudentRequest."""
-        instance = super().save(commit=False)
-
-        # Create a new Skill using the provided skill_name and level
-        skill, created = Skill.objects.get_or_create(
-            language=self.cleaned_data['skill_name'], 
-            level=self.cleaned_data['level']
-        )
-
-        # Associate the created Skill object with the StudentRequest
-        instance.skill = skill
-        
-        if commit:
-            instance.save()
-        
-        return instance
 

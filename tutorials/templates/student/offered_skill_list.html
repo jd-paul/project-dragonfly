@@ -1,0 +1,104 @@
+{% extends 'base_content.html' %}
+{% block content %}
+
+<div class="layout">
+    {% include 'partials/sidebar.html' %}
+
+    <div class="content" style="background-color: #F0F0F0;">
+        <h2>Offered Skills</h2>
+        <h5 class="h5">{{ user.first_name }} {{ user.last_name }}</h5>
+
+        <!-- Skills in the system -->
+        <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
+            <h3>Skills</h3>
+
+            <form method="get" class="mb-4">
+                <div class="form-row">
+                    <div class="col">
+                        <input type="text" name="q" class="form-control mr-sm-2" placeholder="Search skills..." value="{{ query }}">
+                    </div>
+                    <div class="col">
+                        <select name="level" class="form-control">
+                            <option value="">All Levels</option>
+                            {% for key, value in levels %}
+                                <option value="{{ key }}" {% if current_level == key %}selected{% endif %}>{{ value }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </div>
+                </div>
+            </form>
+
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Language</th>
+                        <th>Level</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for skill in skills %}
+                    <tr>
+                        <td>{{ skill.language }}</td>
+                        <td>{{ skill.get_level_display }}</td>
+                        <td><a href="{% url 'student_request_form' skill.id %}" class="btn btn-success">Request</a></td> 
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-center">No skills are being offered yet</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if is_paginated %}
+            <nav class="d-flex justify-content-center">
+                <ul class="pagination">
+                    <!-- Previous Page Link -->
+                    <li class="page-item {% if not skills.has_previous %}disabled{% endif %}">
+                        <a class="page-link"
+                           href="{% if skills.has_previous %}?page={{ skills.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if current_level %}&level={{ current_level }}{% endif %}{% else %}#{% endif %}">
+                            &laquo; Prev
+                        </a>
+                    </li>
+        
+                    <!-- Page Numbers with Ellipsis -->
+                    {% for num in skills.paginator.page_range %}
+                        {% if num == 1 or num == skills.paginator.num_pages or num >= skills.number|add:'-2' and num <= skills.number|add:'2' %}
+                            {% if skills.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link"
+                                       href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if current_level %}&level={{ current_level }}{% endif %}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% elif num == skills.number|add:'-3' or num == skills.number|add:'3' %}
+                            <li class="page-item disabled">
+                                <span class="page-link">…</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+        
+                    <!-- Next Page Link -->
+                    <li class="page-item {% if not skills.has_next %}disabled{% endif %}">
+                        <a class="page-link"
+                           href="{% if skills.has_next %}?page={{ skills.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if current_level %}&level={{ current_level }}{% endif %}{% else %}#{% endif %}">
+                            Next &raquo;
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        {% endif %}
+        
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
