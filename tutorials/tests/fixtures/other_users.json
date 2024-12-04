@@ -8,6 +8,7 @@
       "username": "@janedoe",
       "email": "janedoe@example.org",
       "password": "pbkdf2_sha256$260000$4BNvFuAWoTT1XVU8D6hCay$KqDCG+bHl8TwYcvA60SGhOMluAheVOnF1PMz0wClilc=",
+      "user_type": "Admin",
       "is_active": true
     }
   },
@@ -20,6 +21,7 @@
       "username": "@petrapickles",
       "email": "petrapickles@example.org",
       "password": "pbkdf2_sha256$260000$4BNvFuAWoTT1XVU8D6hCay$KqDCG+bHl8TwYcvA60SGhOMluAheVOnF1PMz0wClilc=",
+      "user_type": "Tutor",
       "is_active": true
     }
   },
@@ -32,6 +34,7 @@
       "username": "@peterpickles",
       "email": "peterpickles@example.org",
       "password": "pbkdf2_sha256$260000$4BNvFuAWoTT1XVU8D6hCay$KqDCG+bHl8TwYcvA60SGhOMluAheVOnF1PMz0wClilc=",
+      "user_type": "Student",
       "is_active": true
     }
   }
