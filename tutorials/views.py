@@ -211,11 +211,17 @@ class ManageTutors(View):
         """Handle approval or rejection of tutor sign-ups."""
         tutor_id = request.POST.get('tutor_id')
         action = request.POST.get('action')
+
+        if not tutor_id or not action:
+            messages.error(request, "Invalid request.")
+            return redirect('manage_tutors')
+
         pending_tutor = get_object_or_404(PendingTutor, id=tutor_id)
 
         if action == 'approve':
             # Move data from PendingTutor to actual models
             user = pending_tutor.user
+            user.user_type = UserType.TUTOR  # Ensure the user type is set to TUTOR
             user.is_active = True
             user.save()
 
@@ -230,6 +236,9 @@ class ManageTutors(View):
             # Reject the tutor by deleting the pending application
             pending_tutor.delete()
             messages.success(request, "Tutor request rejected.")
+
+        else:
+            messages.error(request, "Invalid action. Please try again.")
 
         return redirect('manage_tutors')
 
@@ -388,25 +397,21 @@ class DeleteYourRequestView(View):
 
 
 class TutorSignUpView(LoginProhibitedMixin, FormView):
-    """Display the tutor sign up screen and handle sign ups."""
-    
     form_class = TutorSignUpForm
     template_name = "tutor_sign_up.html"
-    redirect_when_logged_in_url = settings.REDIRECT_URL_WHEN_LOGGED_IN
 
     def form_valid(self, form):
-        # Save the user and set their type as TUTOR
         user = form.save()
-        user.user_type = UserType.TUTOR
-        user.save()
-        
-        # Save the tutor's skill and hourly price in PendingTutor
-        skill = form.cleaned_data['skill']  # assuming 'skill' is a field in the form
-        price_per_hour = form.cleaned_data['price_per_hour']  # assuming 'price_per_hour' is a field in the form
-        PendingTutor.objects.create(user=user, skill=skill, price_per_hour=price_per_hour)
-        
         login(self.request, user)
         return super().form_valid(form)
 
+    def form_invalid(self, form):
+        print(form.errors)
+        return super().form_invalid(form)
+
     def get_success_url(self):
-        return reverse('tutor_dashboard')  # Redirect to tutor dashboard after successful signup
+        return reverse('tutor_application_success')
+
+class TutorApplicationSuccessView(View):
+    def get(self, request, *args, **kwargs):
+        return render(request, 'tutor_application_success.html')

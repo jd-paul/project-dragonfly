@@ -1,114 +1,181 @@
 {% extends 'base_content.html' %}
 
 {% block content %}
-  <div class="container mt-4">
-    <h1 class="text-center">Manage Pending Tutors</h1>
+<head>
+    <style>
+        /* Card Styles */
+        .card-primary {
+            border-left: 5px solid #0092ff;
+        }
 
-    <!-- Display success/error messages -->
-    {% if messages %}
-      <div class="alert alert-{{ message.tags }} mt-4">
-        {% for message in messages %}
-          <div>{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
+        .card-success {
+            border-left: 5px solid #28a745;
+        }
 
-    <div class="row">
-      <div class="col-12">
-        <p class="lead">Total Pending Tutors: <strong>{{ tutor_count }}</strong></p>
+        .card-warning {
+            border-left: 5px solid #ffc107;
+        }
 
-        {% if tutors %}
-          <div class="table-responsive">
-            <table class="table table-bordered table-hover">
-              <thead class="thead-dark">
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Skills</th>
-                  <th>Hourly Rate</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for tutor in tutors %}
-                  <tr>
-                    <td>{{ tutor.user.get_full_name }}</td>
-                    <td>{{ tutor.user.email }}</td>
-                    <td>
-                      {% for skill in tutor.skills.all %}
-                        <span class="badge badge-info">{{ skill.name }}</span>
-                      {% endfor %}
-                    </td>
-                    <td>{{ tutor.price_per_hour }} USD</td>
-                    <td>
-                      <form method="post" style="display:inline;">
-                        {% csrf_token %}
-                        <input type="hidden" name="tutor_id" value="{{ tutor.id }}">
-                        <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">
-                          <i class="fas fa-check-circle"></i> Approve
-                        </button>
-                      </form>
-                      <form method="post" style="display:inline;">
-                        {% csrf_token %}
-                        <input type="hidden" name="tutor_id" value="{{ tutor.id }}">
-                        <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">
-                          <i class="fas fa-times-circle"></i> Reject
-                        </button>
-                      </form>
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
+        .card-danger {
+            border-left: 5px solid #e54d56;
+        }
+
+        /* Pagination Styling */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 0;
+        }
+
+        .page-item {
+            border-radius: 0.25rem;
+            margin: 0;
+        }
+
+        .page-link {
+            border: 1px solid #0092ff;
+            padding: 8px 15px;
+            font-size: 14px;
+            color: #0092ff;
+            background-color: #fff;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .page-link:hover,
+        .page-link:focus {
+            background-color: #0092ff;
+            color: white;
+            border-color: #0056b3;
+        }
+
+        .page-item.active .page-link {
+            background-color: #0092ff;
+            color: white;
+            border-color: #0092ff;
+        }
+
+        .page-item.disabled .page-link {
+            color: #6c757d;
+            background-color: #e0e0e0;
+            border-color: #ddd;
+        }
+    </style>
+</head>
+
+<div class="layout">
+    {% include 'partials/sidebar.html' %}
+
+    <div class="content" style="background-color: #F0F0F0;">
+        <h2>Manage Pending Tutors</h2>
+        <h5 class="h5">{{ user.first_name }} {{ user.last_name }}</h5>
+
+        <!-- Dashboard Cards -->
+        <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
+            <div class="row g-1">
+                <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2">
+                    <div class="card card-primary shadow-sm py-2 w-100">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Pending Tutors
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ tutor_count }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tutor Management Table -->
+        <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
+            <h3>Pending Tutor Applications</h3>
+
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Skills</th>
+                        <th>Hourly Rate</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tutor in tutors %}
+                    <tr>
+                        <td>{{ tutor.user.get_full_name }}</td>
+                        <td>{{ tutor.user.email }}</td>
+                        <td>
+                            {% for skill in tutor.skills.all %}
+                            <span class="badge badge-info">{{ skill.name }}</span>
+                            {% endfor %}
+                        </td>
+                        <td>{{ tutor.price_per_hour }} USD</td>
+                        <td>
+                            <form method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="tutor_id" value="{{ tutor.id }}">
+                                <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">
+                                    <i class="fas fa-check-circle"></i> Approve
+                                </button>
+                            </form>
+                            <form method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="tutor_id" value="{{ tutor.id }}">
+                                <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-times-circle"></i> Reject
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">No pending tutor applications at the moment.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
-          </div>
 
-          <!-- Pagination Controls -->
-          <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center">
-              {% if tutors.has_previous %}
-                <li class="page-item">
-                  <a class="page-link" href="?page=1" aria-label="First">
-                    <span aria-hidden="true">&laquo;&laquo;</span>
-                  </a>
-                </li>
-                <li class="page-item">
-                  <a class="page-link" href="?page={{ tutors.previous_page_number }}" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                  </a>
-                </li>
-              {% endif %}
+            {% if is_paginated %}
+            <nav class="d-flex justify-content-center">
+                <ul class="pagination">
+                    <li class="page-item {% if not tutors.has_previous %}disabled{% endif %}">
+                        <a class="page-link" href="{% if tutors.has_previous %}?page={{ tutors.previous_page_number }}{% else %}#{% endif %}">
+                            &laquo; Prev
+                        </a>
+                    </li>
 
-              {% for num in tutors.paginator.page_range %}
-                {% if tutors.number == num %}
-                  <li class="page-item active">
-                    <span class="page-link">{{ num }}</span>
-                  </li>
-                {% else %}
-                  <li class="page-item">
-                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                  </li>
-                {% endif %}
-              {% endfor %}
+                    {% for num in tutors.paginator.page_range %}
+                        {% if num == 1 or num == tutors.paginator.num_pages or num >= tutors.number|add:"-2" and num <= tutors.number|add:"2" %}
+                            {% if tutors.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% elif num == tutors.number|add:"-3" or num == tutors.number|add:"3" %}
+                        <li class="page-item disabled">
+                            <span class="page-link">…</span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
 
-              {% if tutors.has_next %}
-                <li class="page-item">
-                  <a class="page-link" href="?page={{ tutors.next_page_number }}" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                  </a>
-                </li>
-                <li class="page-item">
-                  <a class="page-link" href="?page={{ tutors.paginator.num_pages }}" aria-label="Last">
-                    <span aria-hidden="true">&raquo;&raquo;</span>
-                  </a>
-                </li>
-              {% endif %}
-            </ul>
-          </nav>
-
-        {% else %}
-          <p>No pending tutor applications at the moment.</p>
-        {% endif %}
-      </div>
+                    <li class="page-item {% if not tutors.has_next %}disabled{% endif %}">
+                        <a class="page-link" href="{% if tutors.has_next %}?page={{ tutors.next_page_number }}{% else %}#{% endif %}">
+                            Next &raquo;
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
     </div>
-  </div>
+</div>
+
 {% endblock %}
