@@ -382,7 +382,7 @@ class DeleteYourRequestView(View):
             student_request.delete()
             messages.success(request, 'Your request has been deleted.')
         else:
-            messages.error(request, 'You cannot delete this request as it has been accepted by a tutor.')
+            messages.error(request, 'You cannot delete this request as it has been accepted already.')
         return redirect('your_requests')
 
 
