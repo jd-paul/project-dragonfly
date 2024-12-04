@@ -1,81 +1,6 @@
 {% extends 'base_content.html' %}
 {% block content %}
 
-<head>
-    <style>
-        /* Primary card */
-        .card-primary {
-            border-left: 5px solid #0092ff;
-        }
-
-        /* Success card */
-        .card-success {
-            border-left: 5px solid #28a745;
-        }
-
-        /* Warning card */
-        .card-warning {
-            border-left: 5px solid #ffc107;
-        }
-
-        .card-danger {
-            border-left: 5px solid #e54d56;
-        }
-
-        /* General Pagination Styling */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            padding: 0;
-        }
-
-        .page-item {
-            border-radius: 0.25rem;
-            margin: 0;
-        }
-
-        .page-link {
-            border: 1px solid #0092ff;
-            padding: 8px 15px;
-            font-size: 14px;
-            color: #0092ff;
-            background-color: #fff;
-            border-radius: 0.25rem;
-            text-decoration: none;
-            transition: background-color 0.2s ease, color 0.2s ease;
-        }
-
-        .page-link:hover,
-        .page-link:focus {
-            background-color: #0092ff;
-            color: white;
-            border-color: #0056b3;
-        }
-
-        .page-item.active .page-link {
-            background-color: #0092ff;
-            color: white;
-            border-color: #0092ff;
-        }
-
-        .page-item.disabled .page-link {
-            color: #6c757d;
-            background-color: #e0e0e0;
-            border-color: #ddd;
-        }
-
-        .pagination .page-item {
-            border-radius: 5rem;
-        }
-
-        .pagination .page-link {
-            border-radius: 5rem;
-        }
-    </style>
-</head>
-
 <div class="layout">
     {% include 'partials/sidebar.html' %}
 
@@ -83,7 +8,6 @@
         <h2>Student Management Page</h2>
         <h5 class="h5">{{ user.first_name }} {{ user.last_name }}</h5>
 
-        <!-- Quick dashboard information -->
         <!-- Quick dashboard information -->
         <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
             <div class="row g-1">
