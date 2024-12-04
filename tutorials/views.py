@@ -342,6 +342,18 @@ class ManageApplications(View):
 
         return redirect('manage_applications')
 
+@login_required
+@user_passes_test(is_admin)
+def LessonRequestDetails(request, id):
+    """Display the details of a specific lesson request."""
+    lesson_request = get_object_or_404(StudentRequest, id=id)  # Assuming StudentRequest represents a lesson request
+
+    context = {
+        'lesson_request': lesson_request,
+    }
+    return render(request, 'admin/lesson_request_details.html', context)
+
+
 """
 Student View Functions
 """
