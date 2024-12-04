@@ -14,17 +14,3 @@ def login_prohibited(view_function):
             return view_function(request)
     return modified_view_function
 
-
-
-def user_type_required(user_type):
-    def decorator(view_func):
-        def _wrapped_view(request, *args, **kwargs):
-            if request.user.user_type == user_type:
-                return view_func(request, *args, **kwargs)
-            raise PermissionDenied
-        return user_passes_test(lambda u: u.is_authenticated)(_wrapped_view)
-    return decorator
-
-admin_required = user_type_required(UserType.ADMIN)
-tutor_required = user_type_required(UserType.TUTOR)
-student_required = user_type_required(UserType.STUDENT)
