@@ -67,11 +67,13 @@ class Skill(models.Model):
     language = models.CharField(max_length=150, blank=False)
     level = models.CharField(max_length=15, choices=SkillLevel.choices)
 
+    def __str__(self):
+        return f"{self.language} ({self.level})"
+
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['language', 'level'], name='unique_language_level')
         ]
-
 
 class TutorSkill(models.Model):
     tutor =  models.ForeignKey(
@@ -94,21 +96,17 @@ class TutorSkill(models.Model):
             models.UniqueConstraint(fields=['tutor', 'skill'], name='unique_tutor_skill')
         ]
 
-
 class Term(models.TextChoices):
     SEPTEMBER_CHRISTMAS = 'September-Christmas', 'September-Christmas'
     JANUARY_EASTER = 'January-Easter', 'January-Easter'
     MAY_JULY = 'May-July', 'May-July'
 
-
 class Frequency(models.TextChoices):
     WEEKLY = 'weekly'
     BI_WEEKLY = 'bi-weekly'
 
-
 class Day(models.Model):
     day_name = models.CharField(max_length=20)
-
 
 class StudentRequest(models.Model):
     student = models.ForeignKey(

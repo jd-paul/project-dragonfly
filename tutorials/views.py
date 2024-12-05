@@ -12,7 +12,9 @@ from django.utils.decorators import method_decorator
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from tutorials.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TutorSignUpForm, StudentRequestForm
 from tutorials.helpers import login_prohibited
-from tutorials.models import User, UserType, Skill, SkillLevel, StudentRequest, PendingTutor, TutorSkill, StudentRequest
+from tutorials.models import User, UserType, Skill, SkillLevel, StudentRequest, PendingTutor, TutorSkill
+from django.db.models import Q
+from django.db.models import Case, When, Value, IntegerField
 
 @login_required
 def dashboard(request):
@@ -167,12 +169,6 @@ def is_student(user):
 Admin View Functions
 """
 
-@login_required
-@user_passes_test(is_admin)
-def ManageApplications(request):
-    print(f"User: {request.user}, User type: {request.user.user_type}")
-    return render(request, 'admin/manage_applications.html')
-
 @method_decorator(login_required, name='dispatch')
 @method_decorator(user_passes_test(is_admin), name='dispatch')
 class ManageTutors(View):
@@ -302,13 +298,89 @@ class ManageApplications(View):
     template_name = 'admin/manage_applications.html'
     paginate_by = 15
 
-    def get_queryset(self):
-        """Retrieve the list of student requests."""
-        return StudentRequest.objects.select_related('student', 'skill').order_by('-created_at')
+    def get_queryset(self, search_query=None, sort_by=None, order='asc'):
+            """Retrieve the list of student requests, with optional search filtering."""
+            requests = StudentRequest.objects.select_related('student', 'skill')
+
+            if search_query:
+                requests = requests.filter(
+                    Q(student__first_name__icontains=search_query) |
+                    Q(student__last_name__icontains=search_query)
+                )
+
+            # Sorting logic based on the selected sort field
+            if sort_by == 'student':
+                # Sort by student's full name (first_name or last_name)
+                if order == 'asc':
+                    requests = requests.order_by('student__first_name', 'student__last_name')
+                else:
+                    requests = requests.order_by('-student__first_name', '-student__last_name')
+            elif sort_by == 'duration':
+                # Sort by duration (numerically)
+                if order == 'asc':
+                    requests = requests.order_by('duration')
+                else:
+                    requests = requests.order_by('-duration')
+            elif sort_by == 'created_at':
+                # Sort by created_at (date)
+                if order == 'asc':
+                    requests = requests.order_by('created_at')
+                else:
+                    requests = requests.order_by('-created_at')
+            elif sort_by == 'status':
+                # Define custom sorting orders based on user-selected order
+                if order == 'asc_pending':
+                    requests = requests.order_by(
+                        Case(
+                            When(status='PENDING', then=Value(1)),
+                            When(status='ACCEPTED', then=Value(2)),
+                            When(status='REJECTED', then=Value(3)),
+                            default=Value(4),
+                            output_field=IntegerField()
+                        )
+                    )
+                elif order == 'asc_accepted':
+                    requests = requests.order_by(
+                        Case(
+                            When(status='ACCEPTED', then=Value(1)),
+                            When(status='PENDING', then=Value(2)),
+                            When(status='REJECTED', then=Value(3)),
+                            default=Value(4),
+                            output_field=IntegerField()
+                        )
+                    )
+                elif order == 'asc_rejected':
+                    requests = requests.order_by(
+                        Case(
+                            When(status='REJECTED', then=Value(1)),
+                            When(status='PENDING', then=Value(2)),
+                            When(status='ACCEPTED', then=Value(3)),
+                            default=Value(4),
+                            output_field=IntegerField()
+                        )
+                    )
+                else:  # Handle descending for all three options
+                    requests = requests.order_by(
+                        Case(
+                            When(status='REJECTED', then=Value(1)),
+                            When(status='ACCEPTED', then=Value(2)),
+                            When(status='PENDING', then=Value(3)),
+                            default=Value(4),
+                            output_field=IntegerField()
+                        )
+                    )
+
+
+            return requests
 
     def get(self, request, *args, **kwargs):
         """Display the list of student requests with pagination."""
-        requests = self.get_queryset()
+        search_query = request.GET.get('search', '')
+        sort_by = request.GET.get('sort_by', 'created_at')
+        order = request.GET.get('order', 'asc')
+
+        requests = self.get_queryset(search_query, sort_by, order)
+        
         paginator = Paginator(requests, self.paginate_by)
         page = request.GET.get('page', 1)
 
@@ -322,34 +394,13 @@ class ManageApplications(View):
         context = {
             'student_requests': student_requests,
             'is_paginated': paginator.num_pages > 1,
-            'request_count': requests.count()  # Total count of student requests
+            'request_count': requests.count(),  # Total count of student requests
+            'order': order,
+            'search': search_query,
+            'sort_by': sort_by,
         }
         return render(request, self.template_name, context)
 
-    def post(self, request, *args, **kwargs):
-        """Handle approval or rejection of student requests."""
-        request_id = request.POST.get('request_id')
-        action = request.POST.get('action')
-
-        if not request_id or not action:
-            messages.error(request, "Invalid action or request ID.")
-            return redirect('manage_applications')
-
-        student_request = get_object_or_404(StudentRequest, id=request_id)
-
-        if action == 'approve':
-            # Handle approval logic (customize as needed)
-            student_request.student.is_active = True
-            student_request.student.save()
-            messages.success(request, f"Request for {student_request.student.get_full_name()} approved.")
-        elif action == 'reject':
-            # Handle rejection logic
-            student_request.delete()
-            messages.success(request, "Student request rejected.")
-        else:
-            messages.error(request, "Invalid action provided.")
-
-        return redirect('manage_applications')
 
 @login_required
 @user_passes_test(is_admin)

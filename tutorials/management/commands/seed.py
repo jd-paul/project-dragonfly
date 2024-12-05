@@ -20,7 +20,7 @@ user_fixtures = [
 
 class Command(BaseCommand):
     """Build automation command to seed the database."""
-    USER_COUNT = 300
+    USER_COUNT = 100
     DEFAULT_PASSWORD = 'Password123'
     help = 'Seeds the database with sample data'
 
@@ -223,7 +223,6 @@ class Command(BaseCommand):
         price = Decimal(random.uniform(20, 150)).quantize(Decimal('0.01'))
         return price
 
-
     def create_student_requests(self):
         self.stdout.write('Creating student requests...')
 
@@ -245,19 +244,29 @@ class Command(BaseCommand):
         for student in self.students:
             k = min(len(self.skills), random.randint(1, 3))  # Ensure valid sampling
             requested_skills = random.sample(self.skills, k=k)
+            
+            # Generate the status based on the proportions
+            statuses = ['pending', 'rejected', 'approved']
+            # Shuffle the statuses list to ensure randomness in assignment
+            random.shuffle(statuses)
+            
             for skill in requested_skills:
+                # Assign one of the statuses randomly, ensuring balanced distribution
+                status = statuses[random.randint(0, 2)]  # Randomly choose from 'pending', 'rejected', 'approved'
+                
                 student_request_data = {
                     'student': student,
                     'skill': skill,
                     'duration': random.choice(durations),
                     'first_term': random.choice(terms),
                     'frequency': random.choice(frequencies),
-                    'status': 'pending',  # Ensure lowercase
+                    'status': status,  # Set the status based on the randomly chosen value
                 }
+                
                 try:
                     with transaction.atomic():
                         StudentRequest.objects.create(**student_request_data)
-                        self.stdout.write(f'Student: {student.username} requested: {skill.language} ({skill.level})')
+                        self.stdout.write(f'Student: {student.username} requested: {skill.language} ({skill.level}) with status {status}')
                 except Exception as e:
                     self.stdout.write(self.style.ERROR(f'Error creating request for {student.username}: {e}'))
 

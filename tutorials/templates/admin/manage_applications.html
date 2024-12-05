@@ -91,7 +91,7 @@
                     <div class="card card-primary shadow-sm py-2 w-100">
                         <div class="card-body">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Total Lesson Requests
+                                Total Lesson Requests (To be fixed)
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ student_requests|length }}</div>
                         </div>
@@ -127,25 +127,59 @@
         <!-- Student Lesson Requests -->
         <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
             <h3>Lesson Requests in the System</h3>
+            <h6><i>Click on header fields to sort</i></h6>
+
+            <!-- Search Form -->
+            <form method="get" action="">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" name="search" placeholder="Search by student name" value="{{ request.GET.search }}">
+                    <button class="btn btn-outline-secondary" type="submit">Search</button>
+                </div>
+            </form>
+
             {% if student_requests %}
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Student</th>
+                        <th>
+                            <a href="?sort_by=student&order={% if order == 'asc' %}desc{% else %}asc{% endif %}">Student</a>
+                        </th>
                         <th>Skill</th>
-                        <th>Duration</th>
+                        <th>
+                            <a href="?sort_by=duration&order={% if order == 'asc' %}desc{% else %}asc{% endif %}">Duration</a>
+                        </th>
                         <th>First Term</th>
                         <th>Frequency</th>
-                        <th>Created At</th>
-                        <th>Status</th>
+                        <th>
+                            <a href="?sort_by=created_at&order={% if order == 'asc' %}desc{% else %}asc{% endif %}">Created At</a>
+                        </th>
+                        <th>
+                            <a href="?sort_by=status&order={% if request.GET.order == 'asc_pending' %}asc_accepted{% elif request.GET.order == 'asc_accepted' %}asc_rejected{% elif request.GET.order == 'asc_rejected' %}desc{% else %}asc_pending{% endif %}">
+                                Status
+                                <small>(Current:
+                                    {% if request.GET.order == 'asc_pending' %}
+                                        Pending First
+                                    {% elif request.GET.order == 'asc_accepted' %}
+                                        Accepted First
+                                    {% elif request.GET.order == 'asc_rejected' %}
+                                        Rejected First
+                                    {% elif request.GET.order == 'desc' %}
+                                        Reversed
+                                    {% else %}
+                                        Default
+                                    {% endif %}
+                                )</small>
+                            </a>
+                        </th>
                         <th>Actions</th>
                     </tr>
+
                 </thead>
                 <tbody>
                     {% for request in student_requests %}
                     <tr>
                         <td>{{ request.student.get_full_name }}</td>
-                        <td>{{ request.skill.name }}</td>
+                        <td>{{ request.skill }}</td>
                         <td>{{ request.duration }} hours</td>
                         <td>{{ request.first_term }}</td>
                         <td>{{ request.frequency }}</td>
@@ -162,24 +196,6 @@
                             {% endif %}
                         </td>
                         <td>
-                            <!--
-                            <form action="{% url 'update_request_status' request.id 'approve' %}" method="post" style="display:inline;">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-success" aria-label="Approve Request">Approve</button>
-                            </form>
-                            
-                            <form action="{% url 'update_request_status' request.id 'reject' %}" method="post" style="display:inline;">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-danger" aria-label="Reject Request">Reject</button>
-                            </form>
-                            
-                            <form action="{% url 'update_request_status' request.id 'pending' %}" method="post" style="display:inline;">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-warning" aria-label="Set to Pending">Pending</button>
-                            </form>
-                            -->
-                        
-                            <!-- Details -->
                             <a href="{% url 'lesson_request_details' request.id %}" class="btn btn-info btn-sm" role="button" aria-label="View Request Details">
                                 Details
                             </a>
@@ -188,7 +204,7 @@
                     {% endfor %}
                 </tbody>
             </table>
-        
+
             <!-- Pagination -->
             {% if is_paginated %}
                 <nav class="d-flex justify-content-center">
@@ -196,11 +212,11 @@
                         <!-- Previous Page Link -->
                         <li class="page-item {% if not student_requests.has_previous %}disabled{% endif %}">
                             <a class="page-link"
-                               href="{% if student_requests.has_previous %}?page={{ student_requests.previous_page_number }}{% else %}#{% endif %}">
+                            href="{% if student_requests.has_previous %}?page={{ student_requests.previous_page_number }}{% else %}#{% endif %}">
                                 &laquo; Prev
                             </a>
                         </li>
-        
+
                         <!-- Page Numbers with Ellipsis -->
                         {% for num in student_requests.paginator.page_range %}
                             {% if num == 1 or num == student_requests.paginator.num_pages or num >= student_requests.number|add:"-2" and num <= student_requests.number|add:"2" %}
@@ -219,11 +235,11 @@
                                 </li>
                             {% endif %}
                         {% endfor %}
-        
+
                         <!-- Next Page Link -->
                         <li class="page-item {% if not student_requests.has_next %}disabled{% endif %}">
                             <a class="page-link"
-                               href="{% if student_requests.has_next %}?page={{ student_requests.next_page_number }}{% else %}#{% endif %}">
+                            href="{% if student_requests.has_next %}?page={{ student_requests.next_page_number }}{% else %}#{% endif %}">
                                 Next &raquo;
                             </a>
                         </li>
@@ -234,6 +250,7 @@
             <p>No pending lesson requests.</p>
             {% endif %}
         </div>
+
     </div>
 </div>
 

@@ -9,6 +9,8 @@
 <div class="layout">
     {% include 'partials/sidebar.html' %}
     <div class="content" style="background-color: #F0F0F0;">
+        <h2>Create a lesson plan</h2>
+        <h5 class="h5"> For student: <span class="bg-danger text-white" style="padding: 2px 4.5px; font-weight: bold; border-radius: 5px;">{{ lesson_request.student.get_full_name }}</span></h5>
         <table class="table table-bordered">
             <tr>
                 <th>Request ID</th>
@@ -20,7 +22,7 @@
             </tr>
             <tr>
                 <th>Skill</th>
-                <td>{{ lesson_request.skill.name }}</td>
+                <td>{{ lesson_request.skill }}</td>
             </tr>
             <tr>
                 <th>Date Requested</th>
@@ -39,19 +41,19 @@
                 {% csrf_token %}
                 <button type="submit" class="btn btn-success" aria-label="Approve Request">Approve</button>
             </form>
-        
+
             <!-- Reject -->
             <form action="{% url 'update_request_status' lesson_request.id 'reject' %}" method="post" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger" aria-label="Reject Request">Reject</button>
             </form>
-        
+
             <!-- Pending -->
             <form action="{% url 'update_request_status' lesson_request.id 'pending' %}" method="post" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-warning" aria-label="Set to Pending">Pending</button>
             </form>
-        
+
             <!-- Details -->
             <a href="{% url 'lesson_request_details' lesson_request.id %}" class="btn btn-info" role="button" aria-label="View Request Details">
                 Details
