@@ -1,0 +1,9 @@
+{% extends 'base_content.html' %}
+
+{% block content %}
+    <div class="container">
+        <h1>Your application has been submitted!</h1>
+        <p>Thank you for applying to become a tutor. Your application is under review by our admin team. We will notify you once it's been approved.</p>
+        <a href="{% url 'home' %}">Go to Homepage</a>
+    </div>
+{% endblock %}

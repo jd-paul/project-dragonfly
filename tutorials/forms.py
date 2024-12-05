@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
-from .models import User, Skill, TutorSkill, UserType, StudentRequest
+from .models import User, Skill, TutorSkill, UserType, StudentRequest, PendingTutor
 from django.core.exceptions import ValidationError
 
 
@@ -110,13 +110,12 @@ class SignUpForm(NewPasswordMixin, forms.ModelForm):
             password=self.cleaned_data.get('new_password'),
         )
         return user
-
+    
 class TutorSignUpForm(forms.ModelForm):
-    skills = forms.ModelMultipleChoiceField(
-        queryset=Skill.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
-        required=True,
-        label="Skills"
+    skills_input = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'Language:Level, e.g., Python:Intermediate, Java:Advanced'}),
+        label="Skills (Language:Level)"
     )
     price_per_hour = forms.DecimalField(
         max_digits=6,
@@ -129,24 +128,39 @@ class TutorSignUpForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name', 'email']
-    
+
+    def clean_skills_input(self):
+        skills_input = self.cleaned_data['skills_input']
+        skills = skills_input.split(',')
+        for skill in skills:
+            skill = skill.strip()
+            if ':' in skill:
+                _, level = skill.split(':', 1)
+                if level.strip() not in SkillLevel.values:
+                    raise ValidationError(f"Invalid skill level: {level.strip()}")
+        return skills_input
+
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.user_type = UserType.TUTOR  # Mark the user as a tutor
+        user.user_type = UserType.TUTOR
         if commit:
             user.save()
-        
-        # Save the tutor's skills and price
-        skills = self.cleaned_data['skills']
+
+        skills = self.cleaned_data['skills_input'].split(',')
         price_per_hour = self.cleaned_data['price_per_hour']
         
-        for skill in skills:
-            TutorSkill.objects.create(
-                tutor=user,
-                skill=skill,
-                price_per_hour=price_per_hour
-            )
+        pending_tutor = PendingTutor.objects.create(user=user, price_per_hour=price_per_hour)
         
+        for skill_name in skills:
+            skill_name = skill_name.strip()
+            if skill_name:
+                if ':' in skill_name:
+                    language, level = skill_name.split(':', 1)
+                else:
+                    language, level = skill_name, SkillLevel.BEGINNER
+                skill, created = Skill.objects.get_or_create(language=language.strip(), level=level.strip())
+                pending_tutor.skills.add(skill)
+
         return user
 
 from django import forms

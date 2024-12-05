@@ -1,24 +1,174 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Tutor Sign-Up</title>
-</head>
-<body>
-    <h1>Submit Your Tutor Sign-Up Request</h1>
+{% extends 'base_content.html' %}
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Submit Request</button>
-    </form>
+{% block content %}
+  <div class="container mt-4">
+    <h1 class="text-center">Tutor Sign Up</h1>
 
+    <!-- Display success/error messages from Django messages framework -->
     {% if messages %}
-        <ul>
+      <div class="alert alert-{{ message.tags }} mt-4">
         {% for message in messages %}
-            <li>{{ message }}</li>
+          <div>{{ message }}</div>
         {% endfor %}
-        </ul>
+      </div>
     {% endif %}
-</body>
-</html>
+
+    <!-- Form to sign up as a tutor -->
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      
+      <!-- Display form-level errors -->
+      {% if form.errors %}
+        <div class="alert alert-danger">
+          <ul>
+            {% for field in form %}
+              {% for error in field.errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+
+      <!-- Explicitly render each form field -->
+      <div class="form-group">
+        <label for="username">Username</label>
+        {{ form.username }}
+        {% if form.username.errors %}
+          <div class="text-danger">
+            {% for error in form.username.errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="first_name">First Name</label>
+        {{ form.first_name }}
+        {% if form.first_name.errors %}
+          <div class="text-danger">
+            {% for error in form.first_name.errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="last_name">Last Name</label>
+        {{ form.last_name }}
+        {% if form.last_name.errors %}
+          <div class="text-danger">
+            {% for error in form.last_name.errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        {{ form.email }}
+        {% if form.email.errors %}
+          <div class="text-danger">
+            {% for error in form.email.errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Dynamic skills input -->
+      <div id="skills-container" class="my-3">
+        <label for="skills">Skills</label>
+        <div class="skills-list">
+          <div class="input-group mb-2">
+            <input type="text" id="language-input" class="form-control" placeholder="Language (e.g., Python)" />
+            <select id="level-select" class="form-control">
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+            </select>
+            <div class="input-group-append">
+              <button type="button" id="add-skill" class="btn btn-primary">+ Add Skill</button>
+            </div>
+          </div>
+          <ul id="skills-list" class="list-group"></ul>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <!-- Hidden input to store skills -->
+        <input type="hidden" name="skills_input" id="skills-input-field" value="{{ form.skills_input.value }}" />
+        {% if form.skills_input.errors %}
+          <div class="text-danger">
+            {% for error in form.skills_input.errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="price_per_hour">Price per Hour</label>
+        {{ form.price_per_hour }}
+        {% if form.price_per_hour.errors %}
+          <div class="text-danger">
+            {% for error in form.price_per_hour.errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="btn btn-success">Submit</button>
+    </form>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const addSkillButton = document.getElementById('add-skill');
+      const languageInput = document.getElementById('language-input');
+      const levelSelect = document.getElementById('level-select');
+      const skillsList = document.getElementById('skills-list');
+      const skillsInputField = document.getElementById('skills-input-field');
+
+      addSkillButton.addEventListener('click', function () {
+        const language = languageInput.value.trim();
+        const level = levelSelect.value;
+
+        if (language) {
+          const listItem = document.createElement('li');
+          listItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+          listItem.textContent = `${language}: ${level}`;
+
+          const removeButton = document.createElement('button');
+          removeButton.classList.add('btn', 'btn-danger', 'btn-sm');
+          removeButton.textContent = 'Remove';
+          removeButton.addEventListener('click', function () {
+            skillsList.removeChild(listItem);
+            updateSkillsInput();
+          });
+
+          listItem.appendChild(removeButton);
+          skillsList.appendChild(listItem);
+
+          updateSkillsInput();
+
+          languageInput.value = '';
+          levelSelect.value = 'Beginner';
+        }
+      });
+
+      function updateSkillsInput() {
+        const skills = [];
+        const items = skillsList.getElementsByTagName('li');
+        for (const item of items) {
+          skills.push(item.textContent.replace('Remove', '').trim());
+        }
+        skillsInputField.value = skills.join(',');
+      }
+    });
+  </script>
+{% endblock %}

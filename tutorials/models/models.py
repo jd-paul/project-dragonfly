@@ -188,7 +188,7 @@ class PendingTutor(models.Model):
     """Model to store pending tutor applications before admin approval."""
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    skill = models.ForeignKey(Skill, on_delete=models.CASCADE, related_name='pending_tutors')
+    skills = models.ManyToManyField(Skill, related_name='pending_tutors')  
     price_per_hour = models.DecimalField(
         max_digits=6,
         decimal_places=2,

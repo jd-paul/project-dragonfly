@@ -30,6 +30,7 @@ urlpatterns = [
     path('profile/', views.ProfileUpdateView.as_view(), name='profile'),
     path('sign_up/', views.SignUpView.as_view(), name='sign_up'),
     path('become_a_tutor/', views.TutorSignUpView.as_view(), name='tutor_signup'),
+    path('tutor-application-success/', views.TutorApplicationSuccessView.as_view(), name='tutor_application_success'),
 
     # Admin views
     path('manage_tutors/', views.ManageTutors.as_view(), name='manage_tutors'),
