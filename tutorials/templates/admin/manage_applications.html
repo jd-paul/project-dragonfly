@@ -91,9 +91,9 @@
                     <div class="card card-primary shadow-sm py-2 w-100">
                         <div class="card-body">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Total Lesson Requests (To be fixed)
+                                Total Lesson Requests
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ student_requests|length }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_lesson_requests }}</div>
                         </div>
                     </div>
                 </div>
@@ -103,9 +103,9 @@
                     <div class="card card-success shadow-sm py-2 w-100">
                         <div class="card-body">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Approved Lessons
+                                Total Approved Lessons
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">To be added</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_approved_lessons }}</div>
                         </div>
                     </div>
                 </div>
@@ -115,9 +115,9 @@
                     <div class="card card-warning shadow-sm py-2 w-100">
                         <div class="card-body">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Pending Approvals
+                                Pending Lessons To Approve
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">To be added</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"> {{ pending_count }}</div>
                         </div>
                     </div>
                 </div>
@@ -127,15 +127,17 @@
         <!-- Student Lesson Requests -->
         <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
             <h3>Lesson Requests in the System</h3>
-            <h6><i>Click on header fields to sort</i></h6>
 
             <!-- Search Form -->
-            <form method="get" action="">
-                <div class="input-group mb-3">
-                    <input type="text" class="form-control" name="search" placeholder="Search by student name" value="{{ request.GET.search }}">
-                    <button class="btn btn-outline-secondary" type="submit">Search</button>
-                </div>
-            </form>
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center" style="padding-bottom: 0.5rem;">
+                <form method="get" action="" class="mb-2 mb-md-0 w-md-auto">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="search" placeholder="Search name" value="{{ request.GET.search }}">
+                        <button class="btn btn-outline-secondary" type="submit">Search</button>
+                    </div>
+                </form>
+                <h6 class="text-left text-md-right w-100 w-md-auto"><i>Click on fields (e.g. Status) to sort</i></h6>
+            </div>
 
             {% if student_requests %}
             <table class="table table-striped">
@@ -154,21 +156,19 @@
                             <a href="?sort_by=created_at&order={% if order == 'asc' %}desc{% else %}asc{% endif %}">Created At</a>
                         </th>
                         <th>
-                            <a href="?sort_by=status&order={% if request.GET.order == 'asc_pending' %}asc_accepted{% elif request.GET.order == 'asc_accepted' %}asc_rejected{% elif request.GET.order == 'asc_rejected' %}desc{% else %}asc_pending{% endif %}">
+                            <a href="?sort_by=status&order={% if request.GET.order == 'asc_pending' %}asc_accepted{% elif request.GET.order == 'asc_accepted' %}asc_rejected{% elif request.GET.order == 'asc_rejected' %}default{% else %}asc_pending{% endif %}">
                                 Status
-                                <small>(Current:
+                                <small>
                                     {% if request.GET.order == 'asc_pending' %}
-                                        Pending First
+                                        (Pending First)
                                     {% elif request.GET.order == 'asc_accepted' %}
-                                        Accepted First
+                                        (Accepted First)
                                     {% elif request.GET.order == 'asc_rejected' %}
-                                        Rejected First
-                                    {% elif request.GET.order == 'desc' %}
-                                        Reversed
+                                        (Rejected First)
                                     {% else %}
-                                        Default
+                                        (Default)
                                     {% endif %}
-                                )</small>
+                                </small>
                             </a>
                         </th>
                         <th>Actions</th>

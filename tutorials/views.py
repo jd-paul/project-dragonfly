@@ -328,13 +328,12 @@ class ManageApplications(View):
                 else:
                     requests = requests.order_by('-created_at')
             elif sort_by == 'status':
-                # Define custom sorting orders based on user-selected order
                 if order == 'asc_pending':
                     requests = requests.order_by(
                         Case(
-                            When(status='PENDING', then=Value(1)),
-                            When(status='ACCEPTED', then=Value(2)),
-                            When(status='REJECTED', then=Value(3)),
+                            When(status='pending', then=Value(1)),
+                            When(status='approved', then=Value(2)),
+                            When(status='rejected', then=Value(3)),
                             default=Value(4),
                             output_field=IntegerField()
                         )
@@ -342,9 +341,9 @@ class ManageApplications(View):
                 elif order == 'asc_accepted':
                     requests = requests.order_by(
                         Case(
-                            When(status='ACCEPTED', then=Value(1)),
-                            When(status='PENDING', then=Value(2)),
-                            When(status='REJECTED', then=Value(3)),
+                            When(status='approved', then=Value(1)),
+                            When(status='pending', then=Value(2)),
+                            When(status='rejected', then=Value(3)),
                             default=Value(4),
                             output_field=IntegerField()
                         )
@@ -352,24 +351,23 @@ class ManageApplications(View):
                 elif order == 'asc_rejected':
                     requests = requests.order_by(
                         Case(
-                            When(status='REJECTED', then=Value(1)),
-                            When(status='PENDING', then=Value(2)),
-                            When(status='ACCEPTED', then=Value(3)),
+                            When(status='rejected', then=Value(1)),
+                            When(status='pending', then=Value(2)),
+                            When(status='approved', then=Value(3)),
                             default=Value(4),
                             output_field=IntegerField()
                         )
                     )
-                else:  # Handle descending for all three options
+                else:
                     requests = requests.order_by(
                         Case(
-                            When(status='REJECTED', then=Value(1)),
-                            When(status='ACCEPTED', then=Value(2)),
-                            When(status='PENDING', then=Value(3)),
+                            When(status='rejected', then=Value(1)),
+                            When(status='approved', then=Value(2)),
+                            When(status='pending', then=Value(3)),
                             default=Value(4),
                             output_field=IntegerField()
                         )
                     )
-
 
             return requests
 
@@ -380,7 +378,10 @@ class ManageApplications(View):
         order = request.GET.get('order', 'asc')
 
         requests = self.get_queryset(search_query, sort_by, order)
-        
+
+        # Calculate the total number of pending lessons
+        pending_count = requests.filter(status='pending').count()
+
         paginator = Paginator(requests, self.paginate_by)
         page = request.GET.get('page', 1)
 
@@ -391,10 +392,19 @@ class ManageApplications(View):
         except EmptyPage:
             student_requests = paginator.page(paginator.num_pages)
 
+        # Calculate the total number of lesson requests in the system
+        total_lesson_requests = StudentRequest.objects.count()
+
+        # Calculate the total number of approved lessons
+        total_approved_lessons = StudentRequest.objects.filter(status='approved').count()
+
         context = {
             'student_requests': student_requests,
             'is_paginated': paginator.num_pages > 1,
             'request_count': requests.count(),  # Total count of student requests
+            'pending_count': pending_count,  # Total count of pending lessons
+            'total_lesson_requests': total_lesson_requests,  # Total count of lesson requests in the system
+            'total_approved_lessons': total_approved_lessons,  # Total count of approved lessons
             'order': order,
             'search': search_query,
             'sort_by': sort_by,
@@ -402,16 +412,30 @@ class ManageApplications(View):
         return render(request, self.template_name, context)
 
 
+
 @login_required
 @user_passes_test(is_admin)
 def LessonRequestDetails(request, id):
-    """Display the details of a specific lesson request."""
+    """Display the details of a specific lesson request and allow tutor selection."""
     lesson_request = get_object_or_404(StudentRequest, id=id)  # Assuming StudentRequest represents a lesson request
+
+    # Fetch tutors (example: all tutors, you can add filtering logic as needed)
+    tutors = User.objects.filter(user_type=UserType.TUTOR)
+
+    if 'assign_tutor' in request.GET:
+        tutor_id = request.GET.get('assign_tutor')
+        selected_tutor = get_object_or_404(User, id=tutor_id)
+        lesson_request.tutor = selected_tutor  # Assign the selected tutor
+        lesson_request.save()
+        messages.success(request, f"Tutor {selected_tutor.get_full_name()} has been assigned.")
+        return redirect('lesson_request_details', id=lesson_request.id)  # Redirect to refresh the page
 
     context = {
         'lesson_request': lesson_request,
+        'tutors': tutors,
     }
     return render(request, 'admin/lesson_request_details.html', context)
+
 
 @login_required
 @user_passes_test(is_admin)
@@ -510,7 +534,7 @@ class RequestLesson(View):
             student_request.student = request.user
             student_request.skill = skill
             student_request.save()
-            return redirect('your_requests') 
+            return redirect('your_requests')
 
         context = { 'skill': skill, 'form': form, }
         return render(request, self.template_name, context)
