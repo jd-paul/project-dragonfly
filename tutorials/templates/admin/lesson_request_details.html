@@ -1,0 +1,45 @@
+{% extends 'base_content.html' %}
+{% block content %}
+
+<head>
+    <style>
+    </style>
+</head>
+
+<div class="layout">
+    {% include 'partials/sidebar.html' %}
+    <div class="content" style="background-color: #F0F0F0;">
+        <table class="table table-bordered">
+            <tr>
+                <th>Request ID</th>
+                <td>{{ lesson_request.id }}</td>
+            </tr>
+            <tr>
+                <th>Student Name</th>
+                <td>{{ lesson_request.student.get_full_name }}</td>
+            </tr>
+            <tr>
+                <th>Skill</th>
+                <td>{{ lesson_request.skill.name }}</td>
+            </tr>
+            <tr>
+                <th>Date Requested</th>
+                <td>{{ lesson_request.created_at }}</td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td>{{ lesson_request.get_status_display }}</td>
+            </tr>
+        </table>
+
+        <a href="{% url 'manage_applications' %}" class="btn btn-primary" style="color: #fff;">Back to Applications</a>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#lessonModal{{ request.id }}" aria-label="Accept Request">
+            Accept
+        </button>
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#lessonModal{{ request.id }}" aria-label="Reject Request">
+            Reject
+        </button>
+    </div>
+</div>
+
+{% endblock %}

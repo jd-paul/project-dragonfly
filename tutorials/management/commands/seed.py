@@ -223,35 +223,43 @@ class Command(BaseCommand):
         price = Decimal(random.uniform(20, 150)).quantize(Decimal('0.01'))
         return price
 
+
     def create_student_requests(self):
         self.stdout.write('Creating student requests...')
 
+        # Check for required data
         if not self.students:
-            self.stdout.write(('No students found to assign requests to.'))
+            self.stdout.write('No students found to assign requests to.')
             return
         
+        if not self.skills:
+            self.stdout.write('No skills found to assign to requests.')
+            return
+
+        # Possible values for request fields
         durations = [30, 60, 90]
         terms = [Term.SEPTEMBER_CHRISTMAS, Term.JANUARY_EASTER, Term.MAY_JULY]
         frequencies = [Frequency.WEEKLY, Frequency.BI_WEEKLY]
-        
-       
+
+        # Generate student requests
         for student in self.students:
-            requested_skills = random.sample(self.skills, k=random.randint(1, 3))
+            k = min(len(self.skills), random.randint(1, 3))  # Ensure valid sampling
+            requested_skills = random.sample(self.skills, k=k)
             for skill in requested_skills:
                 student_request_data = {
                     'student': student,
                     'skill': skill,
                     'duration': random.choice(durations),
                     'first_term': random.choice(terms),
-                    'frequency': random.choice(frequencies)
+                    'frequency': random.choice(frequencies),
+                    'status': 'pending',  # Ensure lowercase
                 }
                 try:
                     with transaction.atomic():
                         StudentRequest.objects.create(**student_request_data)
                         self.stdout.write(f'Student: {student.username} requested: {skill.language} ({skill.level})')
-                    
                 except Exception as e:
-                        self.stdout.write(f'Error: {e}')
+                    self.stdout.write(self.style.ERROR(f'Error creating request for {student.username}: {e}'))
 
     def create_days(self):
         self.stdout.write('Creating days...')
@@ -259,12 +267,10 @@ class Command(BaseCommand):
         day_names = [
             'Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'
         ]
-        
+
         for day_name in day_names:
                 day, created = Day.objects.get_or_create(day_name=day_name)
                 if created:
                     self.stdout.write(f'Created day: {day_name}')
                 else:
                     self.stdout.write(f'Day already exists: {day_name}')
-
-                

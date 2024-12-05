@@ -1,8 +1,7 @@
 from django.core.management.base import BaseCommand
 from tutorials.models import (
-    User, UserType, Admin, Tutor, Student, Skill, TutorSkill,
-    SkillLevel, Day, StudentRequest, Term, Frequency, Enrollment,
-    EnrollmentDays, Invoice
+    User, Skill, TutorSkill, Day, StudentRequest,
+    Enrollment, EnrollmentDays, Invoice
 )
 
 class Command(BaseCommand):
@@ -12,16 +11,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # Delete records in reverse dependency order
         models_to_delete = [
-            Invoice,  # Start with Invoice since it has a FK to Enrollment
-            EnrollmentDays,  # FK to Enrollment
-            Enrollment,  # FK to StudentRequest and Tutor
-            StudentRequest,  # FK to Student and Skill
-            TutorSkill,  # FK to Tutor and Skill
-            Skill,  # No dependencies, but needs to be deleted before Tutor
-            SkillLevel,  # No dependencies, but delete before TutorSkill
-            Day,  # No dependencies
-            UserType,  # Can be deleted after User
-            User,  # Finally, delete User
+            Invoice,          # FK to Enrollment
+            EnrollmentDays,   # FK to Enrollment
+            Enrollment,       # FK to StudentRequest and Tutor
+            StudentRequest,   # FK to Student and Skill
+            TutorSkill,       # FK to Tutor and Skill
+            Skill,            # No FK dependencies
+            Day,              # No FK dependencies
+            User,             # Base User model
         ]
 
         for model in models_to_delete:

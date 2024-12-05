@@ -21,7 +21,7 @@ from django.urls import path
 from tutorials import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # path('admin/', admin.site.urls),
     path('', views.home, name='home'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('log_in/', views.LogInView.as_view(), name='log_in'),
@@ -35,8 +35,8 @@ urlpatterns = [
     # Admin views
     path('manage_tutors/', views.ManageTutors.as_view(), name='manage_tutors'),
     path('manage_students/', views.ManageStudents.as_view(), name='manage_students'),
-    path('manage_applications/', views.ManageApplications, name='manage_applications'),
-
+    path('manage_applications/', views.ManageApplications.as_view(), name='manage_applications'),
+    path('lesson-request/<int:id>/', views.LessonRequestDetails, name='lesson_request_details'),
 
     #Student views
     path('offered_skill_list/', views.SkillListView.as_view(), name = 'offered_skill_list'),

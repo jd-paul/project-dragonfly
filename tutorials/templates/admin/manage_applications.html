@@ -1,13 +1,226 @@
 {% extends 'base_content.html' %}
 {% block content %}
 
-<div class="layout">
-    <!-- Sidebar -->
-    {% include 'partials/sidebar.html' %}
+<head>
+    <style>
+        /* Primary card */
+        .card-primary {
+            border-left: 5px solid #0092ff;
+        }
 
-    <!-- Main Content -->
+        /* Success card */
+        .card-success {
+            border-left: 5px solid #28a745;
+        }
+
+        /* Warning card */
+        .card-warning {
+            border-left: 5px solid #ffc107;
+        }
+
+        .card-danger {
+            border-left: 5px solid #e54d56;
+        }
+
+        /* General Pagination Styling */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 0;
+        }
+
+        .page-item {
+            border-radius: 0.25rem;
+            margin: 0;
+        }
+
+        .page-link {
+            border: 1px solid #0092ff;
+            padding: 8px 15px;
+            font-size: 14px;
+            color: #0092ff;
+            background-color: #fff;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .page-link:hover,
+        .page-link:focus {
+            background-color: #0092ff;
+            color: white;
+            border-color: #0056b3;
+        }
+
+        .page-item.active .page-link {
+            background-color: #0092ff;
+            color: white;
+            border-color: #0092ff;
+        }
+
+        .page-item.disabled .page-link {
+            color: #6c757d;
+            background-color: #e0e0e0;
+            border-color: #ddd;
+        }
+
+        .pagination .page-item {
+            border-radius: 5rem;
+        }
+
+        .pagination .page-link {
+            border-radius: 5rem;
+        }
+    </style>
+</head>
+
+<div class="layout">
+    {% include 'partials/sidebar.html' %}
     <div class="content" style="background-color: #F0F0F0;">
-        <h2>Pending Student Lesson Applications</h2>
+        <h2>Student Lesson Application Management Page</h2>
+        <h5 class="h5">{{ user.first_name }} {{ user.last_name }}</h5>
+
+        <!-- Dashboard Cards -->
+        <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
+            <div class="row g-1">
+                <!-- Card 1 (Primary) -->
+                <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2">
+                    <div class="card card-primary shadow-sm py-2 w-100">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Lesson Requests
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ student_requests|length }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 (Success) -->
+                <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2">
+                    <div class="card card-success shadow-sm py-2 w-100">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Approved Lessons
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">To be added</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3 (Warning) -->
+                <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2">
+                    <div class="card card-warning shadow-sm py-2 w-100">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Pending Approvals
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">To be added</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Lesson Requests -->
+        <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
+            <h3>Lesson Requests in the System</h3>
+            {% if student_requests %}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Skill</th>
+                        <th>Duration</th>
+                        <th>First Term</th>
+                        <th>Frequency</th>
+                        <th>Created At</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in student_requests %}
+                    <tr>
+                        <td>{{ request.student.get_full_name }}</td>
+                        <td>{{ request.skill.name }}</td>
+                        <td>{{ request.duration }} hours</td>
+                        <td>{{ request.first_term }}</td>
+                        <td>{{ request.frequency }}</td>
+                        <td>{{ request.created_at|date:"d-m-Y" }}</td>
+                        <td>
+                            {% if request.status == 'pending' %}
+                                <span class="bg-warning text-dark">Pending</span>
+                            {% else %}
+                                {{ request.status }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#lessonModal{{ request.id }}" aria-label="Accept Request">
+                                Accept
+                            </button>
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#lessonModal{{ request.id }}" aria-label="Reject Request">
+                                Reject
+                            </button>
+                            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#lessonModal{{ request.id }}" aria-label="Reject Request">
+                                Reject
+                            </button>
+                            <a href="{% url 'lesson_request_details' request.id %}" class="btn btn-info" role="button" aria-label="View Request Details">
+                                Details
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        
+            <!-- Pagination -->
+            {% if is_paginated %}
+                <nav class="d-flex justify-content-center">
+                    <ul class="pagination">
+                        <!-- Previous Page Link -->
+                        <li class="page-item {% if not student_requests.has_previous %}disabled{% endif %}">
+                            <a class="page-link"
+                               href="{% if student_requests.has_previous %}?page={{ student_requests.previous_page_number }}{% else %}#{% endif %}">
+                                &laquo; Prev
+                            </a>
+                        </li>
+        
+                        <!-- Page Numbers with Ellipsis -->
+                        {% for num in student_requests.paginator.page_range %}
+                            {% if num == 1 or num == student_requests.paginator.num_pages or num >= student_requests.number|add:"-2" and num <= student_requests.number|add:"2" %}
+                                {% if student_requests.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% elif num == student_requests.number|add:"-3" or num == student_requests.number|add:"3" %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">…</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+        
+                        <!-- Next Page Link -->
+                        <li class="page-item {% if not student_requests.has_next %}disabled{% endif %}">
+                            <a class="page-link"
+                               href="{% if student_requests.has_next %}?page={{ student_requests.next_page_number }}{% else %}#{% endif %}">
+                                Next &raquo;
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            {% endif %}
+            {% else %}
+            <p>No pending lesson requests.</p>
+            {% endif %}
+        </div>
     </div>
 </div>
+
 {% endblock %}

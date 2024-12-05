@@ -122,6 +122,12 @@ class StudentRequest(models.Model):
     first_term = models.CharField(max_length=60, choices=Term.choices)
     frequency = models.CharField(max_length=20, choices=Frequency.choices)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    status = models.CharField(
+        max_length=50,
+        choices=[('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected')],
+        default='pending',
+    )
 
 class Enrollment(models.Model):
     approved_request = models.ForeignKey(StudentRequest, on_delete=models.CASCADE, related_name='enrollments')

@@ -3,20 +3,16 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from tutorials.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TutorSignUpForm, StudentRequestForm
 from tutorials.helpers import login_prohibited
-from datetime import timedelta, timezone
-from tutorials.models import User
-from tutorials.models import UserType, Skill, SkillLevel, StudentRequest, Invoice, PendingTutor, TutorSkill
-from django.core.exceptions import PermissionDenied
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import HttpResponse
+from tutorials.models import User, UserType, Skill, SkillLevel, StudentRequest, PendingTutor, TutorSkill
 
 @login_required
 def dashboard(request):
@@ -167,7 +163,10 @@ def is_student(user):
         return True
     raise PermissionDenied
 
-# Admin View
+"""
+Admin View Functions
+"""
+
 @login_required
 @user_passes_test(is_admin)
 def ManageApplications(request):
@@ -296,6 +295,74 @@ class ManageStudents(View):
 
         return redirect('manage_students')
 
+@method_decorator(login_required, name='dispatch')
+@method_decorator(user_passes_test(is_admin), name='dispatch')
+class ManageApplications(View):
+    """Display and manage pending student requests for admin approval."""
+    template_name = 'admin/manage_applications.html'
+    paginate_by = 15
+
+    def get_queryset(self):
+        """Retrieve the list of student requests."""
+        return StudentRequest.objects.select_related('student', 'skill').order_by('-created_at')
+
+    def get(self, request, *args, **kwargs):
+        """Display the list of student requests with pagination."""
+        requests = self.get_queryset()
+        paginator = Paginator(requests, self.paginate_by)
+        page = request.GET.get('page', 1)
+
+        try:
+            student_requests = paginator.page(page)
+        except PageNotAnInteger:
+            student_requests = paginator.page(1)
+        except EmptyPage:
+            student_requests = paginator.page(paginator.num_pages)
+
+        context = {
+            'student_requests': student_requests,
+            'is_paginated': paginator.num_pages > 1,
+            'request_count': requests.count()  # Total count of student requests
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        """Handle approval or rejection of student requests."""
+        request_id = request.POST.get('request_id')
+        action = request.POST.get('action')
+
+        if not request_id or not action:
+            messages.error(request, "Invalid action or request ID.")
+            return redirect('manage_applications')
+
+        student_request = get_object_or_404(StudentRequest, id=request_id)
+
+        if action == 'approve':
+            # Handle approval logic (customize as needed)
+            student_request.student.is_active = True
+            student_request.student.save()
+            messages.success(request, f"Request for {student_request.student.get_full_name()} approved.")
+        elif action == 'reject':
+            # Handle rejection logic
+            student_request.delete()
+            messages.success(request, "Student request rejected.")
+        else:
+            messages.error(request, "Invalid action provided.")
+
+        return redirect('manage_applications')
+
+@login_required
+@user_passes_test(is_admin)
+def LessonRequestDetails(request, id):
+    """Display the details of a specific lesson request."""
+    lesson_request = get_object_or_404(StudentRequest, id=id)  # Assuming StudentRequest represents a lesson request
+
+    context = {
+        'lesson_request': lesson_request,
+    }
+    return render(request, 'admin/lesson_request_details.html', context)
+
+
 """
 Student View Functions
 """
@@ -391,7 +458,7 @@ class DeleteYourRequestView(View):
             student_request.delete()
             messages.success(request, 'Your request has been deleted.')
         else:
-            messages.error(request, 'You cannot delete this request as it has been accepted by a tutor.')
+            messages.error(request, 'You cannot delete this request as it has been accepted already.')
         return redirect('your_requests')
 
 
