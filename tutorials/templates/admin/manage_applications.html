@@ -79,6 +79,7 @@
 <div class="layout">
     {% include 'partials/sidebar.html' %}
     <div class="content" style="background-color: #F0F0F0;">
+        {% include 'partials/messages.html' %}
         <h2>Student Lesson Application Management Page</h2>
         <h5 class="h5">{{ user.first_name }} {{ user.last_name }}</h5>
 
@@ -151,22 +152,35 @@
                         <td>{{ request.created_at|date:"d-m-Y" }}</td>
                         <td>
                             {% if request.status == 'pending' %}
-                                <span class="bg-warning text-dark">Pending</span>
+                                <span class="bg-warning text-dark" style="font-size: 12px; padding: 2px 4.5px; font-weight: bold; border-radius: 5px;">PENDING</span>
+                            {% elif request.status == 'approved' %}
+                                <span class="bg-success text-white" style="font-size: 12px; padding: 2px 4.5px; font-weight: bold; border-radius: 5px;">APPROVED</span>
+                            {% elif request.status == 'rejected' %}
+                                <span class="bg-danger text-white" style="font-size: 12px; padding: 2px 4.5px; font-weight: bold; border-radius: 5px;">REJECTED</span>
                             {% else %}
                                 {{ request.status }}
                             {% endif %}
                         </td>
                         <td>
-                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#lessonModal{{ request.id }}" aria-label="Accept Request">
-                                Accept
-                            </button>
-                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#lessonModal{{ request.id }}" aria-label="Reject Request">
-                                Reject
-                            </button>
-                            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#lessonModal{{ request.id }}" aria-label="Reject Request">
-                                Reject
-                            </button>
-                            <a href="{% url 'lesson_request_details' request.id %}" class="btn btn-info" role="button" aria-label="View Request Details">
+                            <!--
+                            <form action="{% url 'update_request_status' request.id 'approve' %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success" aria-label="Approve Request">Approve</button>
+                            </form>
+                            
+                            <form action="{% url 'update_request_status' request.id 'reject' %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger" aria-label="Reject Request">Reject</button>
+                            </form>
+                            
+                            <form action="{% url 'update_request_status' request.id 'pending' %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-warning" aria-label="Set to Pending">Pending</button>
+                            </form>
+                            -->
+                        
+                            <!-- Details -->
+                            <a href="{% url 'lesson_request_details' request.id %}" class="btn btn-info btn-sm" role="button" aria-label="View Request Details">
                                 Details
                             </a>
                         </td>

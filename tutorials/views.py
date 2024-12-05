@@ -12,7 +12,7 @@ from django.utils.decorators import method_decorator
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from tutorials.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TutorSignUpForm, StudentRequestForm
 from tutorials.helpers import login_prohibited
-from tutorials.models import User, UserType, Skill, SkillLevel, StudentRequest, PendingTutor, TutorSkill
+from tutorials.models import User, UserType, Skill, SkillLevel, StudentRequest, PendingTutor, TutorSkill, StudentRequest
 
 @login_required
 def dashboard(request):
@@ -352,6 +352,36 @@ def LessonRequestDetails(request, id):
         'lesson_request': lesson_request,
     }
     return render(request, 'admin/lesson_request_details.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def update_request_status(request, request_id, action):
+    """
+    Update the status of a StudentRequest based on the action.
+    Actions can be 'approve', 'reject', or 'pending'.
+    """
+    # Fetch the lesson request
+    lesson_request = get_object_or_404(StudentRequest, id=request_id)
+
+    # Determine the new status based on the action
+    if action == 'approve':
+        lesson_request.status = 'approved'
+        messages.success(request, f"Request {lesson_request.id} has been approved.")
+    elif action == 'reject':
+        lesson_request.status = 'rejected'
+        messages.success(request, f"Request {lesson_request.id} has been rejected.")
+    elif action == 'pending':
+        lesson_request.status = 'pending'
+        messages.success(request, f"Request {lesson_request.id} has been set to pending.")
+    else:
+        messages.error(request, "Invalid action.")
+        return redirect('manage_applications')
+
+    # Save the updated status
+    lesson_request.save()
+
+    # Redirect to a relevant page
+    return redirect('manage_applications')
 
 
 """

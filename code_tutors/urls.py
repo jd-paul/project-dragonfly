@@ -35,7 +35,9 @@ urlpatterns = [
     path('manage_tutors/', views.ManageTutors.as_view(), name='manage_tutors'),
     path('manage_students/', views.ManageStudents.as_view(), name='manage_students'),
     path('manage_applications/', views.ManageApplications.as_view(), name='manage_applications'),
+
     path('lesson-request/<int:id>/', views.LessonRequestDetails, name='lesson_request_details'),
+    path('update-request/<int:request_id>/<str:action>/', views.update_request_status, name='update_request_status'),
 
     #Student views
     path('offered_skill_list/', views.SkillListView.as_view(), name = 'offered_skill_list'),
