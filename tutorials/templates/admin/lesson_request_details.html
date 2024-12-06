@@ -50,36 +50,45 @@
 
         <p>Please review the details of the lesson request above and take the appropriate action.</p>
         <p>To do: Select tutor and time</p>
+
         <!-- Tutor List -->
-<h4>Select a Tutor</h4>
-<table class="table table-hover">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Skill</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for tutor in tutors %}
-        <tr>
-            <td>{{ tutor.get_full_name }}</td>
-            <td>{{ tutor.email }}</td>
-            <td>{{ tutor.TutorSkill }}</td>
-            <td>
-                <a href="?assign_tutor={{ tutor.id }}" class="btn btn-sm btn-primary">
-                    Assign {{ tutor.get_full_name }}
-                </a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="4" class="text-center">No tutors available</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        <h4>Select a Tutor</h4>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Skill</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tutor_info in tutors_with_skills %}
+                <tr>
+                    <td>{{ tutor_info.tutor.get_full_name }}</td>
+                    <td>{{ tutor_info.tutor.email }}</td>
+                    <td style="text-align: left;">
+                        {% if tutor_info.skills %}
+                            {% for tutor_skill in tutor_info.skills %}
+                                {{ tutor_skill.skill.language }} ({{ tutor_skill.skill.level }}){% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            No skills assigned
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="?assign_tutor={{ tutor_info.tutor.id }}" class="btn btn-sm btn-primary">
+                            Assign {{ tutor_info.tutor.get_full_name }}
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">No tutors available</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
 
         <!-- Decisions to make -->

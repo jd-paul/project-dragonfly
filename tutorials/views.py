@@ -413,6 +413,8 @@ class ManageApplications(View):
 
 
 
+
+
 @login_required
 @user_passes_test(is_admin)
 def LessonRequestDetails(request, id):
@@ -421,6 +423,15 @@ def LessonRequestDetails(request, id):
 
     # Fetch tutors (example: all tutors, you can add filtering logic as needed)
     tutors = User.objects.filter(user_type=UserType.TUTOR)
+
+    # Pre-fetch related TutorSkills to reduce query count
+    tutors_with_skills = []
+    for tutor in tutors:
+        tutor_skills = TutorSkill.objects.filter(tutor=tutor)
+        tutors_with_skills.append({
+            'tutor': tutor,
+            'skills': tutor_skills
+        })
 
     if 'assign_tutor' in request.GET:
         tutor_id = request.GET.get('assign_tutor')
@@ -432,9 +443,10 @@ def LessonRequestDetails(request, id):
 
     context = {
         'lesson_request': lesson_request,
-        'tutors': tutors,
+        'tutors_with_skills': tutors_with_skills,
     }
     return render(request, 'admin/lesson_request_details.html', context)
+
 
 
 @login_required
