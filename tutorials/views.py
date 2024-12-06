@@ -9,10 +9,11 @@ from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from tutorials.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TutorSignUpForm, StudentRequestForm
 from tutorials.helpers import login_prohibited
-from tutorials.models import User, UserType, Skill, SkillLevel, StudentRequest, PendingTutor, TutorSkill
+from tutorials.models import User, UserType, Skill, SkillLevel, StudentRequest, PendingTutor, TutorSkill, Enrollment
 from django.db.models import Q
 from django.db.models import Case, When, Value, IntegerField
 
@@ -415,14 +416,28 @@ class ManageApplications(View):
 
 
 
+
+
 @login_required
 @user_passes_test(is_admin)
 def LessonRequestDetails(request, id):
-    """Display the details of a specific lesson request and allow tutor selection."""
-    lesson_request = get_object_or_404(StudentRequest, id=id)  # Assuming StudentRequest represents a lesson request
+    """Display the details of a specific lesson request and handle tutor assignment."""
+    lesson_request = get_object_or_404(StudentRequest, id=id)
 
-    # Fetch tutors (example: all tutors, you can add filtering logic as needed)
+    # Get the search query from the GET parameters
+    search_query = request.GET.get('search', '')
+
+    # Fetch tutors
     tutors = User.objects.filter(user_type=UserType.TUTOR)
+
+    # If there is a search query, filter tutors by name (first_name, last_name) or skill (language and level)
+    if search_query:
+        tutors = tutors.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(skills__skill__language__icontains=search_query) |
+            Q(skills__skill__level__icontains=search_query)
+        ).distinct()
 
     # Pre-fetch related TutorSkills to reduce query count
     tutors_with_skills = []
@@ -433,20 +448,32 @@ def LessonRequestDetails(request, id):
             'skills': tutor_skills
         })
 
+    # Handle tutor assignment
     if 'assign_tutor' in request.GET:
         tutor_id = request.GET.get('assign_tutor')
         selected_tutor = get_object_or_404(User, id=tutor_id)
-        lesson_request.tutor = selected_tutor  # Assign the selected tutor
-        lesson_request.save()
-        messages.success(request, f"Tutor {selected_tutor.get_full_name()} has been assigned.")
-        return redirect('lesson_request_details', id=lesson_request.id)  # Redirect to refresh the page
+
+        # Create a new Enrollment based on the approved StudentRequest
+        enrollment = Enrollment.objects.create(
+            approved_request=lesson_request,
+            current_term=lesson_request.first_term,  # Copying term from request
+            tutor=selected_tutor,
+            week_count=12,  # Default value, adjust as necessary
+            start_time=timezone.now(),  # Default start time, can be adjusted
+            status='ongoing'
+        )
+        messages.success(request, f"Tutor {selected_tutor.get_full_name()} has been assigned and enrollment created.")
+        return redirect('lesson_request_details', id=lesson_request.id)
+
+    # Get the latest Enrollment associated with this StudentRequest, if any
+    latest_enrollment = lesson_request.enrollments.order_by('-created_at').first()
 
     context = {
         'lesson_request': lesson_request,
         'tutors_with_skills': tutors_with_skills,
+        'latest_enrollment': latest_enrollment,  # Pass latest enrollment to template
     }
     return render(request, 'admin/lesson_request_details.html', context)
-
 
 
 @login_required

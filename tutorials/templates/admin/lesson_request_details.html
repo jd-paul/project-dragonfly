@@ -9,6 +9,7 @@
 <div class="layout">
     {% include 'partials/sidebar.html' %}
     <div class="content" style="background-color: #F0F0F0;">
+        {% include 'partials/messages.html' %}
         <h2>Create a lesson plan</h2>
         <h5 class="h5"> For student: <span class="bg-danger text-white" style="padding: 2px 4.5px; font-weight: bold; border-radius: 5px;">{{ lesson_request.student.get_full_name }}</span></h5>
         <table class="table table-bordered">
@@ -48,11 +49,21 @@
 
         <hr>
 
-        <p>Please review the details of the lesson request above and take the appropriate action.</p>
-        <p>To do: Select tutor and time</p>
+        <p>Kindly review the lesson request details provided above and proceed with the necessary actions. <br> <b>Next step:</b> Select a tutor to initiate the lesson plan.</p>
 
         <!-- Tutor List -->
         <h4>Select a Tutor</h4>
+        <!-- Search Form -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center" style="padding-bottom: 0.5rem;">
+            <form method="get" action="" class="mb-2 mb-md-0 w-md-auto">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="search" placeholder="Search skill / name" value="{{ request.GET.search }}">
+                    <button class="btn btn-outline-secondary" type="submit">Search</button>
+                </div>
+            </form>
+            <h6 class="text-left text-md-right w-100 w-md-auto"><i>Click on fields (e.g. Name) to sort</i></h6>
+        </div>
+
         <table class="table table-hover">
             <thead>
                 <tr>
