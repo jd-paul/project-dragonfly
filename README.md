@@ -3,7 +3,6 @@
 ## Team members
 The members of the team are:
 - Anahita Savarypour
-- Mohammed Kazi
 - Juri Alaskar
 - Ahmed Almuallem
 - John Paul San Diego
