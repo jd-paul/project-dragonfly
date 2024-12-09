@@ -278,33 +278,6 @@ class ManageStudents(PaginatorMixin, View):
        return render(request, self.template_name, context)
 
 
-   def post(self, request, *args, **kwargs):
-       """Handle approval or rejection of student sign-ups."""
-       student_id = request.POST.get('student_id')
-       action = request.POST.get('action')
-
-
-       if not student_id or not action:
-           messages.error(request, "Invalid action or student ID.")
-           return redirect('manage_students')
-
-
-       student = get_object_or_404(User, id=student_id, user_type=UserType.STUDENT)
-
-
-       if action == 'approve':
-           student.is_active = True
-           student.save()
-           messages.success(request, f"Student {student.get_full_name()} approved.")
-       elif action == 'reject':
-           student.delete()
-           messages.success(request, "Student request rejected.")
-       else:
-           messages.error(request, "Invalid action provided.")
-
-
-       return redirect('manage_students')
-
 @method_decorator(login_required, name='dispatch')
 @method_decorator(user_passes_test(is_admin), name='dispatch')
 class ManageApplications(View):
@@ -595,10 +568,7 @@ class YourRequestsView(View):
 
 
    def get(self, request):
-      
        student_requests = StudentRequest.objects.filter(student=request.user)
-       for student_request in student_requests:
-           student_request.is_accepted = student_request.enrollments.exists()
        context = {
            'student_requests': student_requests
        }
@@ -608,14 +578,14 @@ class YourRequestsView(View):
 @method_decorator(login_required, name='dispatch')
 @method_decorator(user_passes_test(is_student), name='dispatch')
 class DeleteYourRequestView(View):
-   def post(self, request, student_request_id):
-       student_request = get_object_or_404(StudentRequest, id=student_request_id, student=request.user)
-       if not student_request.enrollments.exists():
+  def post(self, request, student_request_id):
+      student_request = get_object_or_404(StudentRequest, id=student_request_id, student=request.user)
+      if  student_request.status == 'pending':
            student_request.delete()
            messages.success(request, 'Your request has been deleted.')
-       else:
-           messages.error(request, 'You cannot delete this request as it has been accepted already.')
-       return redirect('your_requests')
+      else:
+           messages.error(request, 'You cannot delete this request.')
+      return redirect('your_requests')
 
 
 
