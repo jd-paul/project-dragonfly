@@ -259,13 +259,12 @@ Admin View Functions
 class ManageTutors(PaginatorMixin, View):
    """Display a list of pending tutor sign-up requests for admin approval."""
    template_name = 'admin/manage_tutors.html'
-
-
-    def get_queryset(self):
+   
+   def get_queryset(self):
         """Filter for pending tutors."""
         return PendingTutor.objects.filter(is_approved=False)
-
-    def get_current_tutors(self):
+   
+   def get_current_tutors(self):
         """Retrieve approved tutors."""
         # return User.objects.filter(user_type=UserType.TUTOR, is_active=True)
         """Retrieve all active tutors along with their skills."""
@@ -278,7 +277,7 @@ class ManageTutors(PaginatorMixin, View):
                 queryset=TutorSkill.objects.select_related('skill')
             )
         )
-    def get(self, request, *args, **kwargs):
+   def get(self, request, *args, **kwargs):
         """Display the list of tutors with pagination."""
         # Pending tutors
         pending_tutors = self.get_queryset()
