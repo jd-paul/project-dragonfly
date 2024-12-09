@@ -121,6 +121,11 @@
         <!-- Student Specific Sidebar -->
         {% elif user.user_type == 'Student' %}
         <li>
+            <a href="{% url 'your_enrollments' %}"
+                class="btn btn-dark btn-block {% if request.path == '/your_enrollments/' %}active-tab{% endif %}"
+                style="line-height: 1.2;">Enrollments</a>
+        </li>
+        <li>
             <a href="{% url 'submit_ticket' %}"
                 class="btn btn-dark btn-block {% if request.path == '/submit_ticket/' %}active-tab{% endif %}"
                 style="line-height: 1.2;">Submit Ticket</a>

@@ -187,6 +187,8 @@ class StudentRequestForm(forms.ModelForm):
         if duration is not None and duration < 10:
             raise ValidationError("Duration must be at least 10 minutes.")
         return duration
+
+        
 class TicketForm(forms.ModelForm):
     """Form for submitting and updating tickets."""
     

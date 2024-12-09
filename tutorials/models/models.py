@@ -140,7 +140,7 @@ class Enrollment(models.Model):
     )
     week_count = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(13)])
     start_time = models.DateTimeField()
-    status = models.CharField(max_length=50, choices=[('ongoing', 'Ongoing'), ('terminated', 'Terminated')])
+    status = models.CharField(max_length=50, choices=[('ongoing', 'Ongoing'), ('ended', 'Ended'), ('terminated', 'Terminated')])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at =  models.DateTimeField(auto_now=True)
 
