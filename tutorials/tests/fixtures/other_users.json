@@ -37,5 +37,44 @@
       "user_type": "Student",
       "is_active": true
     }
+  },
+  {
+    "model": "tutorials.user",
+    "pk": 5,
+    "fields": {
+      "first_name": "Adminfn",
+      "last_name": "Adminln",
+      "username": "@adminuser",
+      "email": "adminuser@example.org",
+      "password": "pbkdf2_sha256$260000$4BNvFuAWoTT1XVU8D6hCay$KqDCG+bHl8TwYcvA60SGhOMluAheVOnF1PMz0wClilc=",
+      "user_type": "Admin",
+      "is_active": true
+    }
+  },
+  {
+    "model": "tutorials.user",
+    "pk": 6,
+    "fields": {
+      "first_name": "Tutorfn",
+      "last_name": "Tutorln",
+      "username": "@tutoruser",
+      "email": "tutoruser@example.org",
+      "password": "pbkdf2_sha256$260000$4BNvFuAWoTT1XVU8D6hCay$KqDCG+bHl8TwYcvA60SGhOMluAheVOnF1PMz0wClilc=",
+      "user_type": "Tutor",
+      "is_active": true
+    }
+  },
+  {
+    "model": "tutorials.user",
+    "pk": 7,
+    "fields": {
+      "first_name": "Studentfn",
+      "last_name": "Studentln",
+      "username": "@studentuser",
+      "email": "studentuser@example.org",
+      "password": "pbkdf2_sha256$260000$4BNvFuAWoTT1XVU8D6hCay$KqDCG+bHl8TwYcvA60SGhOMluAheVOnF1PMz0wClilc=",
+      "user_type": "Student",
+      "is_active": true
+    }
   }
-]
+ ] 

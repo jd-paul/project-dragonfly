@@ -181,5 +181,10 @@ class StudentRequestForm(forms.ModelForm):
         help_texts = {
             'duration': 'Please enter the duration in minutes e.g. 75',
         }
-
+        
+    def clean_duration(self):
+        duration = self.cleaned_data.get('duration')
+        if duration is not None and duration < 10:
+            raise ValidationError("Duration must be at least 10 minutes.")
+        return duration
 

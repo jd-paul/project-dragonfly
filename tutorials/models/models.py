@@ -74,6 +74,7 @@ class Skill(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['language', 'level'], name='unique_language_level')
         ]
+        ordering = ['language']
 
 class TutorSkill(models.Model):
     tutor =  models.ForeignKey(
