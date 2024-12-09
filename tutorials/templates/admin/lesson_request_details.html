@@ -9,7 +9,6 @@
 <div class="layout">
     {% include 'partials/sidebar.html' %}
     <div class="content" style="background-color: #F0F0F0;">
-        {% include 'partials/messages.html' %}
         <h2>Create a lesson plan</h2>
         <h5 class="h5"> For student: <span class="bg-danger text-white" style="padding: 2px 4.5px; font-weight: bold; border-radius: 5px;">{{ lesson_request.student.get_full_name }}</span></h5>
         <table class="table table-bordered">

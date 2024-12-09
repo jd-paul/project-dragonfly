@@ -15,13 +15,12 @@
         <!-- Username Field -->
         <label for="inputUsername" class="sr-only">Username</label>
         <input type="text" id="inputUsername" name="username" class="form-control" placeholder="Username (e.g. @name)"
-          required autofocus value="{{ form.username.value }}" pattern="^@[\w]+$"
+          pattern="^@[\w]+$"
           title="Username must start with '@' and contain only letters, numbers, and underscores">
 
         <!-- Password Field -->
         <label for="inputPassword" class="sr-only">Password</label>
-        <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required
-          value="{{ form.password.value }}">
+        <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" >
 
         <!-- Remember Me Checkbox -->
         <div class="checkbox mb-3">
