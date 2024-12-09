@@ -70,7 +70,6 @@
 
     <div class="content" style="background-color: #F0F0F0;">
         <h2>Manage Pending Tutors</h2>
-        <h5 class="h5">{{ user.first_name }} {{ user.last_name }}</h5>
 
         <!-- Dashboard Cards -->
         <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
@@ -88,7 +87,7 @@
             </div>
         </div>
 
-        <!-- Tutor Management Table -->
+        <!-- Tutor Management Table for Pending Tutors -->
         <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
             <h3>Pending Tutor Applications</h3>
 
@@ -109,7 +108,9 @@
                         <td>{{ tutor.user.email }}</td>
                         <td>
                             {% for skill in tutor.skills.all %}
-                            <span class="badge badge-info">{{ skill.name }}</span>
+                            <span class="badge badge-info">{{ skill.language }}: {{ skill.level }}</span>
+                            {% empty %}
+                            <span>No skills added</span>
                             {% endfor %}
                         </td>
                         <td>{{ tutor.price_per_hour }} USD</td>
@@ -173,6 +174,40 @@
                 </ul>
             </nav>
             {% endif %}
+        </div>
+
+        <!-- Section for Current Tutors -->
+        <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
+            <h3>Current Tutors</h3>
+
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Skills</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for current_tutor in current_tutors %}
+                    <tr>
+                        <td>{{ current_tutor.get_full_name }}</td>
+                        <td>{{ current_tutor.email }}</td>
+                        <td>
+                            {% for skill in current_tutor.skills.all %}
+                            <span class="badge badge-success">{{ skill.language }}: {{ skill.level }}</span>
+                            {% empty %}
+                            <span>No skills added</span>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center">No current tutors available.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

@@ -11,11 +11,12 @@ from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from tutorials.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TutorSignUpForm, StudentRequestForm
+from tutorials.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TutorSignUpForm, StudentRequestForm, TicketForm
 from tutorials.helpers import login_prohibited
-from tutorials.models import User, UserType, Skill, SkillLevel, StudentRequest, PendingTutor, TutorSkill, Enrollment
+from tutorials.models import User, UserType, Skill, SkillLevel, StudentRequest, PendingTutor, TutorSkill, Enrollment, Ticket, TicketStatus
 from django.db.models import Q
 from django.db.models import Case, When, Value, IntegerField
+from django.db.models import Prefetch
 
 @login_required
 def dashboard(request):
@@ -28,6 +29,60 @@ def dashboard(request):
 def home(request):
     """Display the application's start/home screen."""
     return render(request, 'home.html')
+
+def manage_tickets(request):
+    # Handle approve/reject actions
+    if request.method == 'POST':
+        ticket_id = request.POST.get('ticket_id')
+        action = request.POST.get('action')
+        ticket = Ticket.objects.get(id=ticket_id)
+        
+        if action == 'approve':
+            ticket.status = TicketStatus.APPROVED  # Change status to approved
+            ticket.save()
+        elif action == 'reject':
+            ticket.status = TicketStatus.REJECT  # Change status to rejected
+            ticket.save()
+
+        # Redirect to prevent re-submission of the form
+        return redirect('manage_tickets')
+
+    # Fetch tickets with 'Pending' status (new tickets)
+    new_tickets = Ticket.objects.filter(status=TicketStatus.PENDING)
+    
+    # Fetch tickets with 'Approved' or 'Rejected' status (resolved tickets)
+    resolved_tickets = Ticket.objects.filter(status__in=[TicketStatus.APPROVED, TicketStatus.REJECT])
+    
+    # Pass both new and resolved tickets to the template
+    return render(request, 'admin/manage_tickets.html', {
+        'new_tickets': new_tickets,
+        'resolved_tickets': resolved_tickets,
+    })
+
+def submit_ticket(request):
+    """Handle ticket submission."""
+    if request.method == 'POST':
+        form = TicketForm(request.POST)
+        if form.is_valid():
+            ticket = form.save(user=request.user, commit=False)
+            # Save the ticket with status 'Pending'
+            ticket.status = TicketStatus.PENDING
+            # ticket = form.save(user=request.user)  # Pass user to save method
+            ticket.save()
+
+            messages.success(request, "Your ticket has been submitted successfully.")
+            return redirect('home')  # Redirect to a success page or home page
+        else:
+            messages.error(request, "There was an error with your ticket submission. Please try again.")
+    else:
+        form = TicketForm()
+
+    return render(request, 'submit_ticket.html', {'form': form})
+
+def my_tickets(request):
+    """Display tickets submitted by the logged-in user."""
+    tickets = Ticket.objects.filter(user=request.user)
+    return render(request, 'my_tickets.html', {'tickets': tickets})
 
 class LoginProhibitedMixin:
     """Mixin that redirects when a user is logged in."""
@@ -178,28 +233,48 @@ class ManageTutors(View):
     paginate_by = 15
 
     def get_queryset(self):
-        """Filter for tutors."""
+        """Filter for pending tutors."""
         return PendingTutor.objects.filter(is_approved=False)
 
+    def get_current_tutors(self):
+        """Retrieve approved tutors."""
+        # return User.objects.filter(user_type=UserType.TUTOR, is_active=True)
+        """Retrieve all active tutors along with their skills."""
+        return User.objects.filter(
+            user_type=UserType.TUTOR, 
+            is_active=True
+        ).prefetch_related(
+            Prefetch(
+                'skills',  # This matches the related_name on the TutorSkill model
+                queryset=TutorSkill.objects.select_related('skill')
+            )
+        )
     def get(self, request, *args, **kwargs):
         """Display the list of tutors with pagination."""
-        tutors_by_type = self.get_queryset()
-        paginator = Paginator(tutors_by_type, self.paginate_by)
+        # Pending tutors
+        pending_tutors = self.get_queryset()
+        pending_paginator = Paginator(pending_tutors, self.paginate_by)
         page = request.GET.get('page', 1)
 
         try:
-            tutors = paginator.page(page)
+            tutors = pending_paginator.page(page)
         except PageNotAnInteger:
-            tutors = paginator.page(1)
+            tutors = pending_paginator.page(1)
         except EmptyPage:
-            tutors = paginator.page(paginator.num_pages)
+            tutors = pending_paginator.page(pending_paginator.num_pages)
 
-        tutor_count = tutors_by_type.count()
+        pending_count = pending_tutors.count()
+
+        # Approved tutors
+        current_tutors = self.get_current_tutors()
+        current_tutors_count = current_tutors.count()
 
         context = {
             'tutors': tutors,
-            'is_paginated': paginator.num_pages > 1,
-            'tutor_count': tutor_count  # Pass the count to the template
+            'is_paginated': pending_paginator.num_pages > 1,
+            'tutor_count': pending_count,
+            'current_tutors': current_tutors,  # Pass current tutors to the template
+            'current_tutors_count': current_tutors_count  # Count of approved tutors
         }
         return render(request, self.template_name, context)
 
@@ -226,18 +301,16 @@ class ManageTutors(View):
 
             pending_tutor.is_approved = True
             pending_tutor.save()
-            messages.success(request, f"Tutor {user.get_full_name()} approved.")
 
         elif action == 'reject':
             # Reject the tutor by deleting the pending application
             pending_tutor.delete()
-            messages.success(request, "Tutor request rejected.")
 
         else:
             messages.error(request, "Invalid action. Please try again.")
 
         return redirect('manage_tutors')
-
+    
 @method_decorator(login_required, name='dispatch')
 @method_decorator(user_passes_test(is_admin), name='dispatch')
 class ManageStudents(View):
@@ -506,6 +579,60 @@ def update_request_status(request, request_id, action):
     # Redirect to a relevant page
     return redirect('manage_applications')
 
+@method_decorator(login_required, name='dispatch')
+@method_decorator(user_passes_test(is_admin), name='dispatch')
+class ManageTickets(View):
+    """Manage tickets submitted by users."""
+
+    template_name = 'admin/manage_tickets.html'
+    paginate_by = 15
+
+    def get_queryset(self):
+        """Retrieve all tickets."""
+        return Ticket.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        """Display the list of tickets with pagination."""
+        tickets = self.get_queryset()
+        paginator = Paginator(tickets, self.paginate_by)
+        page = request.GET.get('page', 1)
+
+        try:
+            ticket_list = paginator.page(page)
+        except PageNotAnInteger:
+            ticket_list = paginator.page(1)
+        except EmptyPage:
+            ticket_list = paginator.page(paginator.num_pages)
+
+        context = {
+            'tickets': ticket_list,
+            'is_paginated': paginator.num_pages > 1,
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request):
+        """Handle ticket updates (e.g., change status)."""
+        ticket_id = request.POST.get('ticket_id')
+        action = request.POST.get('action')
+
+        if not ticket_id or not action:
+            messages.error(request, "Invalid request.")
+            return redirect('manage_tickets')
+
+        ticket = get_object_or_404(Ticket, id=ticket_id)
+
+        if action == 'resolve':
+            ticket.status = 'resolved'
+            ticket.save()
+            messages.success(request, f"Ticket {ticket.title} has been resolved.")
+        elif action == 'in_progress':
+            ticket.status = 'in_progress'
+            ticket.save()
+            messages.success(request, f"Ticket {ticket.title} is now in progress.")
+        else:
+            messages.error(request, "Invalid action. Please try again.")
+
+        return redirect('manage_tickets')
 
 """
 Student View Functions
@@ -613,7 +740,6 @@ class TutorSignUpView(LoginProhibitedMixin, FormView):
 
     def form_valid(self, form):
         user = form.save()
-        login(self.request, user)
         return super().form_valid(form)
 
     def form_invalid(self, form):
@@ -625,4 +751,6 @@ class TutorSignUpView(LoginProhibitedMixin, FormView):
 
 class TutorApplicationSuccessView(View):
     def get(self, request, *args, **kwargs):
-        return render(request, 'tutor_application_success.html')
+        return render(request, 'tutor_application_success.html', {
+            'home_url': 'http://localhost:8000/'  # This will be the URL for the homepage
+        })

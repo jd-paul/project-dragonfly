@@ -10,6 +10,7 @@ class UserType(models.TextChoices):
     TUTOR = 'Tutor', 'Tutor'
     ADMIN = 'Admin', 'Admin'
     STUDENT = 'Student', 'Student'
+    PENDING = 'Pending', 'Pending'
 
 class User(AbstractUser):
     """Model used for user authentication, and team member related information."""
@@ -200,3 +201,32 @@ class PendingTutor(models.Model):
 
     def __str__(self):
         return f"Pending Tutor: {self.user.full_name()}"
+
+class TicketStatus(models.TextChoices):
+    APPROVED = 'Approve', 'Approve'
+    PENDING = 'Pending', 'Pending'
+    REJECT = 'Reject', 'Reject'
+
+class Ticket(models.Model):
+    """Model to represent tickets for issues/requests raised by students or tutors."""
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tickets')
+    title = models.CharField(max_length=255, blank=False)
+    description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    status = models.CharField(
+        max_length=20,
+        choices=TicketStatus.choices,
+        default=TicketStatus.PENDING,
+    )
+    resolved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='resolved_tickets')
+    resolution_notes = models.TextField(null=True, blank=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)  # Timestamp when the ticket is resolved
+
+    def __str__(self):
+        return f"Ticket {self.id} - {self.title}"
+
+    class Meta:
+        """Ticket options."""
+        ordering = ['-created_at']

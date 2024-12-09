@@ -1,0 +1,33 @@
+<!-- my_tickets.html -->
+{% extends 'base_content.html' %}
+
+{% block content %}
+  <div class="container">
+    <h2>Your Tickets</h2>
+
+    {% if tickets %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Created At</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ticket in tickets %}
+            <tr>
+              <td>{{ ticket.title }}</td>
+              <td>{{ ticket.description }}</td>
+              <td>{{ ticket.get_status_display }}</td>
+              <td>{{ ticket.created_at }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>You have not submitted any tickets yet.</p>
+    {% endif %}
+  </div>
+{% endblock %}

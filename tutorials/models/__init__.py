@@ -13,3 +13,5 @@ from .models import Enrollment
 from .models import EnrollmentDays
 from .models import Invoice
 from .models import PendingTutor
+from .models import Ticket
+from .models import TicketStatus

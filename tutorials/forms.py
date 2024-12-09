@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
-from .models import User, Skill, TutorSkill, UserType, StudentRequest, PendingTutor
+from .models import User, Skill, TutorSkill, UserType, StudentRequest, PendingTutor, Ticket, TicketStatus
 from django.core.exceptions import ValidationError
 
 
@@ -142,7 +142,7 @@ class TutorSignUpForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.user_type = UserType.TUTOR
+        user.user_type = UserType.PENDING
         if commit:
             user.save()
 
@@ -182,4 +182,27 @@ class StudentRequestForm(forms.ModelForm):
             'duration': 'Please enter the duration in minutes e.g. 75',
         }
 
+class TicketForm(forms.ModelForm):
+    """Form for submitting and updating tickets."""
+    
+    class Meta:
+        model = Ticket
+        fields = ['title', 'description']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 4}),
+        }
+
+    def clean_title(self):
+        title = self.cleaned_data['title']
+        if len(title) < 5:
+            raise ValidationError("Title must be at least 5 characters long.")
+        return title
+
+    def save(self, user, commit=True):
+        """Override save to set the user."""
+        ticket = super().save(commit=False)
+        ticket.user = user  # Set the user who created the ticket
+        if commit:
+            ticket.save()
+        return ticket
 

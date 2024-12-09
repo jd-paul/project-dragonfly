@@ -1,0 +1,29 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<h1>Submit a Ticket</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="title" class="form-label">Ticket Title</label>
+        <input type="text" class="form-control" id="title" name="title" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="category" class="form-label">Category</label>
+        <select class="form-select" id="category" name="category" required>
+            <option value="General">General</option>
+            <option value="Technical">Technical</option>
+            <option value="Payment">Payment</option>
+            <option value="Other">Other</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit Ticket</button>
+</form>
+{% endblock %}

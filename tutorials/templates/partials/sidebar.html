@@ -100,13 +100,37 @@
                 class="btn btn-dark btn-block {% if request.path == '/manage_applications/' %}active-tab{% endif %}"
                 style="line-height: 1.2;">Manage Applications</a>
         </li>
+        <li>
+            <a href="{% url 'manage_tickets' %}"
+                class="btn btn-dark btn-block {% if request.path == '/manage_tickets/' %}active-tab{% endif %}"
+                style="line-height: 1.2;">Manage Tickets</a>
+        </li>
         <!-- Tutor Specific Sidebar -->
         {% elif user.user_type == 'Tutor' %}
         <li>
-            <a href="" class="btn btn-dark btn-block " style="line-height: 1.2;">Tutor Sidebar placeholder</a>
+            <a href="{% url 'submit_ticket' %}"
+                class="btn btn-dark btn-block {% if request.path == '/submit_ticket/' %}active-tab{% endif %}"
+                style="line-height: 1.2;">Submit Ticket</a>
         </li>
+        <li>
+            <a href="{% url 'my_tickets' %}"
+               class="btn btn-dark btn-block {% if request.path == '/my_tickets/' %}active-tab{% endif %}"
+               style="line-height: 1.2;">My Tickets</a>  <!-- Add My Tickets link -->
+        </li>
+        
         <!-- Student Specific Sidebar -->
         {% elif user.user_type == 'Student' %}
+        <li>
+            <a href="{% url 'submit_ticket' %}"
+                class="btn btn-dark btn-block {% if request.path == '/submit_ticket/' %}active-tab{% endif %}"
+                style="line-height: 1.2;">Submit Ticket</a>
+        </li>
+        <li>
+            <a href="{% url 'my_tickets' %}"
+               class="btn btn-dark btn-block {% if request.path == '/my_tickets/' %}active-tab{% endif %}"
+               style="line-height: 1.2;">My Tickets</a>  <!-- Add My Tickets link -->
+        </li>
+        
         <li>
             <a href="{% url 'offered_skill_list' %}"
                 class="btn btn-dark btn-block {% if request.path == '/offered_skill_list/' %}active-tab{% endif %}"

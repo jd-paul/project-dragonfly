@@ -31,11 +31,16 @@ urlpatterns = [
     path('sign_up/', views.SignUpView.as_view(), name='sign_up'),
     path('become_a_tutor/', views.TutorSignUpView.as_view(), name='tutor_signup'),
     path('tutor-application-success/', views.TutorApplicationSuccessView.as_view(), name='tutor_application_success'),
+    path('submit_ticket/', views.submit_ticket, name='submit_ticket'),
+    path('my_tickets/', views.my_tickets, name='my_tickets'),
+
 
     # Admin views
     path('manage_tutors/', views.ManageTutors.as_view(), name='manage_tutors'),
     path('manage_students/', views.ManageStudents.as_view(), name='manage_students'),
     path('manage_applications/', views.ManageApplications.as_view(), name='manage_applications'),
+    path('manage_tickets/', views.ManageTickets.as_view(), name='manage_tickets'),
+
 
     path('lesson-request/<int:id>/', views.LessonRequestDetails, name='lesson_request_details'),
     path('update-request/<int:request_id>/<str:action>/', views.update_request_status, name='update_request_status'),

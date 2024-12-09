@@ -1,9 +1,11 @@
-{% extends 'base_content.html' %}
-
-{% block content %}
-    <div class="container">
-        <h1>Your application has been submitted!</h1>
-        <p>Thank you for applying to become a tutor. Your application is under review by our admin team. We will notify you once it's been approved.</p>
-        <a href="{% url 'home' %}">Go to Homepage</a>
-    </div>
-{% endblock %}
+<head>
+    <title>Tutor Application Success</title>
+</head>
+<body>
+    <h1>Your tutor application was successful!</h1>
+    <p>Thank you for applying. We will review your application and get back to you soon.</p>
+    
+    <!-- Link to the homepage -->
+    <a href="{{ home_url }}">Go back to homepage</a>
+</body>
+</html>
