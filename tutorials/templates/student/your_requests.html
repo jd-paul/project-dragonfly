@@ -90,10 +90,12 @@
                         {% for student_request in student_requests %}
                         <tr>
                             <td>
-                                {% if not student_request.is_accepted %}
+                                {% if student_request.status == 'pending' %}
                                     <span class="badge badge-warning">Pending</span>
+                                {% elif not student_request.status == 'rejected' %}
+                                    <span class="badge badge-danger">Rejected</span>    
                                 {% else %}
-                                    <span class="badge badge-success">Accepted</span>
+                                    <span class="badge badge-success">Approved</span>
                                 {% endif %}
                             </td>
                             <td>{{ student_request.skill.language }} ({{ student_request.skill.get_level_display }})</td>
@@ -102,7 +104,7 @@
                             <td>{{ student_request.get_frequency_display }}</td>
                             <td>{{ student_request.created_at|date:"F j, Y, g:i a" }}</td>
                             <td>
-                                {% if not student_request.is_accepted %}
+                                {% if not student_request.status == 'pending' %}
                                     <form method="post" action="{% url 'delete_your_request' student_request.id %}">
                                         {% csrf_token %}
                                         <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this request?');">Delete</button>
