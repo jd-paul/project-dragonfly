@@ -578,37 +578,48 @@ def LessonRequestDetails(request, id):
     # Handle tutor assignment
     if 'assign_tutor' in request.GET:
         tutor_id = request.GET.get('assign_tutor')
-        selected_tutor = get_object_or_404(User, id=tutor_id)
+        selected_tutor = get_object_or_404(User, id=tutor_id, user_type=UserType.TUTOR)
 
-        # Create a new Enrollment based on the approved StudentRequest
-        enrollment = Enrollment.objects.create(
+        # Modify existing enrollment or create a new one
+        enrollment, created = Enrollment.objects.get_or_create(
             approved_request=lesson_request,
-            current_term=lesson_request.first_term,  # Copying term from request
-            tutor=selected_tutor,
-            week_count=12,  # Default value, adjust as necessary
-            start_time=timezone.now()+ timedelta(days = 2),  # Default start time, can be adjusted
-            status='ongoing'
+            defaults={
+                'current_term': lesson_request.first_term,
+                'tutor': selected_tutor,
+                'week_count': 12,
+                'start_time': timezone.now() + timedelta(days=2),
+                'status': 'ongoing',
+            },
         )
-        if enrollment:
-            invoice = Invoice.objects.create(
-                enrollment = enrollment,
-                amount = 0.00,
-                issued_date = timezone.now(),
-                payment_status = 'unpaid',
-                due_date = enrollment.start_time
+
+        if not created:
+            enrollment.tutor = selected_tutor
+            enrollment.start_time = timezone.now() + timedelta(days=2)
+            enrollment.save()
+            messages.success(request, f"Tutor updated to {selected_tutor.get_full_name()}.")
+        else:
+            Invoice.objects.create(
+                enrollment=enrollment,
+                amount=0.00,
+                issued_date=timezone.now(),
+                payment_status='unpaid',
+                due_date=enrollment.start_time,
             )
-        messages.success(request, f"Tutor {selected_tutor.get_full_name()} has been assigned and enrollment created.")
+            messages.success(request, f"Tutor {selected_tutor.get_full_name()} assigned and enrollment created.")
         return redirect('lesson_request_details', id=lesson_request.id)
 
     # Get the latest Enrollment associated with this StudentRequest, if any
     latest_enrollment = lesson_request.enrollments.order_by('-created_at').first()
 
+    # Ensure the function always renders a response
     context = {
         'lesson_request': lesson_request,
         'tutors_with_skills': tutors_with_skills,
-        'latest_enrollment': latest_enrollment,  # Pass latest enrollment to template
+        'latest_enrollment': latest_enrollment,
     }
     return render(request, 'admin/lesson_request_details.html', context)
+
+
 
 @login_required
 @user_passes_test(is_admin)
@@ -627,10 +638,15 @@ def update_request_status(request, request_id, action):
     elif action == 'reject':
         lesson_request.status = 'rejected'
         messages.success(request, f"Request {lesson_request.id} has been rejected.")
+
+        lesson_request.save()
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', 'manage_applications'))
     elif action == 'pending':
         lesson_request.status = 'pending'
         messages.success(request, f"Request {lesson_request.id} has been set to pending.")
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
+        lesson_request.save()
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', 'manage_applications'))
     else:
         messages.error(request, "Invalid action.")
         return redirect('manage_applications')

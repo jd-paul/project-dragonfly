@@ -13,6 +13,17 @@
                 {{ lesson_request.student.get_full_name }}
             </span>
         </h5>
+
+        {% if lesson_request.status == 'approved' %}
+        <h6>
+            {% if latest_enrollment %}
+                Currently selected tutor: 
+                <span style="font-weight: bold; color: #007bff;">{{ latest_enrollment.tutor.get_full_name }}</span>
+            {% else %}
+                No tutor assigned yet.
+            {% endif %}
+        </h6>
+        {% endif %}
         <table class="table table-bordered">
             <tr>
                 <th>Request ID</th>
@@ -63,9 +74,9 @@
             Next Step:
             </span>
             {% if lesson_request.status == 'pending' %}
-                Select a tutor to initiate the lesson plan.
+                Select a tutor to initiate the lesson plan. After selecting a tutor, you can approve the request.
             {% elif lesson_request.status == 'approved' %}
-                Clean up and delete from the system as it is already approved.
+                You are done!
             {% elif lesson_request.status == 'rejected' %}
                 Clean up and delete from the system OR set to pending again.
             {% endif %}
@@ -73,7 +84,16 @@
 
         <!-- Tutor List -->
         {% if lesson_request.status == 'pending' %}
-        <h4>Select a Tutor</h4>
+        <h4>
+            Select a Tutor. 
+            {% if latest_enrollment %}
+                Currently selected tutor: 
+                <span style="font-weight: bold; color: #007bff;">{{ latest_enrollment.tutor.get_full_name }}</span>
+            {% else %}
+                No tutor assigned yet.
+            {% endif %}
+        </h4>
+        
         <!-- Search Form -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center" style="padding-bottom: 0.5rem;">
             <form method="get" action="" class="mb-2 mb-md-0 w-md-auto">
@@ -128,10 +148,18 @@
         <td>
             {% if lesson_request.status == 'pending' %}
             <!-- Approve -->
-            <form action="{% url 'update_request_status' lesson_request.id 'approve' %}" method="post" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-success" aria-label="Approve Request">Approve and Create Lesson Plan</button>
-            </form>
+            {% if latest_enrollment %}
+                <form action="{% url 'update_request_status' lesson_request.id 'approve' %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success" aria-label="Approve Request">Approve and Create Lesson Plan</button>
+                </form>
+            {% else %}
+                <button type="button" class="btn btn-secondary" aria-label="Cannot Approve" disabled>
+                    Approve and Create Lesson Plan
+                </button>
+                <small class="text-muted d-block">Please select a tutor before approving the request.</small>
+            {% endif %}
+
 
             <!-- Reject -->
             <form action="{% url 'update_request_status' lesson_request.id 'reject' %}" method="post" style="display:inline;">
@@ -140,23 +168,12 @@
             </form>
 
             {% elif lesson_request.status == 'approved' %}
-            <!-- Delete -->
-            <form action="{% url 'update_request_status' lesson_request.id 'delete' %}" method="post" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger" aria-label="Delete Request">Delete</button>
-            </form>
 
             {% elif lesson_request.status == 'rejected' %}
             <!-- Re-Approve -->
             <form action="{% url 'update_request_status' lesson_request.id 'pending' %}" method="post" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-warning" aria-label="Re-Approve Request">Re-Approve</button>
-            </form>
-
-            <!-- Delete -->
-            <form action="{% url 'update_request_status' lesson_request.id 'delete' %}" method="post" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger" aria-label="Delete Request">Delete</button>
             </form>
             {% endif %}
         </td>
