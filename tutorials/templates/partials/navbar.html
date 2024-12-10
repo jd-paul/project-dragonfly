@@ -28,15 +28,9 @@
         aria-labelledby="userDropdown"
         style="min-width: 200px; right: 0; left: auto;"
       >
-        <li>
-          <a class="dropdown-item" href="{% url 'profile' %}">Change Profile</a>
-        </li>
-        <li>
-          <a class="dropdown-item" href="{% url 'password' %}"
-            >Change Password</a
-          >
-        </li>
-        <li><a class="dropdown-item" href="{% url 'log_out' %}">Log Out</a></li>
+        <a class="dropdown-item" href="{% url 'profile' %}">Change Profile</a>
+        <a class="dropdown-item" href="{% url 'password' %}">Change Password</a>
+        <a class="dropdown-item" href="{% url 'log_out' %}">Log Out</a>
       </ul>
     </div>
   </div>

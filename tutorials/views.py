@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.shortcuts import redirect, render, get_object_or_404
+from django.http import HttpResponseRedirect
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
@@ -637,6 +638,7 @@ def update_request_status(request, request_id, action):
     elif action == 'pending':
         lesson_request.status = 'pending'
         messages.success(request, f"Request {lesson_request.id} has been set to pending.")
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
     else:
         messages.error(request, "Invalid action.")
         return redirect('manage_applications')
