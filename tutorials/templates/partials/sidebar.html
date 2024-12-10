@@ -81,41 +81,46 @@
         <li>
             <a href="{% url 'dashboard' %}"
                 class="btn btn-dark btn-block {% if request.path == '/dashboard/' %}active-tab{% endif %}"
-                style="line-height: 1.2;">Dashboard</a>
+                style="line-height: 1.2; font-size: 0.9rem;">Dashboard</a>
         </li>
         <!-- Admin Specific Sidebar -->
         {% if user.user_type == 'Admin' %}
         <li>
             <a href="{% url 'manage_tutors' %}"
                 class="btn btn-dark btn-block {% if request.path == '/manage_tutors/' %}active-tab{% endif %}"
-                style="line-height: 1.2;">Manage Tutors</a>
+                style="line-height: 1.2; font-size: 0.9rem;">Manage Tutors</a>
         </li>
         <li>
             <a href="{% url 'manage_students' %}"
                 class="btn btn-dark btn-block {% if request.path == '/manage_students/' %}active-tab{% endif %}"
-                style="line-height: 1.2;">Manage Students</a>
+                style="line-height: 1.2; font-size: 0.9rem;">Manage Students</a>
         </li>
         <li>
             <a href="{% url 'manage_applications' %}"
                 class="btn btn-dark btn-block {% if request.path == '/manage_applications/' %}active-tab{% endif %}"
-                style="line-height: 1.2;">Manage Applications</a>
+                style="line-height: 1.2; font-size: 0.9rem;">Manage Applications</a>
+        </li>
+        <li>
+            <a href="{% url 'manage_lessons' %}"
+                class="btn btn-dark btn-block {% if request.path == '/manage_lessons/' %}active-tab{% endif %}"
+                style="line-height: 1.2; font-size: 0.9rem;">Manage Lessons</a>
         </li>
         <li>
             <a href="{% url 'manage_tickets' %}"
                 class="btn btn-dark btn-block {% if request.path == '/manage_tickets/' %}active-tab{% endif %}"
-                style="line-height: 1.2;">Manage Tickets</a>
+                style="line-height: 1.2; font-size: 0.9rem;">Manage Tickets</a>
         </li>
         <!-- Tutor Specific Sidebar -->
         {% elif user.user_type == 'Tutor' %}
         <li>
             <a href="{% url 'submit_ticket' %}"
                 class="btn btn-dark btn-block {% if request.path == '/submit_ticket/' %}active-tab{% endif %}"
-                style="line-height: 1.2;">Submit Ticket</a>
+                style="line-height: 1.2; font-size: 0.9rem;">Submit Ticket</a>
         </li>
         <li>
             <a href="{% url 'my_tickets' %}"
                class="btn btn-dark btn-block {% if request.path == '/my_tickets/' %}active-tab{% endif %}"
-               style="line-height: 1.2;">My Tickets</a>  <!-- Add My Tickets link -->
+               style="line-height: 1.2; font-size: 0.9rem;">My Tickets</a>
         </li>
         
         <!-- Student Specific Sidebar -->
@@ -123,28 +128,28 @@
         <li>
             <a href="{% url 'your_enrollments' %}"
                 class="btn btn-dark btn-block {% if request.path == '/your_enrollments/' %}active-tab{% endif %}"
-                style="line-height: 1.2;">Enrollments</a>
+                style="line-height: 1.2; font-size: 0.9rem;">Enrollments</a>
         </li>
         <li>
             <a href="{% url 'submit_ticket' %}"
                 class="btn btn-dark btn-block {% if request.path == '/submit_ticket/' %}active-tab{% endif %}"
-                style="line-height: 1.2;">Submit Ticket</a>
+                style="line-height: 1.2; font-size: 0.9rem;">Submit Ticket</a>
         </li>
         <li>
             <a href="{% url 'my_tickets' %}"
                class="btn btn-dark btn-block {% if request.path == '/my_tickets/' %}active-tab{% endif %}"
-               style="line-height: 1.2;">My Tickets</a>  <!-- Add My Tickets link -->
+               style="line-height: 1.2; font-size: 0.9rem;">My Tickets</a>
         </li>
         
         <li>
             <a href="{% url 'offered_skill_list' %}"
                 class="btn btn-dark btn-block {% if request.path == '/offered_skill_list/' %}active-tab{% endif %}"
-                style="line-height: 1.2;">Request Lesson</a>
+                style="line-height: 1.2; font-size: 0.9rem;">Request Lesson</a>
         </li>
         <li>
             <a href="{% url 'your_requests' %}"
                 class="btn btn-dark btn-block {% if request.path == '/your_requests/' %}active-tab{% endif %}"
-                style="line-height: 1.2;">Manage Your Requests</a>
+                style="line-height: 1.2; font-size: 0.9rem;">Manage Your Requests</a>
         </li>
         {% endif %}
     </ul>

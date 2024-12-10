@@ -251,9 +251,6 @@ class PaginatorMixin:
 Admin View Functions
 """
 
-# Admin View
-
-
 @method_decorator(login_required, name='dispatch')
 @method_decorator(user_passes_test(is_admin), name='dispatch')
 class ManageTutors(PaginatorMixin, View):
@@ -360,7 +357,6 @@ class ManageStudents(PaginatorMixin, View):
        context = self.get_paginated_context(paginated_students, 'students')
        context['student_count'] = students_by_type.count()
        return render(request, self.template_name, context)
-
 
 @method_decorator(login_required, name='dispatch')
 @method_decorator(user_passes_test(is_admin), name='dispatch')
@@ -482,6 +478,87 @@ class ManageApplications(View):
         }
         return render(request, self.template_name, context)
 
+@method_decorator(login_required, name='dispatch')
+@method_decorator(user_passes_test(is_admin), name='dispatch')
+class ManageLessons(View):
+    """
+    Admin view for managing lessons.
+    """
+    template_name = 'admin/manage_lessons.html'
+    paginate_by = 10  # or whatever number you want per page
+
+    def get_queryset(self, search_query=None, status_filter=None):
+        """
+        Retrieve all lessons with optional search and status filters.
+        """
+        lessons = Enrollment.objects.select_related('approved_request__student', 'tutor', 'approved_request__skill')
+
+        if search_query:
+            lessons = lessons.filter(
+                Q(approved_request__student__first_name__icontains=search_query) |
+                Q(approved_request__student__last_name__icontains=search_query) |
+                Q(tutor__first_name__icontains=search_query) |
+                Q(tutor__last_name__icontains=search_query) |
+                Q(approved_request__skill__language__icontains=search_query)
+            )
+
+        if status_filter:
+            lessons = lessons.filter(status=status_filter)
+
+        return lessons
+
+    def get(self, request, *args, **kwargs):
+        """
+        Handle GET requests to display lessons with pagination,
+        similar to ManageApplications logic.
+        """
+        search_query = request.GET.get('search', '')
+        status_filter = request.GET.get('status', '')
+        lessons = self.get_queryset(search_query, status_filter)
+
+        # Set up pagination
+        paginator = Paginator(lessons, self.paginate_by)
+        page = request.GET.get('page', 1)
+
+        try:
+            student_lessons = paginator.page(page)
+        except PageNotAnInteger:
+            student_lessons = paginator.page(1)
+        except EmptyPage:
+            student_lessons = paginator.page(paginator.num_pages)
+
+        # Add any counts or additional context if needed
+        ongoing_count = Enrollment.objects.filter(status='ongoing').count()
+        ended_count = Enrollment.objects.filter(status='ended').count()
+
+        context = {
+            'lessons': student_lessons,
+            'is_paginated': paginator.num_pages > 1,
+            'search_query': search_query,
+            'status_filter': status_filter,
+            'ongoing_count': ongoing_count,
+            'ended_count': ended_count,
+        }
+
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        """
+        Handle POST requests to update lesson status.
+        """
+        lesson_id = request.POST.get('lesson_id')
+        action = request.POST.get('action')
+
+        lesson = get_object_or_404(Enrollment, id=lesson_id)
+
+        if action == 'end' and lesson.status == 'ongoing':
+            lesson.status = 'ended'
+            lesson.save()
+            messages.success(request, f"Lesson {lesson.id} has been marked as ended.")
+        else:
+            messages.error(request, "Invalid action or lesson status.")
+
+        return redirect('manage_lessons')
 
 @login_required
 @user_passes_test(is_admin)
@@ -539,7 +616,6 @@ def LessonRequestDetails(request, id):
         'latest_enrollment': latest_enrollment,  # Pass latest enrollment to template
     }
     return render(request, 'admin/lesson_request_details.html', context)
-
 
 @login_required
 @user_passes_test(is_admin)

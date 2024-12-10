@@ -1,0 +1,222 @@
+{% extends 'base_content.html' %}
+{% block content %}
+
+<head>
+    <style>
+        /* Primary card */
+        .card-primary {
+            border-left: 5px solid #0092ff;
+        }
+
+        /* Success card */
+        .card-success {
+            border-left: 5px solid #28a745;
+        }
+
+        /* Warning card */
+        .card-warning {
+            border-left: 5px solid #ffc107;
+        }
+
+        .card-danger {
+            border-left: 5px solid #e54d56;
+        }
+
+        /* General Pagination Styling */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 0;
+        }
+
+        .page-item {
+            border-radius: 0.25rem;
+            margin: 0;
+        }
+
+        .page-link {
+            border: 1px solid #0092ff;
+            padding: 8px 15px;
+            font-size: 14px;
+            color: #0092ff;
+            background-color: #fff;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .page-link:hover,
+        .page-link:focus {
+            background-color: #0092ff;
+            color: white;
+            border-color: #0056b3;
+        }
+
+        .page-item.active .page-link {
+            background-color: #0092ff;
+            color: white;
+            border-color: #0092ff;
+        }
+
+        .page-item.disabled .page-link {
+            color: #6c757d;
+            background-color: #e0e0e0;
+            border-color: #ddd;
+        }
+
+        .pagination .page-item {
+            border-radius: 5rem;
+        }
+
+        .pagination .page-link {
+            border-radius: 5rem;
+        }
+    </style>
+</head>
+
+<div class="layout">
+    {% include 'partials/sidebar.html' %}
+
+    <div class="content" style="background-color: #F0F0F0;">
+        <h2>Lesson Management Page</h2>
+        <h5 class="h5">{{ user.first_name }} {{ user.last_name }}</h5>
+
+        <!-- Quick dashboard information -->
+        <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
+            <div class="row g-1">
+                <!-- Ongoing Lessons -->
+                <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2">
+                    <div class="card card-primary shadow-sm py-2 w-100">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Ongoing Lessons
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ ongoing_count }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ended Lessons -->
+                <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2">
+                    <div class="card card-danger shadow-sm py-2 w-100">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Ended Lessons
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ ended_count }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Lessons in the System -->
+                <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2">
+                    <div class="card card-success shadow-sm py-2 w-100">
+                        <div class="card-body">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Total Lessons in the System
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ lessons.paginator.count }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lessons List -->
+        <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
+            <h3>Lessons in the System</h3>
+
+            <form method="get" class="mb-3">
+                <div class="form-row align-items-center">
+                    <div class="col-auto">
+                        <input type="text" name="search" class="form-control" placeholder="Search by student, tutor, or skill" value="{{ search_query }}">
+                    </div>
+                    <div class="col-auto">
+                        <select name="status" class="form-control">
+                            <option value="">All Statuses</option>
+                            <option value="ongoing" {% if status_filter == "ongoing" %}selected{% endif %}>Ongoing</option>
+                            <option value="ended" {% if status_filter == "ended" %}selected{% endif %}>Ended</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                    </div>
+                </div>
+            </form>
+
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Tutor</th>
+                        <th>Skill</th>
+                        <th>Status</th>
+                        <th>Start Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lesson in lessons %}
+                    <tr>
+                        <td>{{ lesson.approved_request.student.full_name }}</td>
+                        <td>{{ lesson.tutor.full_name }}</td>
+                        <td>{{ lesson.approved_request.skill }}</td>
+                        <td>{{ lesson.status }}</td>
+                        <td>{{ lesson.start_time|date:"Y-m-d H:i" }}</td>
+                        <td>
+                            {% if lesson.status == 'ongoing' %}
+                            <form method="post" action="{% url 'manage_lessons' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="lesson_id" value="{{ lesson.id }}">
+                                <input type="hidden" name="action" value="end">
+                                <button type="submit" class="btn btn-sm btn-danger">End</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No lessons found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if is_paginated %}
+                <nav class="d-flex justify-content-center">
+                    <ul class="pagination">
+                        <!-- Previous Page Link -->
+                        <li class="page-item {% if not lessons.has_previous %}disabled{% endif %}">
+                            {% if lessons.has_previous %}
+                                <a class="page-link" href="?page={{ lessons.previous_page_number }}" aria-label="Previous">&laquo;</a>
+                            {% else %}
+                                <span class="page-link">&laquo;</span>
+                            {% endif %}
+                        </li>
+
+                        <!-- Page Numbers -->
+                        {% for num in lessons.paginator.page_range %}
+                            <li class="page-item {% if lessons.number == num %}active{% endif %}">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endfor %}
+
+                        <!-- Next Page Link -->
+                        <li class="page-item {% if not lessons.has_next %}disabled{% endif %}">
+                            {% if lessons.has_next %}
+                                <a class="page-link" href="?page={{ lessons.next_page_number }}" aria-label="Next">&raquo;</a>
+                            {% else %}
+                                <span class="page-link">&raquo;</span>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </nav>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

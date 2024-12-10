@@ -44,6 +44,7 @@ urlpatterns = [
 
     path('lesson-request/<int:id>/', views.LessonRequestDetails, name='lesson_request_details'),
     path('update-request/<int:request_id>/<str:action>/', views.update_request_status, name='update_request_status'),
+    path('manage_lessons/', views.ManageLessons.as_view(), name='manage_lessons'),
 
     #Student views
     path('offered_skill_list/', views.SkillListView.as_view(), name = 'offered_skill_list'),
