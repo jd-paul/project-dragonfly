@@ -64,8 +64,10 @@
    </style>
 </head>
 
+
 <div class="layout">
    {% include 'partials/sidebar.html' %}
+
 
    <div class="content" style="background-color: #F0F0F0;">
        <h2>Your Enrollments</h2>
@@ -99,21 +101,15 @@
                                    <span class="badge badge-danger">Cancelled</span>
                                {% endif %}
                            </td>
-                           <td>
-                               {% if enrollment.status == 'ongoing' %}
-                                   <a href="{% url 'invoice' enrollment.id %}" class="btn btn-warning">Invoice</a>
-                               {% endif %}
-                           </td>   
-                           <td>{{ enrollment.tutor }}</td>
+                           <td>{{ enrollment.approved_request.student }}</td>
                            <td>{{ enrollment.approved_request.skill.language }} ({{ enrollment.approved_request.skill.get_level_display }}) </td>
                            <td>{{ enrollment.get_current_term_display }}</td>
                            <td>{{ enrollment.start_time|date:"F j, Y, g:i a"  }}</td>
                            <td>{{ enrollment.approved_request.duration }} minutes</td>
                            <td>{{ enrollment.approved_request.get_frequency_display}}</td>
                            <td>
-                               {% if enrollment.status == 'ongoing' %}
-                              
-                               <a href="{% url 'submit_ticket' enrollment.id %}" class="btn btn-warning">Request Cancellation/Change</a>                                
+                               {% if enrollment.status == 'ongoing' %}                              
+                               <a href="{% url 'submit_ticket' enrollment.id %}" class="btn btn-warning">Request Cancellation/Change</a>
                                {% endif %}
                            </td>   
                        </tr>
@@ -121,10 +117,11 @@
                    </tbody>
                </table>
            {% else %}
-               You are not enrolled in any courses yet.
+               You are not teaching any courses yet.
            {% endif %}
        </div>
    </div>
 </div>
+
 
 {% endblock %}

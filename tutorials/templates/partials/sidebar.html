@@ -4,7 +4,7 @@
             margin: 0;
             padding: 0;
         }
-
+ 
         .layout {
             display: flex;
             /* Enable flexbox layout */
@@ -12,7 +12,7 @@
             /* Full viewport height minus navbar height */
             position: relative;
         }
-
+ 
         .sidebar {
             width: 10rem;
             /* Fixed width */
@@ -25,14 +25,14 @@
             box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
             z-index: 5;
         }
-
+ 
         .profile-picture {
             width: 50px;
             height: 50px;
             border-radius: 50%;
             background-color: #ebeef2;
         }
-
+ 
         .content {
             flex: 1;
             /* Automatically occupy remaining horizontal space */
@@ -40,12 +40,12 @@
             overflow: auto;
             /* Ensure content scrolls if it overflows */
         }
-
+ 
         .active-tab {
             font-weight: bold;
             text-decoration: underline;
         }
-
+ 
         ul {
             list-style: none;
             padding: 1rem;
@@ -53,14 +53,14 @@
             text-align: center;
             width: 100%;
         }
-
+  
         li {
             margin-bottom: 0.7rem;
             display: flex;
             justify-content: center;
             width: 100%;
         }
-
+ 
         .btn-block {
             width: 100%;
             white-space: nowrap;
@@ -69,14 +69,14 @@
             padding-bottom: 5.5%;
         }
     </style>
-</head>
-
-<div class="sidebar">
+ </head>
+ 
+ <div class="sidebar">
     <div class="profile-picture mb-2" style="background-color: #08b1c5;"></div>
     <b>
         <p class="mb-3" style="color: #434B51; list-style: none; padding: 0; margin: 0;">{{ user.username }}</p>
     </b>
-
+ 
     <ul>
         <li>
             <a href="{% url 'dashboard' %}"
@@ -113,16 +113,16 @@
         <!-- Tutor Specific Sidebar -->
         {% elif user.user_type == 'Tutor' %}
         <li>
-            <a href="{% url 'submit_ticket' %}"
-                class="btn btn-dark btn-block {% if request.path == '/submit_ticket/' %}active-tab{% endif %}"
-                style="line-height: 1.2; font-size: 0.9rem;">Submit Ticket</a>
-        </li>
-        <li>
             <a href="{% url 'my_tickets' %}"
                class="btn btn-dark btn-block {% if request.path == '/my_tickets/' %}active-tab{% endif %}"
                style="line-height: 1.2; font-size: 0.9rem;">My Tickets</a>
         </li>
-        
+        <li>
+            <a href="{% url 'tutor_enrollments' %}"
+               class="btn btn-dark btn-block {% if request.path == '/tutor_enrollments/' %}active-tab{% endif %}"
+               style="line-height: 1.2; font-size: 0.9rem;">Enrollments</a>  
+        </li>
+       
         <!-- Student Specific Sidebar -->
         {% elif user.user_type == 'Student' %}
         <li>
@@ -131,16 +131,11 @@
                 style="line-height: 1.2; font-size: 0.9rem;">Enrollments</a>
         </li>
         <li>
-            <a href="{% url 'submit_ticket' %}"
-                class="btn btn-dark btn-block {% if request.path == '/submit_ticket/' %}active-tab{% endif %}"
-                style="line-height: 1.2; font-size: 0.9rem;">Submit Ticket</a>
-        </li>
-        <li>
             <a href="{% url 'my_tickets' %}"
                class="btn btn-dark btn-block {% if request.path == '/my_tickets/' %}active-tab{% endif %}"
                style="line-height: 1.2; font-size: 0.9rem;">My Tickets</a>
         </li>
-        
+       
         <li>
             <a href="{% url 'offered_skill_list' %}"
                 class="btn btn-dark btn-block {% if request.path == '/offered_skill_list/' %}active-tab{% endif %}"
@@ -153,4 +148,4 @@
         </li>
         {% endif %}
     </ul>
-</div>
+ </div>
