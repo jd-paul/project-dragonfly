@@ -190,26 +190,14 @@ class StudentRequestForm(forms.ModelForm):
 
         
 class TicketForm(forms.ModelForm):
-    """Form for submitting and updating tickets."""
-    
-    class Meta:
-        model = Ticket
-        fields = ['title', 'description']
-        widgets = {
-            'description': forms.Textarea(attrs={'rows': 4}),
-        }
-
-    def clean_title(self):
-        title = self.cleaned_data['title']
-        if len(title) < 5:
-            raise ValidationError("Title must be at least 5 characters long.")
-        return title
-
-    def save(self, user, commit=True):
-        """Override save to set the user."""
-        ticket = super().save(commit=False)
-        ticket.user = user  # Set the user who created the ticket
-        if commit:
-            ticket.save()
-        return ticket
-
+   """Form for submitting and updating tickets."""
+  
+   class Meta:
+       model = Ticket
+       fields = ['ticket_type', 'description']
+       widgets = {
+           'description': forms.Textarea(attrs={'rows': 4}),
+       }
+       help_texts = {
+           'description': 'Please explain in detail your desired modification.',
+       }

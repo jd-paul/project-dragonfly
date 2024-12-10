@@ -140,7 +140,7 @@ class Enrollment(models.Model):
     )
     week_count = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(13)])
     start_time = models.DateTimeField()
-    status = models.CharField(max_length=50, choices=[('ongoing', 'Ongoing'), ('ended', 'Ended'), ('terminated', 'Terminated')])
+    status = models.CharField(max_length=50, choices=[('ongoing', 'Ongoing'), ('ended', 'Ended'), ('cancelled', 'Cancelled')])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at =  models.DateTimeField(auto_now=True)
 
@@ -160,6 +160,7 @@ class Invoice(models.Model):
     issued_date = models.DateTimeField()
     payment_status = models.CharField(max_length=50, choices=[('paid', 'Paid'), ('unpaid', 'Unpaid')])
     due_date = models.DateTimeField()
+
 
     @property
     def subtotal(self):
@@ -212,21 +213,22 @@ class Ticket(models.Model):
     """Model to represent tickets for issues/requests raised by students or tutors."""
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tickets')
-    title = models.CharField(max_length=255, blank=False)
+    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, related_name='modification_requests')
+    ticket_type = models.CharField(
+        max_length=20,
+        choices=[('cancellation', 'Cancellation'), ('change', 'Change')],
+        default='cancellation',
+    )
     description = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     status = models.CharField(
         max_length=20,
         choices=TicketStatus.choices,
         default=TicketStatus.PENDING,
     )
-    resolved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='resolved_tickets')
-    resolution_notes = models.TextField(null=True, blank=True)
-    resolved_at = models.DateTimeField(null=True, blank=True)  # Timestamp when the ticket is resolved
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Ticket {self.id} - {self.title}"
+        return f"Ticket submitted by {self.user} - {self.ticket_type}"
 
     class Meta:
         """Ticket options."""
