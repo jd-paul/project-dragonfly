@@ -55,7 +55,7 @@ class Command(BaseCommand):
         self.create_tutor_skills()
         self.create_student_requests()
         self.create_days()
-
+        self.create_enrollments()
         self.stdout.write('\nSeeding complete.')
 
     def create_users(self):
@@ -203,7 +203,7 @@ class Command(BaseCommand):
             return
 
         for tutor in self.tutors:
-            assigned_skills = random.sample(self.skills, k=random.randint(3, 5))  # Each tutor gets 3-5 random skills
+            assigned_skills = random.sample(self.skills, k=random.randint(7, 10))  # Each tutor gets 3-5 random skills
             for skill in assigned_skills:
                 tutor_skill_data = {
                     'tutor': tutor,
@@ -242,16 +242,14 @@ class Command(BaseCommand):
 
         # Generate student requests
         for student in self.students:
-            k = min(len(self.skills), random.randint(1, 3))  # Ensure valid sampling
+            k = min(len(self.skills), random.randint(5, 10))  # Ensure valid sampling
             requested_skills = random.sample(self.skills, k=k)
-            
-            # Generate the status based on the proportions
+
             statuses = ['pending', 'rejected', 'approved']
-            # Shuffle the statuses list to ensure randomness in assignment
+            
             random.shuffle(statuses)
             
             for skill in requested_skills:
-                # Assign one of the statuses randomly, ensuring balanced distribution
                 status = statuses[random.randint(0, 2)]  # Randomly choose from 'pending', 'rejected', 'approved'
                 
                 student_request_data = {
@@ -260,7 +258,7 @@ class Command(BaseCommand):
                     'duration': random.choice(durations),
                     'first_term': random.choice(terms),
                     'frequency': random.choice(frequencies),
-                    'status': status,  # Set the status based on the randomly chosen value
+                    'status': status,  
                 }
                 
                 try:
@@ -283,3 +281,38 @@ class Command(BaseCommand):
                     self.stdout.write(f'Created day: {day_name}')
                 else:
                     self.stdout.write(f'Day already exists: {day_name}')
+
+
+    def create_enrollments(self):
+        self.stdout.write('Creating enrollments for approved requests...')
+
+        approved_requests = StudentRequest.objects.filter(status='approved')
+        if not approved_requests.exists():
+            self.stdout.write('No approved requests found to create enrollments for.')
+            return
+
+        for req in approved_requests:
+            # Find a tutor who teaches this skill
+            tutor_skills = TutorSkill.objects.filter(skill=req.skill)
+            if not tutor_skills.exists():
+                self.stdout.write(f'No tutors found who teach {req.skill} for request {req.id}. Skipping enrollment.')
+                continue
+
+            chosen_tutor_skill = random.choice(tutor_skills)
+            tutor = chosen_tutor_skill.tutor
+            start_time = timezone.now() + timedelta(days=random.randint(1, 30), hours=random.randint(0, 23))
+
+            enrollment_data = {
+                'approved_request': req,
+                'current_term': req.first_term,
+                'tutor': tutor,
+                'week_count': random.randint(1,13),
+                'start_time': start_time,
+                'status': 'ongoing'
+            }
+            try:
+                with transaction.atomic():
+                    Enrollment.objects.create(**enrollment_data)
+                    self.stdout.write(f'Created enrollment for request {req.id}')
+            except Exception as e:
+                self.stdout.write(self.style.ERROR(f'Error creating enrollment for request {req.id}: {e}'))

@@ -307,7 +307,7 @@ class ManageTutors(PaginatorMixin, View):
         return render(request, self.template_name, context)
 
 
-   def post(self, request):
+    def post(self, request):
         """Handle approval or rejection of tutor sign-ups."""
         tutor_id = request.POST.get('tutor_id')
         action = request.POST.get('action')
@@ -724,6 +724,21 @@ class DeleteYourRequestView(View):
            messages.error(request, 'You cannot delete this request.')
       return redirect('your_requests')
 
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(user_passes_test(is_student), name='dispatch')
+class YourEnrollmentsView(View):
+    template_name = 'student/your_enrollments.html'
+
+    def get(self, request):
+        approved_requests = StudentRequest.objects.filter(student=request.user, status='approved')
+        enrollments = Enrollment.objects.filter(approved_request__in=approved_requests)
+
+        context = {
+            'enrollments': enrollments
+        }
+
+        return render(request, self.template_name, context)
 
 
 class TutorSignUpView(LoginProhibitedMixin, FormView):
