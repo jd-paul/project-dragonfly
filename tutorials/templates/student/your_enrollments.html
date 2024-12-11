@@ -78,6 +78,7 @@
                    <thead>
                        <tr>
                            <th></th>
+                           <th></th>
                            <th>Tutor</th>
                            <th>Skill</th>
                            <th>Term</th>
@@ -100,10 +101,10 @@
                                {% endif %}
                            </td>
                            <td>
-                               {% if enrollment.status == 'ongoing' %}
-                                   <a href="{% url 'invoice' enrollment.id %}" class="btn btn-warning">Invoice</a>
+                               {% if enrollment.status == 'ongoing' and enrollment.has_invoice %}
+                               <a href="{% url 'invoice' enrollment.id %}" class="btn btn-warning">Invoice</a>
                                {% endif %}
-                           </td>   
+                            </td>  
                            <td>{{ enrollment.tutor }}</td>
                            <td>{{ enrollment.approved_request.skill.language }} ({{ enrollment.approved_request.skill.get_level_display }}) </td>
                            <td>{{ enrollment.get_current_term_display }}</td>

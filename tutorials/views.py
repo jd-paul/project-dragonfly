@@ -32,38 +32,6 @@ def home(request):
     """Display the application's start/home screen."""
     return render(request, 'home.html')
 
-def manage_tickets(request):
-    # Handle approve/reject actions
-    if request.method == 'POST':
-        ticket_id = request.POST.get('ticket_id')
-        action = request.POST.get('action')
-        ticket = Ticket.objects.get(id=ticket_id)
-        
-        if action == 'approve':
-            ticket.status = TicketStatus.APPROVED  # Change status to approved
-            ticket.save()
-        elif action == 'reject':
-            ticket.status = TicketStatus.REJECT  # Change status to rejected
-            ticket.save()
-
-        # Redirect to prevent re-submission of the form
-        return redirect('manage_tickets')
-
-    # Fetch tickets with 'Pending' status (new tickets)
-    new_tickets = Ticket.objects.filter(status=TicketStatus.PENDING)
-    
-    # Fetch tickets with 'Approved' or 'Rejected' status (resolved tickets)
-    resolved_tickets = Ticket.objects.filter(status__in=[TicketStatus.APPROVED, TicketStatus.REJECT])
-    
-    # Pass both new and resolved tickets to the template
-    return render(request, 'admin/manage_tickets.html', {
-        'new_tickets': new_tickets,
-        'resolved_tickets': resolved_tickets,
-    })
-
-
-
-
 
 class LoginProhibitedMixin:
     """Mixin that redirects when a user is logged in."""
@@ -554,17 +522,18 @@ def LessonRequestDetails(request, id):
     # Get the search query from the GET parameters
     search_query = request.GET.get('search', '')
 
-    # Fetch tutors
-    tutors = User.objects.filter(user_type=UserType.TUTOR)
+    # Fetch tutors with requested skill 
+    skill_needed = lesson_request.skill
+    tutors = User.objects.filter(user_type=UserType.TUTOR, skills__skill=skill_needed).distinct()
 
-    # If there is a search query, filter tutors by name (first_name, last_name) or skill (language and level)
-    if search_query:
-        tutors = tutors.filter(
-            Q(first_name__icontains=search_query) |
-            Q(last_name__icontains=search_query) |
-            Q(skills__skill__language__icontains=search_query) |
-            Q(skills__skill__level__icontains=search_query)
-        ).distinct()
+    # # If there is a search query, filter tutors by name (first_name, last_name) or skill (language and level)
+    # if search_query:
+    #     tutors = tutors.filter(
+    #         Q(first_name__icontains=search_query) |
+    #         Q(last_name__icontains=search_query) |
+    #         Q(skills__skill__language__icontains=search_query) |
+    #         Q(skills__skill__level__icontains=search_query)
+    #     ).distinct()
 
     # Pre-fetch related TutorSkills to reduce query count
     tutors_with_skills = []
@@ -663,28 +632,22 @@ class ManageTickets(View):
     """Manage tickets submitted by users."""
 
     template_name = 'admin/manage_tickets.html'
-    paginate_by = 15
 
     def get_queryset(self):
         """Retrieve all tickets."""
-        return Ticket.objects.all()
+        return Ticket.objects.all().order_by('-created_at')
 
     def get(self, request, *args, **kwargs):
         """Display the list of tickets with pagination."""
         tickets = self.get_queryset()
-        paginator = Paginator(tickets, self.paginate_by)
-        page = request.GET.get('page', 1)
 
-        try:
-            ticket_list = paginator.page(page)
-        except PageNotAnInteger:
-            ticket_list = paginator.page(1)
-        except EmptyPage:
-            ticket_list = paginator.page(paginator.num_pages)
+        # Categorise tickets
+        new_tickets = tickets.filter(status=TicketStatus.PENDING)
+        resolved_tickets = tickets.filter(status__in=[TicketStatus.APPROVED, TicketStatus.REJECTED])
 
         context = {
-            'tickets': ticket_list,
-            'is_paginated': paginator.num_pages > 1,
+            'new_tickets': new_tickets,
+            'resolved_tickets': resolved_tickets,
         }
         return render(request, self.template_name, context)
 
@@ -699,18 +662,20 @@ class ManageTickets(View):
 
         ticket = get_object_or_404(Ticket, id=ticket_id)
 
-        if action == 'resolve':
-            ticket.status = 'resolved'
+        if action == 'approve':
+            ticket.status = TicketStatus.APPROVED
             ticket.save()
-            messages.success(request, f"Ticket {ticket.title} has been resolved.")
-        elif action == 'in_progress':
-            ticket.status = 'in_progress'
+            messages.success(request, f"Ticket '{ticket.id}' has been approved.")
+        elif action == 'reject':
+            ticket.status = TicketStatus.REJECTED
             ticket.save()
-            messages.success(request, f"Ticket {ticket.title} is now in progress.")
+            messages.success(request, f"Ticket '{ticket.id}' has been rejected.")
         else:
             messages.error(request, "Invalid action. Please try again.")
 
         return redirect('manage_tickets')
+
+
 
 
 @method_decorator(login_required, name='dispatch')
@@ -846,7 +811,8 @@ class YourEnrollmentsView(View):
     def get(self, request):
         approved_requests = StudentRequest.objects.filter(student=request.user, status='approved')
         enrollments = Enrollment.objects.filter(approved_request__in=approved_requests)
-
+        for enrollment in enrollments:
+            enrollment.has_invoice = Invoice.objects.filter(enrollment=enrollment).exists()
         context = {
             'enrollments': enrollments
         }

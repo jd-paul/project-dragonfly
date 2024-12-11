@@ -1,39 +1,23 @@
 {% extends 'base_content.html' %}
-
 {% block content %}
 <head>
     <style>
-        /* Card Styles */
         .card-primary {
             border-left: 5px solid #0092ff;
         }
-
         .card-success {
             border-left: 5px solid #28a745;
         }
-
         .card-warning {
             border-left: 5px solid #ffc107;
         }
-
         .card-danger {
             border-left: 5px solid #e54d56;
         }
-
-        /* Pagination Styling */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            padding: 0;
-        }
-
         .page-item {
             border-radius: 0.25rem;
             margin: 0;
         }
-
         .page-link {
             border: 1px solid #0092ff;
             padding: 8px 15px;
@@ -44,163 +28,179 @@
             text-decoration: none;
             transition: background-color 0.2s ease, color 0.2s ease;
         }
-
         .page-link:hover,
         .page-link:focus {
             background-color: #0092ff;
             color: white;
             border-color: #0056b3;
         }
-
         .page-item.active .page-link {
             background-color: #0092ff;
             color: white;
             border-color: #0092ff;
         }
-
         .page-item.disabled .page-link {
             color: #6c757d;
             background-color: #e0e0e0;
             border-color: #ddd;
         }
+
+        /* Additional Styles for Tickets */
+        .ticket-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+        }
+
+        .ticket-table th, .ticket-table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .ticket-table th {
+            background-color: #f2f2f2;
+        }
+
+        .action-buttons button {
+            margin-right: 5px;
+        }
+
+        .alert {
+            margin-bottom: 1rem;
+        }
+
+        /* Enrollment Details Styling */
+        .enrollment-details {
+            margin-top: 10px;
+            padding-left: 20px;
+            border-left: 3px solid #ccc;
+            background-color: #f9f9f9;
+        }
+
+        .enrollment-details p {
+            margin: 0;
+            padding: 2px 0;
+        }
     </style>
 </head>
 
 <div class="layout">
+    <!-- Sidebar -->
     {% include 'partials/sidebar.html' %}
 
+    <!-- Main Content -->
     <div class="content" style="background-color: #F0F0F0;">
         <h2>Manage Tickets</h2>
 
-        <!-- Dashboard Cards -->
-        <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
-            <div class="row g-1">
-                <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2">
-                    <div class="card card-primary shadow-sm py-2 w-100">
-                        <div class="card-body">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                New Tickets
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ new_tickets.count }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- New Tickets Table -->
-        <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
-            <h3>New Tickets</h3>
-            {% if new_tickets %}
-                <table class="table table-striped">
-                    <thead>
+        <!-- New Tickets (Pending) -->
+        <h4>New Tickets</h4>
+        {% if new_tickets %}
+            <table class="ticket-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Type</th>
+                        <th>Submitted By</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Created At</th>
+                        <th>Enrollment Details</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in new_tickets %}
                         <tr>
-                            <th>Title</th>
-                            <th>Description</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for ticket in new_tickets %}
-                        <tr>
-                            <td>{{ ticket.title }}</td>
+                            <td>{{ ticket.id }}</td>
+                            <td>{{ ticket.ticket_type }}</td>
+                            <td>{{ ticket.user.username }}</td>
                             <td>{{ ticket.description }}</td>
-                            <td>{{ ticket.get_status_display }}</td>
                             <td>
-                                <form method="POST" style="display:inline;">
+                                {% if ticket.status == 'Pending' %}
+                                    <span class="badge badge-warning">Pending</span>
+                                {% elif ticket.status == 'Rejected' %}
+                                    <span class="badge badge-danger">Rejected</span>    
+                                {% elif ticket.status == 'Approved' %}
+                                    <span class="badge badge-success">Approved</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ ticket.created_at|date:"F j, Y, g:i a" }}</td>
+                            <td>
+                                <div class="enrollment-details">
+                                    <p><strong>Enrollment ID:</strong> {{ ticket.enrollment.id }}</p>
+                                    <p><strong>Current Term:</strong> {{ ticket.enrollment.current_term }}</p>
+                                    <p><strong>Tutor:</strong> {{ ticket.enrollment.tutor.username }}</p>
+                                    <p><strong>Week Count:</strong> {{ ticket.enrollment.week_count }}</p>
+                                    <p><strong>Start Time:</strong> {{ ticket.enrollment.start_time|date:"F j, Y, g:i a" }}</p>
+                                    <p><strong>Status:</strong> {{ ticket.enrollment.get_status_display }}</p>
+                                </div>
+                            </td>
+                            <td class="action-buttons">
+                                <form method="post" style="display:inline;">
                                     {% csrf_token %}
                                     <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
-                                    <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">
-                                        <i class="fas fa-check-circle"></i> Approve
-                                    </button>
-                                </form>
-                                <form method="POST" style="display:inline;">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
-                                    <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">
-                                        <i class="fas fa-times-circle"></i> Reject
-                                    </button>
+                                    <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
+                                    <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
                                 </form>
                             </td>
                         </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="4" class="text-center">No new tickets available.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% endif %}
-        </div>
-
-        <!-- Pagination for Tickets -->
-        {% if new_tickets.has_other_pages %}
-        <nav class="d-flex justify-content-center">
-            <ul class="pagination">
-                <li class="page-item {% if not new_tickets.has_previous %}disabled{% endif %}">
-                    <a class="page-link" href="{% if new_tickets.has_previous %}?page={{ new_tickets.previous_page_number }}{% else %}#{% endif %}">
-                        &laquo; Prev
-                    </a>
-                </li>
-
-                {% for num in new_tickets.paginator.page_range %}
-                    {% if num == 1 or num == new_tickets.paginator.num_pages or num >= new_tickets.number|add:"-2" and num <= new_tickets.number|add:"2" %}
-                        {% if new_tickets.number == num %}
-                        <li class="page-item active">
-                            <span class="page-link">{{ num }}</span>
-                        </li>
-                        {% else %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                        </li>
-                        {% endif %}
-                    {% elif num == new_tickets.number|add:"-3" or num == new_tickets.number|add:"3" %}
-                    <li class="page-item disabled">
-                        <span class="page-link">…</span>
-                    </li>
-                    {% endif %}
-                {% endfor %}
-
-                <li class="page-item {% if not new_tickets.has_next %}disabled{% endif %}">
-                    <a class="page-link" href="{% if new_tickets.has_next %}?page={{ new_tickets.next_page_number }}{% else %}#{% endif %}">
-                        Next &raquo;
-                    </a>
-                </li>
-            </ul>
-        </nav>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No new tickets available.</p>
         {% endif %}
 
-        <!-- Resolved Tickets Table -->
-        <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
-            <h3>Resolved Tickets</h3>
-            {% if resolved_tickets %}
-                <table class="table table-striped">
-                    <thead>
+        <!-- Resolved Tickets (Approved or Rejected) -->
+        <h4>Resolved Tickets</h4>
+        {% if resolved_tickets %}
+            <table class="ticket-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Type</th>
+                        <th>Submitted By</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Created At</th>
+                        <th>Enrollment Details</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in resolved_tickets %}
                         <tr>
-                            <th>Title</th>
-                            <th>Description</th>
-                            <th>Status</th>
-                            <th>Resolved At</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for ticket in resolved_tickets %}
-                        <tr>
-                            <td>{{ ticket.title }}</td>
+                            <td>{{ ticket.id }}</td>
+                            <td>{{ ticket.ticket_type }}</td>
+                            <td>{{ ticket.user.username }}</td>
                             <td>{{ ticket.description }}</td>
-                            <td>{{ ticket.get_status_display }}</td>
-                            <td>{{ ticket.updated_at }}</td>
+                            <td>
+                                {% if ticket.status == 'Approved' %}
+                                    <span class="badge badge-success">Approved</span>
+                                {% elif ticket.status == 'Rejected' %}
+                                    <span class="badge badge-danger">Rejected</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ ticket.created_at|date:"F j, Y, g:i a" }}</td>
+                            <td>
+                                <div class="enrollment-details">
+                                    <p><strong>Enrollment ID:</strong> {{ ticket.enrollment.id }}</p>
+                                    <p><strong>Current Term:</strong> {{ ticket.enrollment.current_term }}</p>
+                                    <p><strong>Tutor:</strong> {{ ticket.enrollment.tutor.username }}</p>
+                                    <p><strong>Week Count:</strong> {{ ticket.enrollment.week_count }}</p>
+                                    <p><strong>Start Time:</strong> {{ ticket.enrollment.start_time|date:"F j, Y, g:i a" }}</p>
+                                    <p><strong>Status:</strong> {{ ticket.enrollment.get_status_display }}</p>
+                                </div>
+                            </td>
+
                         </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="4" class="text-center">No resolved tickets.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% endif %}
-        </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No resolved tickets available.</p>
+        {% endif %}
     </div>
 </div>
 

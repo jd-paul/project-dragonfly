@@ -205,9 +205,9 @@ class PendingTutor(models.Model):
         return f"Pending Tutor: {self.user.full_name()}"
 
 class TicketStatus(models.TextChoices):
-    APPROVED = 'Approve', 'Approve'
+    APPROVED = 'Approved', 'Approved'
     PENDING = 'Pending', 'Pending'
-    REJECT = 'Reject', 'Reject'
+    REJECTED = 'Rejected', 'Rejected'
 
 class Ticket(models.Model):
     """Model to represent tickets for issues/requests raised by students or tutors."""
