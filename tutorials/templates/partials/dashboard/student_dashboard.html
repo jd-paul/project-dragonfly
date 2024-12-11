@@ -1,7 +1,82 @@
+<head>
+    <style>
+        /* Primary card */
+        .card-primary {
+            border-left: 5px solid #007bff;
+            /* Primary color for the card */
+        }
+        /* Success card */
+        .card-success {
+            border-left: 5px solid #28a745;
+            /* Success color for the card */
+        }
+        /* Warning card */
+        .card-warning {
+            border-left: 5px solid #ffc107;
+            /* Warning color for the card */
+        }
 
+        .card-danger {
+            border-left: 5px solid #e54d56;
+        }
+
+
+    </style>
+</head>
 
 <h2>Student Dashboard</h2>
-<ul>
-    <li><a href="#">View Courses</a></li>
-</ul>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Enrollments Card -->
+        <div class="col-lg-6 col-md-6 col-sm-12 d-flex px-2 mb-4">
+            <a href="{% url 'your_enrollments' %}" class="card card-primary shadow-sm py-2 w-100 text-decoration-none text-dark">
+                <div class="card-body text-center">
+                    <div class="card-icon text-primary mb-3">
+                        <i class="fas fa-clipboard-list fa-2x"></i>
+                    </div>
+                    <div class="card-title h5">Enrollments</div>
+                    <div class="card-text">View and manage your enrollments.</div>
+                </div>
+            </a>
+        </div>
 
+        <!-- My Tickets Card -->
+        <div class="col-lg-6 col-md-6 col-sm-12 d-flex px-2 mb-4">
+            <a href="{% url 'my_tickets' %}" class="card card-success shadow-sm py-2 w-100 text-decoration-none text-dark">
+                <div class="card-body text-center">
+                    <div class="card-icon text-success mb-3">
+                        <i class="fas fa-ticket-alt fa-2x"></i>
+                    </div>
+                    <div class="card-title h5">Tickets</div>
+                    <div class="card-text">Submit tickets to request to cancel or change your enrollments</div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Request Lesson Card -->
+        <div class="col-lg-6 col-md-6 col-sm-12 d-flex px-2 mb-4">
+            <a href="{% url 'offered_skill_list' %}" class="card card-warning shadow-sm py-2 w-100 text-decoration-none text-dark">
+                <div class="card-body text-center">
+                    <div class="card-icon text-warning mb-3">
+                        <i class="fas fa-chalkboard-teacher fa-2x"></i>
+                    </div>
+                    <div class="card-title h5">Request Lesson</div>
+                    <div class="card-text">Request new lessons.</div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Manage Your Requests Card -->
+        <div class="col-lg-6 col-md-6 col-sm-12 d-flex px-2 mb-4">
+            <a href="{% url 'your_requests' %}" class="card card-danger shadow-sm py-2 w-100 text-decoration-none text-dark">
+                <div class="card-body text-center">
+                    <div class="card-icon text-danger mb-3">
+                        <i class="fas fa-edit fa-2x"></i>
+                    </div>
+                    <div class="card-title h5">Manage Your Requests</div>
+                    <div class="card-text">View and cancel your lesson requests.</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>

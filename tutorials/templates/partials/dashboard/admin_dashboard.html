@@ -15,6 +15,15 @@
             border-left: 5px solid #ffc107;
             /* Warning color for the card */
         }
+
+        .card-danger {
+            border-left: 5px solid #e54d56;
+        }
+
+        .card-another {
+            border-left: 5px solid #ab4de5;
+        }
+
     </style>
 </head>
 
@@ -22,83 +31,75 @@
     <h1>Hello, {{ user.first_name }}</h1>
     <h5 class="h5">{{ user.first_name }} {{ user.last_name }}</h5>
 
+<!-- templates/partials/dashboard/admin_dashboard.html -->
 
-    <div class="container-fluid" style="padding: 0; margin: 0;">
-        <div class="row g-1">
-            <!-- Card 1 (Primary) -->
-            <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2">
-                <div class="card card-primary shadow-sm py-2 w-100">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <!-- Icon Section -->
-                            <div class="col-auto">
-                                <div class="icon-container bg-primary text-white d-flex align-items-center justify-content-center rounded-circle"
-                                    style="width: 50px; height: 50px;">
-                                    <i class="fas fa-chart-line fa-lg"></i>
-                                </div>
-                            </div>
-
-                            <!-- Text Section -->
-                            <div class="col ms-3">
-                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                    New tutees in last 30 days
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">52</div>
-                            </div>
-                        </div>
+<h2>Admin Dashboard</h2>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Manage Tutors Card -->
+        <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2 mb-4">
+            <a href="{% url 'manage_tutors' %}" class="card card-primary shadow-sm py-2 w-100 text-decoration-none text-dark">
+                <div class="card-body text-center">
+                    <div class="card-icon text-primary mb-3">
+                        <i class="fas fa-users-cog fa-2x"></i>
                     </div>
+                    <div class="card-title h5">Manage Tutors</div>
+
                 </div>
-            </div>
+            </a>
+        </div>
 
-            <!-- Card 2 (Success) -->
-            <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2">
-                <div class="card card-success shadow-sm py-2 w-100">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <!-- Icon Section -->
-                            <div class="col-auto">
-                                <div class="icon-container bg-success text-white d-flex align-items-center justify-content-center rounded-circle"
-                                    style="width: 50px; height: 50px;">
-                                    <i class="fas fa-dollar-sign fa-lg"></i>
-                                </div>
-                            </div>
-
-                            <!-- Text Section -->
-                            <div class="col ms-3">
-                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                    Revenue in last 30 Days
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">$12,500</div>
-                            </div>
-                        </div>
+        <!-- Manage Students Card -->
+        <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2 mb-4">
+            <a href="{% url 'manage_students' %}" class="card card-success shadow-sm py-2 w-100 text-decoration-none text-dark">
+                <div class="card-body text-center">
+                    <div class="card-icon text-success mb-3">
+                        <i class="fas fa-user-graduate fa-2x"></i>
                     </div>
+                    <div class="card-title h5">Manage Students</div>
+
                 </div>
-            </div>
+            </a>
+        </div>
 
-            <!-- Card 3 (Warning) -->
-            <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2">
-                <div class="card card-warning shadow-sm py-2 w-100">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <!-- Icon Section -->
-                            <div class="col-auto">
-                                <div class="icon-container bg-warning text-white d-flex align-items-center justify-content-center rounded-circle"
-                                    style="width: 50px; height: 50px;">
-                                    <i class="fas fa-exclamation-triangle fa-lg"></i>
-                                </div>
-                            </div>
-
-                            <!-- Text Section -->
-                            <div class="col ms-3">
-                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                    Pending Applications
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">3</div>
-                            </div>
-                        </div>
+        <!-- Manage Applications Card -->
+        <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2 mb-4">
+            <a href="{% url 'manage_applications' %}" class="card card-warning shadow-sm py-2 w-100 text-decoration-none text-dark">
+                <div class="card-body text-center">
+                    <div class="card-icon text-warning mb-3">
+                        <i class="fas fa-file-alt fa-2x"></i>
                     </div>
+                    <div class="card-title h5">Manage Applications</div>
                 </div>
-            </div>
+            </a>
+        </div>
+
+        <!-- Manage Lessons Card -->
+        <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2 mb-4">
+            <a href="{% url 'manage_lessons' %}" class="card card-danger shadow-sm py-2 w-100 text-decoration-none text-dark">
+                <div class="card-body text-center">
+                    <div class="card-icon text-danger mb-3">
+                        <i class="fas fa-book-open fa-2x"></i>
+                    </div>
+                    <div class="card-title h5">Manage Lessons</div>
+
+                </div>
+            </a>
+        </div>
+
+        <!-- Manage Tickets Card -->
+        <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2 mb-4">
+            <a href="{% url 'manage_tickets' %}" class="card card-another shadow-sm py-2 w-100 text-decoration-none text-dark">
+                <div class="card-body text-center">
+                    <div class="card-icon text-another mb-3">
+                        <i class="fas fa-ticket-alt fa-2x"></i>
+                    </div>
+                    <div class="card-title h5">Manage Tickets</div>
+
+                </div>
+            </a>
         </div>
     </div>
+</div>
+
 </div>
