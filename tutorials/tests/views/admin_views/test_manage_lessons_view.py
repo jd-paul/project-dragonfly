@@ -4,7 +4,6 @@ from tutorials.models import User, Enrollment, Skill, StudentRequest
 from django.utils.timezone import localtime
 import random
 import string
-from django.core.management import call_command
 from tutorials.models import User, UserType, Frequency, Term
 
 def generate_unique_username():
