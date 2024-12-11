@@ -165,6 +165,7 @@
                         <th>Status</th>
                         <th>Created At</th>
                         <th>Enrollment Details</th>
+                        <th>Actions</th>
 
                     </tr>
                 </thead>
@@ -192,6 +193,14 @@
                                     <p><strong>Start Time:</strong> {{ ticket.enrollment.start_time|date:"F j, Y, g:i a" }}</p>
                                     <p><strong>Status:</strong> {{ ticket.enrollment.get_status_display }}</p>
                                 </div>
+                            </td>
+                            <td class="action-buttons">
+                                <form method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
+                                    <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
+                                    <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
+                                </form>
                             </td>
 
                         </tr>

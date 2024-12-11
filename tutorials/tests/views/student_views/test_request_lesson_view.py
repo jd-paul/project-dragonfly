@@ -113,8 +113,6 @@ class RequestLessonViewTestCase(TestCase):
        self.assertFalse(StudentRequest.objects.filter(student=self.student, skill=self.skill).exists())
 
 
-
-
    def test_request_lesson_does_not_allow_duplicate_requests(self):
        StudentRequest.objects.create(
            student=self.student,
