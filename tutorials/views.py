@@ -676,14 +676,11 @@ class ManageTickets(View):
         return redirect('manage_tickets')
 
 
-
-
 @method_decorator(login_required, name='dispatch')
 @method_decorator(user_passes_test(is_student), name='dispatch')
 class InvoiceView(View):
    """Display invoice to student"""
    template_name = 'student/invoice.html'
-
 
    def get(self, request, enrollment_id):
        """Display the list of tutors with pagination."""
@@ -695,7 +692,6 @@ class InvoiceView(View):
            'tutor': enrollment.tutor,
            'start_time': enrollment.start_time,
            'term': enrollment.current_term,
-           # 'enrollment_days': enrollment.days, # passed as a list
            'frequecy': enrollment.approved_request.frequency,
            'amount': enrollment.invoice.subtotal,
            'tutor_skill': enrollment.tutor.skills.get(skill=enrollment.approved_request.skill)
@@ -872,10 +868,8 @@ def submit_ticket(request, enrollment_id):
             ticket.status = TicketStatus.PENDING
             ticket.save()
 
-
             messages.success(request, "Your ticket has been submitted successfully.")
             return redirect('dashboard')  # Redirect to a success page or home page
-
 
         else:
             messages.error(request, "There was an error with your ticket submission. Please try again.")
@@ -884,7 +878,6 @@ def submit_ticket(request, enrollment_id):
 
 
     return render(request, 'submit_ticket.html', {'form': form, 'form': form, 'enrollment': enrollment})
-
 
 def my_tickets(request):
     """Display tickets submitted by the logged-in user."""

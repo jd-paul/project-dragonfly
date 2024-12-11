@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
 from .models import User, Skill, TutorSkill, UserType, StudentRequest, PendingTutor, Ticket, TicketStatus
 from django.core.exceptions import ValidationError
-
+from .models import StudentRequest, Skill, SkillLevel
 
 class LogInForm(forms.Form):
     """Form enabling registered users to log in."""
@@ -163,8 +163,8 @@ class TutorSignUpForm(forms.ModelForm):
 
         return user
 
-from django import forms
-from .models import StudentRequest, Skill, SkillLevel
+
+
 
 class StudentRequestForm(forms.ModelForm):
     class Meta:
