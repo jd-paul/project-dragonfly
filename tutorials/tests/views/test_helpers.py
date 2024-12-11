@@ -39,20 +39,3 @@ class HelperFunctionsTestCase(TestCase):
             is_tutor(self.admin)
         with self.assertRaises(PermissionDenied):
             is_tutor(self.student)
-    def test_is_student_with_student_user(self):
-       self.assertTrue(is_student(self.student))
-
-    def test_is_student_with_non_student_raises(self):
-       with self.assertRaises(PermissionDenied):
-           is_student(self.admin)
-       with self.assertRaises(PermissionDenied):
-           is_student(self.tutor)
-
-    def test_is_tutor_with_tutor_user(self):
-       self.assertTrue(is_tutor(self.tutor))
-
-    def test_is_tutor_with_non_tutor_raises(self):
-       with self.assertRaises(PermissionDenied):
-           is_tutor(self.admin)
-       with self.assertRaises(PermissionDenied):
-           is_tutor(self.student)

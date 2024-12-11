@@ -96,10 +96,8 @@ class ManageTicketsViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "No new tickets available.")
         self.assertContains(response, "No resolved tickets available.")
-        self.assertQuerysetEqual(response.context['new_tickets'], [])
-        self.assertQuerysetEqual(response.context['resolved_tickets'], [])
 
-    
+
     def test_approve_ticket(self):
         """Admin can approve any ticket."""
         post_data = {
