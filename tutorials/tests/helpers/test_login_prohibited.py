@@ -36,8 +36,8 @@ class LoginProhibitedDecoratorTestCase(TestCase):
         response = test_view(request)
 
         # Normalize the expected URL for comparison
-        # Ensure the expected URL starts with a leading slash
-        expected_url = '/' + settings.REDIRECT_URL_WHEN_LOGGED_IN.strip('/') + '/'
+        # Ensure the expected URL starts with a leading slash and ends with one
+        expected_url = f"/{settings.REDIRECT_URL_WHEN_LOGGED_IN}".rstrip("/") + "/"
 
         # Assert the response is a redirect (HTTP 302)
         self.assertEqual(response.status_code, 302, "Expected a 302 redirect status code.")

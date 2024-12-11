@@ -89,7 +89,6 @@ class TutorSkillModelTestCase(TestCase):
 
 
 class StudentRequestModelTestCase(TestCase):
-
     def setUp(self):
         self.student = User.objects.create(
             username='@studentusername1',
