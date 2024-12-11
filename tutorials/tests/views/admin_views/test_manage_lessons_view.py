@@ -21,7 +21,6 @@ fixed_time = localtime()
 
 class ManageLessonsViewTestCase(TestCase):
     def setUp(self):
-
         random.seed(51005)
 
         # Generate unique usernames and emails
@@ -176,6 +175,6 @@ class ManageLessonsViewTestCase(TestCase):
         lessons = response.context['lessons']
         
         # Verify that the lessons object list is empty
-        self.assertEqual(len(lessons.object_list), 0)  
+        self.assertEqual(len(lessons.object_list), 0)
         self.assertEqual(lessons.paginator.count, 0)
 

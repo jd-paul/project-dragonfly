@@ -210,10 +210,10 @@ class ManageTutors(PaginatorMixin, View):
     """Display a list of pending tutor sign-up requests for admin approval."""
     template_name = 'admin/manage_tutors.html'
 
-
     def get_queryset(self):
-        """Filter for pending tutors."""
-        return PendingTutor.objects.filter(is_approved=False)
+        """Filter for pending tutors and order by ID."""
+        return PendingTutor.objects.filter(is_approved=False).order_by('id')
+
 
     def get_current_tutors(self):
         """Retrieve approved tutors."""
@@ -458,7 +458,9 @@ class ManageLessons(View):
         if status_filter:
             lessons = lessons.filter(status=status_filter)
 
-        return lessons
+        # Add explicit ordering
+        return lessons.order_by('-created_at')  # Adjust ordering field as needed
+
 
     def get(self, request, *args, **kwargs):
         """
@@ -470,7 +472,7 @@ class ManageLessons(View):
         lessons = self.get_queryset(search_query, status_filter)
 
         # Set up pagination
-        paginator = Paginator(lessons, self.paginate_by)
+        paginator = Paginator(lessons, self.paginate_by) # There might be an error here! Look at this mr GPT
         page = request.GET.get('page', 1)
 
         try:
@@ -519,21 +521,9 @@ def LessonRequestDetails(request, id):
     """Display the details of a specific lesson request and handle tutor assignment."""
     lesson_request = get_object_or_404(StudentRequest, id=id)
 
-    # Get the search query from the GET parameters
-    search_query = request.GET.get('search', '')
-
-    # Fetch tutors with requested skill 
+    # Fetch tutors with requested skill
     skill_needed = lesson_request.skill
     tutors = User.objects.filter(user_type=UserType.TUTOR, skills__skill=skill_needed).distinct()
-
-    # # If there is a search query, filter tutors by name (first_name, last_name) or skill (language and level)
-    # if search_query:
-    #     tutors = tutors.filter(
-    #         Q(first_name__icontains=search_query) |
-    #         Q(last_name__icontains=search_query) |
-    #         Q(skills__skill__language__icontains=search_query) |
-    #         Q(skills__skill__level__icontains=search_query)
-    #     ).distinct()
 
     # Pre-fetch related TutorSkills to reduce query count
     tutors_with_skills = []
@@ -587,8 +577,6 @@ def LessonRequestDetails(request, id):
         'latest_enrollment': latest_enrollment,
     }
     return render(request, 'admin/lesson_request_details.html', context)
-
-
 
 @login_required
 @user_passes_test(is_admin)
@@ -674,9 +662,6 @@ class ManageTickets(View):
             messages.error(request, "Invalid action. Please try again.")
 
         return redirect('manage_tickets')
-
-
-
 
 @method_decorator(login_required, name='dispatch')
 @method_decorator(user_passes_test(is_student), name='dispatch')
@@ -819,7 +804,6 @@ class YourEnrollmentsView(View):
 
         return render(request, self.template_name, context)
 
-
 class TutorSignUpView(LoginProhibitedMixin, FormView):
     form_class = TutorSignUpForm
     template_name = "tutor_sign_up.html"
@@ -884,7 +868,6 @@ def submit_ticket(request, enrollment_id):
 
 
     return render(request, 'submit_ticket.html', {'form': form, 'form': form, 'enrollment': enrollment})
-
 
 def my_tickets(request):
     """Display tickets submitted by the logged-in user."""

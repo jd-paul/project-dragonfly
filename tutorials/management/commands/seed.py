@@ -143,14 +143,14 @@ class Command(BaseCommand):
             )
 
     def assign_user_type(self):
-        """Assign a user type with 90% chance for Student, 5% for Tutor, and 5% for Admin."""
-        rand_num = random.random()  # Use random.random()
-        if rand_num < 0.9:
-            return 'Student'  # 90% chance
-        elif rand_num < 0.95:
-            return 'Tutor'    # 5% chance
+        """Assign a user type with 60% chance for Student, 20% for Tutor, and 20% for Admin."""
+        rand_num = random.random()  # Generates a float between 0 and 1
+        if rand_num < 0.6:
+            return 'Student'  # 60% chance
+        elif rand_num < 0.8:
+            return 'Tutor'    # 20% chance (0.6 to 0.8)
         else:
-            return 'Admin'    # 5% chance
+            return 'Admin'    # 20% chance (0.8 to 1.0)
 
     def create_unique_username(self, first_name, last_name):
         base_username = '@' + first_name.lower() + last_name.lower()
