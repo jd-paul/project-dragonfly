@@ -1,0 +1,119 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<head>
+   <style>
+       /* Primary card */
+       .card-primary {
+           border-left: 5px solid #0092ff;
+       }
+       /* Success card */
+       .card-success {
+           border-left: 5px solid #28a745;
+       }
+       /* Warning card */
+       .card-warning {
+           border-left: 5px solid #ffc107;
+       }
+       .card-danger {
+           border-left: 5px solid #e54d56;
+       }
+       /* General Pagination Styling */
+       .pagination {
+           display: flex;
+           justify-content: center;
+           align-items: center;
+           gap: 10px;
+           padding: 0;
+       }
+       .page-item {
+           border-radius: 0.25rem;
+           margin: 0;
+       }
+       .page-link {
+           border: 1px solid #0092ff;
+           padding: 8px 15px;
+           font-size: 14px;
+           color: #0092ff;
+           background-color: #fff;
+           border-radius: 0.25rem;
+           text-decoration: none;
+           transition: background-color 0.2s ease, color 0.2s ease;
+       }
+       .page-link:hover,
+       .page-link:focus {
+           background-color: #0092ff;
+           color: white;
+           border-color: #0056b3;
+       }
+       .page-item.active .page-link {
+           background-color: #0092ff;
+           color: white;
+           border-color: #0092ff;
+       }
+       .page-item.disabled .page-link {
+           color: #6c757d;
+           background-color: #e0e0e0;
+           border-color: #ddd;
+       }
+       .pagination .page-item {
+           border-radius: 5rem;
+       }
+       .pagination .page-link {
+           border-radius: 5rem;
+       }
+   </style>
+</head>
+
+
+<div class="layout">
+   {% include 'partials/sidebar.html' %}
+
+
+   <div class="content" style="background-color: #F0F0F0;">
+       <h2>Invoice</h2>
+
+       
+
+       <!-- Skills in the system -->
+       <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
+
+
+          
+
+
+           <table class="table table-striped">
+               <thead>
+                   <tr>
+                       <th>Student</th>
+                       <th>Tutor</th>
+                       <th>Start Time</th>
+                       <th>Term</th>
+                       <th>Frequency</th>
+                       <th>Amount</th>
+                       <th>Skill</th>
+                   </tr>
+               </thead>
+               <tbody>
+                  
+                   <tr>
+                       <td>{{ student }}</td>
+                       <td>{{ tutor }}</td>
+                       <td>{{ start_time }}</td>
+                       <td>{{ term }}</td>
+                       <td>{{ frequecy }}</td>
+                       <td>£{{ amount|floatformat:2 }}</td>
+                       <td>{{ tutor_skill.skill.language }}</td>
+                   </tr>
+               </tbody>
+           </table>
+
+           <h3>Please pay this invoice at the start of every term via bank transfer and specify the course</h3>
+           <h3>for which you are making the payment in the reference</h2>
+        
+      
+       </div>
+   </div>
+</div>
+
+
+{% endblock %}

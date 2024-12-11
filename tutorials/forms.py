@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
 from .models import User, Skill, TutorSkill, UserType, StudentRequest, PendingTutor, Ticket, TicketStatus
 from django.core.exceptions import ValidationError
-
+from .models import StudentRequest, Skill, SkillLevel
 
 class LogInForm(forms.Form):
     """Form enabling registered users to log in."""
@@ -163,13 +163,13 @@ class TutorSignUpForm(forms.ModelForm):
 
         return user
 
-from django import forms
-from .models import StudentRequest, Skill, SkillLevel
+
+
 
 class StudentRequestForm(forms.ModelForm):
     class Meta:
         model = StudentRequest
-        exclude = ['student', 'skill']
+        exclude = ['student', 'skill', 'status']
         widgets = {
             'duration': forms.NumberInput(attrs={'min': 10}),
             'first_term': forms.Select(),
@@ -190,26 +190,14 @@ class StudentRequestForm(forms.ModelForm):
 
         
 class TicketForm(forms.ModelForm):
-    """Form for submitting and updating tickets."""
-    
-    class Meta:
-        model = Ticket
-        fields = ['title', 'description']
-        widgets = {
-            'description': forms.Textarea(attrs={'rows': 4}),
-        }
-
-    def clean_title(self):
-        title = self.cleaned_data['title']
-        if len(title) < 5:
-            raise ValidationError("Title must be at least 5 characters long.")
-        return title
-
-    def save(self, user, commit=True):
-        """Override save to set the user."""
-        ticket = super().save(commit=False)
-        ticket.user = user  # Set the user who created the ticket
-        if commit:
-            ticket.save()
-        return ticket
-
+   """Form for submitting and updating tickets."""
+  
+   class Meta:
+       model = Ticket
+       fields = ['ticket_type', 'description']
+       widgets = {
+           'description': forms.Textarea(attrs={'rows': 4}),
+       }
+       help_texts = {
+           'description': 'Please explain in detail your desired modification.',
+       }

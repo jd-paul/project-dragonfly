@@ -1,29 +1,26 @@
 {% extends 'base_content.html' %}
+{% load widget_tweaks %}
 {% block content %}
-<h1>Submit a Ticket</h1>
 
-<form method="post">
-    {% csrf_token %}
-    <div class="mb-3">
-        <label for="title" class="form-label">Ticket Title</label>
-        <input type="text" class="form-control" id="title" name="title" required>
-    </div>
 
-    <div class="mb-3">
-        <label for="category" class="form-label">Category</label>
-        <select class="form-select" id="category" name="category" required>
-            <option value="General">General</option>
-            <option value="Technical">Technical</option>
-            <option value="Payment">Payment</option>
-            <option value="Other">Other</option>
-        </select>
-    </div>
+<div class="layout">
+   {% include 'partials/sidebar.html' %}
 
-    <div class="mb-3">
-        <label for="description" class="form-label">Description</label>
-        <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
-    </div>
 
-    <button type="submit" class="btn btn-primary">Submit Ticket</button>
-</form>
+   <div class="content" style="background-color: #F0F0F0;">
+       <h2>
+           Request Modification for {{ enrollment.approved_request.skill.language }}
+           ({{ enrollment.approved_request.skill.get_level_display }})
+       </h2>
+
+
+       <form method="post">
+           {% csrf_token %}
+           {% include 'partials/bootstrap_form.html' with form=form %}
+           <button type="submit" class="btn btn-primary">Submit Request</button>
+       </form>
+   </div>
+</div>
+
+
 {% endblock %}

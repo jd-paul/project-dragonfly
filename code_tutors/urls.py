@@ -2,17 +2,17 @@
 URL configuration for code_tutors project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/4.2/topics/http/urls/
+   https://docs.djangoproject.com/en/4.2/topics/http/urls/
 Examples:
 Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
+   1. Add an import:  from my_app import views
+   2. Add a URL to urlpatterns:  path('', views.home, name='home')
 Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
+   1. Add an import:  from other_app.views import Home
+   2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
 Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+   1. Import the include() function: from django.urls import include, path
+   2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf import settings
 from django.conf.urls.static import static
@@ -31,7 +31,7 @@ urlpatterns = [
     path('sign_up/', views.SignUpView.as_view(), name='sign_up'),
     path('become_a_tutor/', views.TutorSignUpView.as_view(), name='tutor_signup'),
     path('tutor-application-success/', views.TutorApplicationSuccessView.as_view(), name='tutor_application_success'),
-    path('submit_ticket/', views.submit_ticket, name='submit_ticket'),
+    path('submit_ticket/<int:enrollment_id>/', views.submit_ticket, name='submit_ticket'),
     path('my_tickets/', views.my_tickets, name='my_tickets'),
 
 
@@ -44,12 +44,18 @@ urlpatterns = [
 
     path('lesson-request/<int:id>/', views.LessonRequestDetails, name='lesson_request_details'),
     path('update-request/<int:request_id>/<str:action>/', views.update_request_status, name='update_request_status'),
-
+    path('manage_lessons/', views.ManageLessons.as_view(), name='manage_lessons'),
+    
     #Student views
     path('offered_skill_list/', views.SkillListView.as_view(), name = 'offered_skill_list'),
     path('student_request_form/<int:skill_id>/', views.RequestLesson.as_view(), name = 'student_request_form'),
     path('your_requests/', views.YourRequestsView.as_view(), name = 'your_requests'),
     path('delete_your_request/<int:student_request_id>/', views.DeleteYourRequestView.as_view(), name = 'delete_your_request'),
     path('your_enrollments/', views.YourEnrollmentsView.as_view(), name = 'your_enrollments'),
+    path('invoice/<int:enrollment_id>/', views.InvoiceView.as_view(), name= 'invoice'),
+
+
+    #Tutor views
+    path('tutor_enrollments', views.TutorEnrollmentList.as_view(), name= 'tutor_enrollments'),
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

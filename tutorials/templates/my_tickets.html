@@ -1,33 +1,107 @@
-<!-- my_tickets.html -->
-{% extends 'base_content.html' %}
+  {% extends 'base_content.html' %}
+  {% block content %}
+  <head>
+    <style>
+        /* Primary card */
+        .card-primary {
+            border-left: 5px solid #0092ff;
+        }
+        /* Success card */
+        .card-success {
+            border-left: 5px solid #28a745;
+        }
+        /* Warning card */
+        .card-warning {
+            border-left: 5px solid #ffc107;
+        }
+        .card-danger {
+            border-left: 5px solid #e54d56;
+        }
+        /* General Pagination Styling */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 0;
+        }
+        .page-item {
+            border-radius: 0.25rem;
+            margin: 0;
+        }
+        .page-link {
+            border: 1px solid #0092ff;
+            padding: 8px 15px;
+            font-size: 14px;
+            color: #0092ff;
+            background-color: #fff;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .page-link:hover,
+        .page-link:focus {
+            background-color: #0092ff;
+            color: white;
+            border-color: #0056b3;
+        }
+        .page-item.active .page-link {
+            background-color: #0092ff;
+            color: white;
+            border-color: #0092ff;
+        }
+        .page-item.disabled .page-link {
+            color: #6c757d;
+            background-color: #e0e0e0;
+            border-color: #ddd;
+        }
+        .pagination .page-item {
+            border-radius: 5rem;
+        }
+        .pagination .page-link {
+            border-radius: 5rem;
+        }
+    </style>
+  </head>
 
-{% block content %}
-  <div class="container">
-    <h2>Your Tickets</h2>
 
-    {% if tickets %}
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Description</th>
-            <th>Status</th>
-            <th>Created At</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for ticket in tickets %}
-            <tr>
-              <td>{{ ticket.title }}</td>
-              <td>{{ ticket.description }}</td>
-              <td>{{ ticket.get_status_display }}</td>
-              <td>{{ ticket.created_at }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-      <p>You have not submitted any tickets yet.</p>
-    {% endif %}
+  <div class="layout">
+    {% include 'partials/sidebar.html' %}
+
+
+    <div class="content" style="background-color: #F0F0F0;">
+        <h2>Your Tickets</h2>
+        
+        <!-- Requests submitted by this student -->
+        <div class="container-fluid" style="padding: 0; margin: 0; padding-bottom: 1.5rem;">
+            
+            {% if tickets %}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                          <th>Ticket Type</th>
+                          <th>Description</th>
+                          <th>Status</th>
+                          <th>Created At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in tickets %}
+                        <tr>
+                          <td>{{ ticket.ticket_type }}</td>
+                          <td>{{ ticket.description }}</td>
+                          <td>{{ ticket.get_status_display }}</td>
+                          <td>{{ ticket.created_at }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                You have not submitted any tickets yet.
+            {% endif %}
+        </div>
+    </div>
   </div>
-{% endblock %}
+
+
+  {% endblock %}
