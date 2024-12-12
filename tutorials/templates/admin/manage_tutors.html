@@ -186,6 +186,7 @@
                         <th>Name</th>
                         <th>Email</th>
                         <th>Skills</th>
+                        <th>Hourly Rate</th>  <!-- Add this column header for hourly rate -->
                     </tr>
                 </thead>
                 <tbody>
@@ -194,12 +195,13 @@
                         <td>{{ current_tutor.get_full_name }}</td>
                         <td>{{ current_tutor.email }}</td>
                         <td>
-                            {% for skill in current_tutor.skills.all %}
-                            <span class="badge badge-success">{{ skill.language }}: {{ skill.level }}</span>
+                            {% for tutor_skill in current_tutor.skills.all %}
+                                <span class="badge badge-success">{{ tutor_skill.skill.language }}: {{ tutor_skill.skill.level }}</span>
                             {% empty %}
-                            <span>No skills added</span>
+                                <span>No skills added</span>
                             {% endfor %}
                         </td>
+                        <td>{{ current_tutor.skills.first.price_per_hour }} USD</td> <!-- Display hourly rate here -->
                     </tr>
                     {% empty %}
                     <tr>

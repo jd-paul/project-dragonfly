@@ -228,7 +228,7 @@ class ManageTutors(PaginatorMixin, View):
                 queryset=TutorSkill.objects.select_related('skill')
             )
         )
-   def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         """Display the list of tutors with pagination."""
         # Pending tutors
         pending_tutors = self.get_queryset()
@@ -771,6 +771,7 @@ class YourEnrollmentsView(View):
 class TutorSignUpView(LoginProhibitedMixin, FormView):
     form_class = TutorSignUpForm
     template_name = "tutor_sign_up.html"
+    redirect_when_logged_in_url = 'dashboard'  
 
     def form_valid(self, form):
         user = form.save()
@@ -834,4 +835,8 @@ def submit_ticket(request, enrollment_id):
 def my_tickets(request):
     """Display tickets submitted by the logged-in user."""
     tickets = Ticket.objects.filter(user=request.user)
+        # If no tickets are found, render with a message saying 'No tickets found'
+    if not tickets:
+        return render(request, 'my_tickets.html', {'tickets': tickets, 'message': 'No tickets found'})
+
     return render(request, 'my_tickets.html', {'tickets': tickets})
