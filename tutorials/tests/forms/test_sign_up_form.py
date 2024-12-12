@@ -1,4 +1,3 @@
-"""Unit tests of the sign up form."""
 from django.test import TestCase
 from tutorials.forms import TutorSignUpForm
 from tutorials.models import User, Skill, PendingTutor, UserType, SkillLevel
@@ -8,7 +7,7 @@ class TutorSignUpFormTest(TestCase):
     def setUp(self):
         """Setup any necessary objects for tests."""
         self.valid_data = {
-            'username': 'test_tutor',
+            'username': '@test_tutor',  # Updated to include '@'
             'first_name': 'Test',
             'last_name': 'Tutor',
             'email': 'test.tutor@example.com',
@@ -16,7 +15,7 @@ class TutorSignUpFormTest(TestCase):
             'price_per_hour': 25.00
         }
         self.invalid_data = {
-            'username': 'test_tutor',
+            'username': 'test_tutor',  # Invalid username without '@'
             'first_name': 'Test',
             'last_name': 'Tutor',
             'email': 'test.tutor@example.com',
@@ -97,7 +96,7 @@ class TutorSignUpFormTest(TestCase):
 
     def test_duplicate_username(self):
         """Test duplicate username validation."""
-        User.objects.create(username='test_tutor', email='existing@example.com')
+        User.objects.create(username='@test_tutor', email='existing@example.com')  # Updated to have '@'
         form = TutorSignUpForm(data=self.valid_data)
         self.assertFalse(form.is_valid(), "Form should be invalid with duplicate username.")
         self.assertIn('username', form.errors, "Error should be associated with 'username' field.")
