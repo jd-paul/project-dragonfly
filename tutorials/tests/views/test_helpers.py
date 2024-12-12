@@ -106,11 +106,22 @@ class LoginProhibitedDecoratorTestCase(TestCase, MenuTesterMixin):
 
     def test_menu_present_for_logged_in_user(self):
         """Test that the menu is present for a logged-in user."""
-        self.client.login(username='@studentuser', password='password123')
-        response = self.client.get(reverse('dashboard'))  # Replace with a real view name
+
+        # Force log in the user without checking the password
+        self.client.force_login(self.student)
+
+        # Make a request to the home view and follow redirects
+        response = self.client.get(reverse('home'), follow=True)
+
+        # Assert the response status code is 200 OK after following redirects
+        self.assertEqual(response.status_code, 200, "Expected a 200 OK status code after redirect.")
+
+        # Assert the menu is present in the final response
         self.assert_menu(response)
+
+
 
     def test_menu_not_present_for_anonymous_user(self):
         """Test that the menu is not present for an anonymous user."""
-        response = self.client.get(reverse('home'))  # Replace with your public view
+        response = self.client.get(reverse('home'))
         self.assert_no_menu(response)
