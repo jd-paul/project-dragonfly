@@ -1,67 +1,97 @@
 from django.test import TestCase
+from django.contrib.auth import get_user_model
 from django.utils import timezone
-from tutorials.models import Term, Skill, User, StudentRequest, Enrollment, Ticket
+from django.urls import reverse
+from tutorials.models import Skill, UserType, Enrollment, Ticket, TicketStatus, StudentRequest
 from tutorials.forms import TicketForm
 
 class TicketFormTest(TestCase):
-    def setUp(self):
-        # Create necessary objects
-        self.student = User.objects.create_user(
-            username='@studentuser', email='student@example.com', password='password123'
-        )
-        self.tutor = User.objects.create_user(
-            username='@tutoruser', email='tutor@example.com', password='password123'
-        )
 
-        # Create a skill for the enrollment
-        self.skill = Skill.objects.create(language="Python", level="Beginner")
+    def setUp(self):
+        # Create users
+        self.student = get_user_model().objects.create_user(
+            username="@studentuser", email="student@example.com", password="testpassword", user_type=UserType.STUDENT)
+        self.tutor = get_user_model().objects.create_user(
+            username="@tutoruser", email="tutor@example.com", password="testpassword", user_type=UserType.TUTOR)
+
+        # Create a skill
+        self.skill = Skill.objects.create(language="Math", level="Beginner")
 
         # Create a student request
-        student_request = StudentRequest.objects.create(
-            student=self.student,
-            skill=self.skill,
-            duration=60,
-            first_term=Term.SEPTEMBER_CHRISTMAS,
-            frequency="weekly"
-        )
+        self.student_request = StudentRequest.objects.create(
+            student=self.student, skill=self.skill, duration=60, first_term="September-Christmas", frequency="weekly")
 
-        # Create an enrollment instance
+        # Create an enrollment for the student
         self.enrollment = Enrollment.objects.create(
-            approved_request=student_request,
-            tutor=self.tutor,
-            current_term=Term.SEPTEMBER_CHRISTMAS,
-            week_count=10,
-            status="ongoing",
-            start_time=timezone.now()  # Ensure the start_time uses timezone.now()
-        )
+            approved_request=self.student_request, tutor=self.tutor, current_term="September-Christmas", 
+            week_count=10, start_time=timezone.now(), status="ongoing")
 
-        # Initialize the form data
-        self.valid_data = {
-            'ticket_type': 'cancellation',  # Example ticket type
-            'description': 'Test ticket description',  # Example description
-            'enrollment': self.enrollment  # Pass the valid enrollment object
+    def test_ticket_form_valid(self):
+        """Test that the form is valid with correct data."""
+        form_data = {
+            'ticket_type': 'cancellation',
+            'description': 'Request to cancel the session.',
+            'enrollment': self.enrollment.id,  # Ensure enrollment ID is passed correctly
         }
+        form = TicketForm(data=form_data)
 
-    def test_save_creates_ticket(self):
-        """Test that saving the form creates a Ticket object."""
-        form = TicketForm(data=self.valid_data)
-        self.assertTrue(form.is_valid())  # Ensure the form is valid
-        ticket = form.save()  # Save the form and create the ticket
-        self.assertEqual(Ticket.objects.count(), 1)  # Check if one ticket is created
-        self.assertEqual(ticket.enrollment, self.enrollment)  # Ensure ticket is associated with the correct enrollment
+        # Ensure the form is valid
+        self.assertTrue(form.is_valid())
 
-    def test_invalid_ticket_form_missing_description(self):
+        # Save the form and check that a ticket is created
+        ticket = form.save(commit=False)
+        ticket.enrollment = self.enrollment
+        ticket.user = self.student  # Assign the ticket to the student (requesting user)
+        ticket.status = TicketStatus.PENDING
+        ticket.save()
+
+        self.assertEqual(Ticket.objects.count(), 1)
+        self.assertEqual(ticket.ticket_type, 'cancellation')
+        self.assertEqual(ticket.description, 'Request to cancel the session.')
+        self.assertEqual(ticket.status, TicketStatus.PENDING)
+
+    def test_ticket_form_invalid_missing_description(self):
         """Test that the form is invalid if the description is missing."""
-        invalid_data = {
+        form_data = {
             'ticket_type': 'cancellation',
             'description': '',  # Missing description
-            'enrollment': self.enrollment
+            'enrollment': self.enrollment.id,
         }
-        form = TicketForm(data=invalid_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('description', form.errors)
+        form = TicketForm(data=form_data)
 
-    def test_valid_ticket_form(self):
-        """Test that the form is valid with correct data."""
-        form = TicketForm(data=self.valid_data)
-        self.assertTrue(form.is_valid())
+        # Ensure the form is invalid
+        self.assertFalse(form.is_valid())
+        self.assertIn('description', form.errors)  # The error should be for description
+
+    def test_ticket_form_invalid_enrollment(self):
+        """Test that the form is invalid if the enrollment doesn't exist or is incorrect."""
+        invalid_enrollment_id = 9999  # Assume this ID doesn't exist in the database
+        form_data = {
+            'ticket_type': 'change',
+            'description': 'Request to change the schedule.',
+            'enrollment': invalid_enrollment_id,
+        }
+        form = TicketForm(data=form_data)
+
+        # Ensure the form is invalid
+        self.assertFalse(form.is_valid())
+        self.assertIn('enrollment', form.errors)  # The error should be for enrollment not being valid
+
+    def test_ticket_form_invalid_user_permission(self):
+        """Test that a user who is neither the student nor tutor for the enrollment cannot submit a ticket."""
+        unauthorized_user = get_user_model().objects.create_user(
+            username="@unauthorized", email="unauthorized@example.com", password="testpassword", user_type=UserType.STUDENT)
+
+        form_data = {
+            'ticket_type': 'cancellation',
+            'description': 'Request to cancel the session.',
+            'enrollment': self.enrollment.id,
+        }
+        form = TicketForm(data=form_data)
+
+        # Simulate an unauthorized user submitting the form
+        self.client.login(username='unauthorized', password='testpassword')
+        response = self.client.post(reverse('submit_ticket', args=[self.enrollment.id]), data=form_data)
+
+        # The user should not be able to submit the ticket
+        self.assertEqual(response.status_code, 403)  # Expecting a Forbidden response

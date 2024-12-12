@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
-from .models import User, Skill, TutorSkill, UserType, StudentRequest, PendingTutor, Ticket, TicketStatus
+from .models import User, Skill, TutorSkill, UserType, StudentRequest, PendingTutor, Ticket, TicketStatus, Enrollment
 from django.core.exceptions import ValidationError
 from .models import StudentRequest, Skill, SkillLevel
 
@@ -188,16 +188,28 @@ class StudentRequestForm(forms.ModelForm):
             raise ValidationError("Duration must be at least 10 minutes.")
         return duration
 
-        
+
 class TicketForm(forms.ModelForm):
-   """Form for submitting and updating tickets."""
+    """Form for submitting and updating tickets."""
   
-   class Meta:
-       model = Ticket
-       fields = ['ticket_type', 'description']
-       widgets = {
-           'description': forms.Textarea(attrs={'rows': 4}),
-       }
-       help_texts = {
-           'description': 'Please explain in detail your desired modification.',
-       }
+    class Meta:
+        model = Ticket
+        fields = ['ticket_type', 'description', 'enrollment']  # Include enrollment field explicitly
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 4}),
+        }
+        help_texts = {
+            'description': 'Please explain in detail your desired modification.',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.pk:
+            # Ensure enrollment is set in the case of new tickets (if enrollment is not provided, it should raise an error)
+            self.fields['enrollment'].required = True
+
+    def clean_enrollment(self):
+        enrollment = self.cleaned_data.get('enrollment')
+        if enrollment and not Enrollment.objects.filter(id=enrollment.id).exists():
+            raise forms.ValidationError('Invalid enrollment.')
+        return enrollment
