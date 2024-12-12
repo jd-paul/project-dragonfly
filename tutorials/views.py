@@ -257,6 +257,48 @@ class ManageTutors(PaginatorMixin, View):
             'current_tutors_count': current_tutors_count  # Count of approved tutors
         }
         return render(request, self.template_name, context)
+    def post(self, request):
+        """Handle approval or rejection of tutor sign-ups."""
+        tutor_id = request.POST.get('tutor_id')
+        action = request.POST.get('action')
+
+
+        if not tutor_id or not action:
+            messages.error(request, "Invalid request.")
+            return redirect('manage_tutors')
+
+
+        pending_tutor = get_object_or_404(PendingTutor, id=tutor_id)
+
+
+        if action == 'approve':
+            # Move data from PendingTutor to actual models
+            user = pending_tutor.user
+            user.user_type = UserType.TUTOR  # Ensure the user type is set to TUTOR
+            user.is_active = True
+            user.save()
+
+
+            for skill in pending_tutor.skills.all():
+                TutorSkill.objects.create(tutor=user, skill=skill, price_per_hour=pending_tutor.price_per_hour)
+
+
+            pending_tutor.is_approved = True
+            pending_tutor.save()
+            messages.success(request, f"Tutor {user.get_full_name()} approved.")
+
+
+        elif action == 'reject':
+            # Reject the tutor by deleting the pending application
+            pending_tutor.delete()
+            messages.success(request, "Tutor request rejected.")
+
+
+        else:
+            messages.error(request, "Invalid action. Please try again.")
+
+
+        return redirect('manage_tutors')
 
 @method_decorator(login_required, name='dispatch')
 @method_decorator(user_passes_test(is_admin), name='dispatch')
