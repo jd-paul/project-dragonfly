@@ -164,17 +164,20 @@ class Invoice(models.Model):
 
     @property
     def subtotal(self):
-        self.week_count = self.enrollment.week_count
-        self.frequency = self.enrollment.approved_request.frequency
-        self.duration = self.enrollment.approved_request.duration
-        self.tutor_skill = self.enrollment.tutor.skills.get(skill=self.enrollment.approved_request.skill)
-        self.price_per_hour = self.tutor_skill.price_per_hour
-        frequency_map = {
-            Frequency.WEEKLY: 1,
-            Frequency.BI_WEEKLY: 0.5,
-        }
-        return Decimal(self.week_count) * Decimal(frequency_map.get(self.frequency)) * Decimal(self.duration/Decimal('60')) * Decimal(self.price_per_hour)
-
+        try:
+            week_count = self.enrollment.week_count
+            frequency = self.enrollment.approved_request.frequency
+            duration = self.enrollment.approved_request.duration
+            tutor_skill = self.enrollment.tutor.skills.get(skill=self.enrollment.approved_request.skill)
+            price_per_hour = tutor_skill.price_per_hour
+            frequency_map = {
+                Frequency.WEEKLY: 1,
+                Frequency.BI_WEEKLY: 0.5,
+            }
+            return Decimal(week_count) * Decimal(frequency_map.get(frequency)) * Decimal(duration/Decimal('60')) * Decimal(price_per_hour)
+        except (Enrollment.DoesNotExist, StudentRequest.DoesNotExist, TutorSkill.DoesNotExist) as e:
+            # Handle exceptions
+            return Decimal('0.00')
     
     def clean(self):
         super().clean()
@@ -184,7 +187,7 @@ class Invoice(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
-    
+
 class PendingTutor(models.Model):
     """Model to store pending tutor applications before admin approval."""
 

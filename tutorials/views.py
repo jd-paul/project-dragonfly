@@ -19,6 +19,7 @@ from django.db.models import Q
 from django.db.models import Case, When, Value, IntegerField
 from django.db.models import Prefetch
 from datetime import timedelta
+from django.http import HttpResponseNotFound
 
 @login_required
 def dashboard(request):
@@ -632,27 +633,32 @@ class ManageTickets(View):
 @method_decorator(login_required, name='dispatch')
 @method_decorator(user_passes_test(is_student), name='dispatch')
 class InvoiceView(View):
-   """Display invoice to student"""
-   template_name = 'student/invoice.html'
-
-   def get(self, request, enrollment_id):
-       """Display the list of tutors with pagination."""
+    """Display invoice to student"""
+    template_name = 'student/invoice.html'
 
 
-       enrollment = Enrollment.objects.get(id=enrollment_id)
-       context = {
-           'student': enrollment.approved_request.student,
-           'tutor': enrollment.tutor,
-           'start_time': enrollment.start_time,
-           'term': enrollment.current_term,
-           'frequecy': enrollment.approved_request.frequency,
-           'amount': enrollment.invoice.subtotal,
-           'tutor_skill': enrollment.tutor.skills.get(skill=enrollment.approved_request.skill)
+    def get(self, request, enrollment_id):
+        """Display the invoice details for a student."""
+        enrollment = get_object_or_404(Enrollment, id=enrollment_id)
+        if enrollment.approved_request.student != request.user:
+            raise PermissionDenied("You do not have permission to view this invoice.")
+        try:
+            invoice = enrollment.invoice
+        except Invoice.DoesNotExist:
+            return HttpResponseNotFound("Invoice does not exist for this enrollment.")
 
 
-       }
-       return render(request, self.template_name, context)
-  
+        context = {
+            'student': enrollment.approved_request.student,
+            'tutor': enrollment.tutor,
+            'start_time': enrollment.start_time,
+            'term': enrollment.current_term,
+            'frequency': enrollment.approved_request.frequency,
+            'amount': invoice.subtotal,
+            'tutor_skill': enrollment.tutor.skills.get(skill=enrollment.approved_request.skill).skill
+        }
+        return render(request, self.template_name, context)
+
 """
 Student View Functions
 """
