@@ -1,10 +1,9 @@
 from django.test import TestCase
 from django.urls import reverse
-from tutorials.models import User, Enrollment, Skill, StudentRequest
+from tutorials.models import User, Enrollment, Skill, StudentRequest, UserType, Frequency, Term
 from django.utils.timezone import localtime
 import random
 import string
-from tutorials.models import User, UserType, Frequency, Term
 
 def generate_unique_username():
     """Generate a unique username to avoid conflicts."""
@@ -14,10 +13,8 @@ def generate_unique_email():
     """Generate a unique email to avoid conflicts."""
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k=10)) + '@example.com'
 
-
 # Fixed time for all tests
 fixed_time = localtime()
-
 
 class ManageLessonsViewTestCase(TestCase):
     def setUp(self):
@@ -178,3 +175,105 @@ class ManageLessonsViewTestCase(TestCase):
         self.assertEqual(len(lessons.object_list), 0)
         self.assertEqual(lessons.paginator.count, 0)
 
+    # -------------------------
+    # New Exception Handling Tests
+    # -------------------------
+
+    def test_manage_lessons_pagination_page_not_integer(self):
+        """Test that providing a non-integer page number defaults to page 1."""
+        self.client.login(username=self.admin_user.username, password='admin_password123')
+        
+        # Ensure there are enough enrollments for multiple pages
+        for _ in range(15):  # Creating 15 enrollments; paginate_by=10
+            Enrollment.objects.create(
+                approved_request=self.student_request,
+                tutor=self.tutor_user,
+                current_term=self.student_request.first_term,
+                week_count=4,
+                start_time=fixed_time,
+                status='ongoing'
+            )
+        
+        # Pass a non-integer page value
+        response = self.client.get(self.url, {'page': 'abc'})
+        self.assertEqual(response.status_code, 200)
+        
+        lessons = response.context['lessons']
+        
+        # Expecting the first page with the first 10 enrollments
+        expected_lessons = Enrollment.objects.order_by('-created_at')[:10]
+        self.assertQuerySetEqual(
+            lessons.object_list,
+            expected_lessons,
+            transform=lambda x: x,
+            ordered=True,
+            msg="The view did not return the expected lessons when page is not an integer."
+        )
+
+    def test_manage_lessons_pagination_empty_page(self):
+        """Test that providing a page number out of range returns the last page."""
+        self.client.login(username=self.admin_user.username, password='admin_password123')
+
+        for _ in range(15):
+            Enrollment.objects.create(
+                approved_request=self.student_request,
+                tutor=self.tutor_user,
+                current_term=self.student_request.first_term,
+                week_count=4,
+                start_time=fixed_time,
+                status='ongoing'
+            )
+
+        # Pass an out-of-range page value to trigger EmptyPage exception
+        response = self.client.get(self.url, {'page': 999})
+        self.assertEqual(response.status_code, 200)
+
+        lessons = response.context['lessons']
+
+        # Expecting the last page with the remaining 7 enrollments
+        expected_lessons = Enrollment.objects.order_by('-created_at')[10:17]
+        self.assertQuerySetEqual(
+            lessons.object_list,
+            expected_lessons,
+            transform=lambda x: x,
+            ordered=True,
+            msg="The view did not return the expected lessons when page is out of range."
+        )
+
+    def test_manage_lessons_post_invalid_action(self):
+        """Test that providing an invalid action returns an error message."""
+        self.client.login(username=self.admin_user.username, password='admin_password123')
+        response = self.client.post(self.url, {
+            'lesson_id': self.ongoing_enrollment.id,
+            'action': 'invalid_action'  # Invalid action
+        })
+        self.assertRedirects(response, self.url)
+        
+        # Check that an error message was added
+        messages = list(response.wsgi_request._messages)
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), "Invalid action or lesson status.")
+        
+        # Ensure lesson status has not changed
+        self.ongoing_enrollment.refresh_from_db()
+        self.assertEqual(self.ongoing_enrollment.status, 'ongoing')
+
+    def test_manage_lessons_post_invalid_lesson_status(self):
+        """Test that cancelling a lesson that is not ongoing returns an error message."""
+        self.client.login(username=self.admin_user.username, password='admin_password123')
+        
+        # Attempt to cancel a lesson that is already 'cancelled'
+        response = self.client.post(self.url, {
+            'lesson_id': self.cancelled_enrollment.id,
+            'action': 'cancel'  # Valid action but invalid status
+        })
+        self.assertRedirects(response, self.url)
+        
+        # Check that an error message was added
+        messages = list(response.wsgi_request._messages)
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), "Invalid action or lesson status.")
+        
+        # Ensure lesson status has not changed
+        self.cancelled_enrollment.refresh_from_db()
+        self.assertEqual(self.cancelled_enrollment.status, 'cancelled')

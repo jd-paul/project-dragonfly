@@ -149,6 +149,20 @@ class ManageApplicationsTests(TestCase):
             [self.request1, self.request2]
         )
 
+    def test_sort_by_status_else_clause(self):
+        """Test sorting requests by status with an invalid order, triggering the else clause."""
+        self.client.login(username='@adminuser', password='Password123')
+        # Use an invalid order value to trigger the else clause
+        response = self.client.get(self.url, {'sort_by': 'status', 'order': 'default'})
+        self.assertEqual(response.status_code, 200)
+        # Expected ordering based on the else clause:
+        # 'rejected' (none in setup), 'approved', then 'pending'
+        self.assertEqual(
+            list(response.context['student_requests']),
+            [self.request2, self.request1]
+        )
+
+
     def test_sort_by_created_at_asc(self):
         """Test sorting requests by creation date in ascending order."""
         self.client.login(username='@adminuser', password='Password123')
@@ -169,4 +183,66 @@ class ManageApplicationsTests(TestCase):
         self.assertEqual(
             list(response.context['student_requests']),
             [self.request2, self.request1]
+        )
+
+    def test_search_by_first_name(self):
+        """Test that searching by student's first name returns the correct request."""
+        self.client.login(username='@adminuser', password='Password123')
+        search_query = 'John'  # Matches student1's first name
+        response = self.client.get(self.url, {'search': search_query})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.request1, response.context['student_requests'])
+        self.assertNotIn(self.request2, response.context['student_requests'])
+        self.assertEqual(len(response.context['student_requests']), 1)
+
+    def test_search_by_last_name(self):
+        """Test that searching by student's last name returns the correct request."""
+        self.client.login(username='@adminuser', password='Password123')
+        search_query = 'Smith'  # Matches student2's last name
+        response = self.client.get(self.url, {'search': search_query})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.request2, response.context['student_requests'])
+        self.assertNotIn(self.request1, response.context['student_requests'])
+        self.assertEqual(len(response.context['student_requests']), 1)
+
+    def test_search_no_results(self):
+        """Test that searching with a query that matches no requests returns no results."""
+        self.client.login(username='@adminuser', password='Password123')
+        search_query = 'Nonexistent'  # No student has this name
+        response = self.client.get(self.url, {'search': search_query})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['student_requests']), 0)
+
+    def test_search_partial_match(self):
+        """Test that a partial search query returns matching requests."""
+        self.client.login(username='@adminuser', password='Password123')
+        search_query = 'Ali'  # Partial match for 'Alice'
+        response = self.client.get(self.url, {'search': search_query})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.request2, response.context['student_requests'])
+        self.assertNotIn(self.request1, response.context['student_requests'])
+        self.assertEqual(len(response.context['student_requests']), 1)
+
+    def test_page_not_integer(self):
+        """Test that providing a non-integer page number defaults to page 1."""
+        self.client.login(username='@adminuser', password='Password123')
+        response = self.client.get(self.url, {'page': 'abc'})
+        self.assertEqual(response.status_code, 200)
+        # Since there's only one page, both requests should return [request1, request2]
+        self.assertEqual(
+            list(response.context['student_requests']),
+            [self.request1, self.request2],
+            "The view did not return the expected student requests when page is not an integer."
+        )
+        
+    def test_page_out_of_range(self):
+        """Test that providing a page number out of range returns the last page."""
+        self.client.login(username='@adminuser', password='Password123')
+        response = self.client.get(self.url, {'page': 999})
+        self.assertEqual(response.status_code, 200)
+        # Since there's only one page, it should still return [request1, request2]
+        self.assertEqual(
+            list(response.context['student_requests']),
+            [self.request1, self.request2],
+            "The view did not return the expected student requests when page is out of range."
         )
