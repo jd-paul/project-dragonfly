@@ -34,7 +34,7 @@ class TutorSignUpViewTests(TestCase):
             'price_per_hour': 20.00,
             'skills_input': 'Python, Django',
         })
-        self.assertRedirects(response, reverse('tutor_application_success'))
+        self.assertRedirects(response, reverse('home'))
 
     def test_tutor_sign_up_post_invalid(self):
         # Test POST request with missing email

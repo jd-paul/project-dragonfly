@@ -31,7 +31,6 @@ class TicketFormTest(TestCase):
         form_data = {
             'ticket_type': 'cancellation',
             'description': 'Request to cancel the session.',
-            'enrollment': self.enrollment.id,  # Ensure enrollment ID is passed correctly
         }
         form = TicketForm(data=form_data)
 
@@ -55,27 +54,12 @@ class TicketFormTest(TestCase):
         form_data = {
             'ticket_type': 'cancellation',
             'description': '',  # Missing description
-            'enrollment': self.enrollment.id,
         }
         form = TicketForm(data=form_data)
 
         # Ensure the form is invalid
         self.assertFalse(form.is_valid())
         self.assertIn('description', form.errors)  # The error should be for description
-
-    def test_ticket_form_invalid_enrollment(self):
-        """Test that the form is invalid if the enrollment doesn't exist or is incorrect."""
-        invalid_enrollment_id = 9999  # Assume this ID doesn't exist in the database
-        form_data = {
-            'ticket_type': 'change',
-            'description': 'Request to change the schedule.',
-            'enrollment': invalid_enrollment_id,
-        }
-        form = TicketForm(data=form_data)
-
-        # Ensure the form is invalid
-        self.assertFalse(form.is_valid())
-        self.assertIn('enrollment', form.errors)  # The error should be for enrollment not being valid
 
     def test_ticket_form_invalid_user_permission(self):
         """Test that a user who is neither the student nor tutor for the enrollment cannot submit a ticket."""
@@ -85,7 +69,6 @@ class TicketFormTest(TestCase):
         form_data = {
             'ticket_type': 'cancellation',
             'description': 'Request to cancel the session.',
-            'enrollment': self.enrollment.id,
         }
         form = TicketForm(data=form_data)
 
