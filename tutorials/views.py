@@ -493,7 +493,7 @@ class ManageLessons(View):
 
         # Add any counts or additional context if needed
         ongoing_count = Enrollment.objects.filter(status='ongoing').count()
-        ended_count = Enrollment.objects.filter(status='ended').count()
+        cancelled_count = Enrollment.objects.filter(status='cancelled').count()
 
         context = {
             'lessons': student_lessons,
@@ -501,7 +501,7 @@ class ManageLessons(View):
             'search_query': search_query,
             'status_filter': status_filter,
             'ongoing_count': ongoing_count,
-            'ended_count': ended_count,
+            'cancelled_count': cancelled_count,
         }
 
         return render(request, self.template_name, context)
@@ -515,10 +515,10 @@ class ManageLessons(View):
 
         lesson = get_object_or_404(Enrollment, id=lesson_id)
 
-        if action == 'end' and lesson.status == 'ongoing':
-            lesson.status = 'ended'
+        if action == 'cancel' and lesson.status == 'ongoing':
+            lesson.status = 'cancelled'
             lesson.save()
-            messages.success(request, f"Lesson {lesson.id} has been marked as ended.")
+            messages.success(request, f"Lesson {lesson.id} has been marked as cancelled.")
         else:
             messages.error(request, "Invalid action or lesson status.")
 
