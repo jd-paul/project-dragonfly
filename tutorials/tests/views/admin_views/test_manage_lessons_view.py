@@ -83,13 +83,13 @@ class ManageLessonsViewTestCase(TestCase):
             start_time=fixed_time,
             status='ongoing'
         )
-        self.ended_enrollment = Enrollment.objects.create(
+        self.cancelled_enrollment = Enrollment.objects.create(
             approved_request=self.student_request,
             tutor=self.tutor_user,
             current_term=self.student_request.first_term,
             week_count=8,
             start_time=fixed_time,
-            status='ended'
+            status='cancelled'
         )
 
         # URL
@@ -121,7 +121,7 @@ class ManageLessonsViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         lessons = response.context['lessons']
         self.assertIn(self.ongoing_enrollment, lessons)
-        self.assertIn(self.ended_enrollment, lessons)
+        self.assertIn(self.cancelled_enrollment, lessons)
 
     def test_manage_lessons_status_filter(self):
         """Test filtering lessons by status."""
@@ -130,7 +130,7 @@ class ManageLessonsViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         lessons = response.context['lessons']
         self.assertIn(self.ongoing_enrollment, lessons)
-        self.assertNotIn(self.ended_enrollment, lessons)
+        self.assertNotIn(self.cancelled_enrollment, lessons)
 
     def test_manage_lessons_pagination(self):
         """Test pagination for lessons."""
@@ -150,18 +150,18 @@ class ManageLessonsViewTestCase(TestCase):
         lessons = response.context['lessons']
         self.assertTrue(lessons.paginator.num_pages > 1)
 
-    def test_manage_lessons_post_end_lesson(self):
-        """Test ending a lesson by admin."""
+    def test_manage_lessons_post_cancel_lesson(self):
+        """Test cancelling a lesson by admin."""
         self.client.login(username=self.admin_user.username, password='admin_password123')
         response = self.client.post(self.url, {
             'lesson_id': self.ongoing_enrollment.id,
-            'action': 'end'
+            'action': 'cancel'
         })
         self.assertRedirects(response, self.url)
 
         # Verify that the lesson status has been updated
         self.ongoing_enrollment.refresh_from_db()
-        self.assertEqual(self.ongoing_enrollment.status, 'ended')
+        self.assertEqual(self.ongoing_enrollment.status, 'cancelled')
 
     def test_manage_lessons_search_non_existent_student(self):
         """Test searching for a non-existent student."""

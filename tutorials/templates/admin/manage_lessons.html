@@ -80,7 +80,7 @@
     {% include 'partials/sidebar.html' %}
 
     <div class="content" style="background-color: #F0F0F0;">
-        <h2>Lesson Management Page</h2>
+        <h2>Enrollment Management Page</h2>
         <h5 class="h5">{{ user.first_name }} {{ user.last_name }}</h5>
 
         <!-- Quick dashboard information -->
@@ -98,14 +98,14 @@
                     </div>
                 </div>
 
-                <!-- Ended Lessons -->
+                <!-- Cancelled Lessons -->
                 <div class="col-lg-4 col-md-6 col-sm-12 d-flex px-2">
                     <div class="card card-danger shadow-sm py-2 w-100">
                         <div class="card-body">
                             <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                                Ended Lessons
+                                Cancelled Lessons
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ ended_count }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ cancelled_count }}</div>
                         </div>
                     </div>
                 </div>
@@ -137,7 +137,7 @@
                         <select name="status" class="form-control">
                             <option value="">All Statuses</option>
                             <option value="ongoing" {% if status_filter == "ongoing" %}selected{% endif %}>Ongoing</option>
-                            <option value="ended" {% if status_filter == "ended" %}selected{% endif %}>Cancelled</option>
+                            <option value="cancelled" {% if status_filter == "cancelled" %}selected{% endif %}>Cancelled</option>
                         </select>
                     </div>
                     <div class="col-auto">
@@ -170,8 +170,8 @@
                             <form method="post" action="{% url 'manage_lessons' %}">
                                 {% csrf_token %}
                                 <input type="hidden" name="lesson_id" value="{{ lesson.id }}">
-                                <input type="hidden" name="action" value="end">
-                                <button type="submit" class="btn btn-sm btn-danger">End</button>
+                                <input type="hidden" name="action" value="cancel">
+                                <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
                             </form>
                             {% endif %}
                         </td>
