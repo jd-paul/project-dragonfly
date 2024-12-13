@@ -830,7 +830,8 @@ class TutorSignUpView(LoginProhibitedMixin, FormView):
         return super().form_invalid(form)
 
     def get_success_url(self):
-        return reverse('tutor_application_success')
+        messages.add_message(self.request, messages.SUCCESS, "Your application to become a tutor has been submitted! We will review your application and get back to you soon.")
+        return reverse('home')
 
 class TutorApplicationSuccessView(View):
     def get(self, request, *args, **kwargs):
@@ -870,7 +871,7 @@ def submit_ticket(request, enrollment_id):
             ticket.save()
 
             messages.success(request, "Your ticket has been submitted successfully.")
-            return redirect('dashboard')  # Redirect to a success page or home page
+            return redirect('dashboard') 
 
         else:
             messages.error(request, "There was an error with your ticket submission. Please try again.")
