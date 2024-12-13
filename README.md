@@ -1,4 +1,4 @@
-# Team *enter team name here* Small Group project
+# Team Dragonfly Small Group project
 
 ## Team members
 The members of the team are:
@@ -8,10 +8,22 @@ The members of the team are:
 - John Paul San Diego
 
 ## Project structure
-The project is called `task_manager`.  It currently consists of a single app `tasks`.
+The project is called `code_tutors`.  It currently consists of a single app `tutorials`.
 
 ## Deployed version of the application
-The deployed version of the application can be found at [*enter url here*](*enter_url_here*).
+The deployed version of the application can be found at [https://jpaul.pythonanywhere.com/](https://jpaul.pythonanywhere.com/).
+
+admin credentials:
+username: @johndoe
+password: Password123
+
+student credentials:
+username: @charlie
+password: Password123
+
+tutor credentials:
+username: @janedoe
+password: Password123
 
 ## Installation instructions
 To install the software and use it in your local development environment, you must first set up and activate a local development environment.  From the root of the project:
@@ -49,4 +61,6 @@ $ python3 manage.py test
 ## Sources
 The packages used by this application are specified in `requirements.txt`
 
-*Declare are other sources here, and remove this line*
+## Disclosure of AI Assistance
+We utilized OpenAI's ChatGPT to assist in generating some of the test cases for the application. The AI tool provided initial test case structures, which we then validated and implemented by ourselves to ensure their effectiveness and alignment with the project objectives.
+
