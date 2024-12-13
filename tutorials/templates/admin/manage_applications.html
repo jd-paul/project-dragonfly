@@ -156,12 +156,12 @@
                             <a href="?sort_by=created_at&order={% if order == 'asc' %}desc{% else %}asc{% endif %}">Created At</a>
                         </th>
                         <th>
-                            <a href="?sort_by=status&order={% if request.GET.order == 'asc_pending' %}asc_accepted{% elif request.GET.order == 'asc_accepted' %}asc_rejected{% elif request.GET.order == 'asc_rejected' %}default{% else %}asc_pending{% endif %}">
+                            <a href="?sort_by=status&order={% if request.GET.order == 'asc_pending' %}asc_approved{% elif request.GET.order == 'asc_approved' %}asc_rejected{% elif request.GET.order == 'asc_rejected' %}default{% else %}asc_pending{% endif %}">
                                 Status
                                 <small>
                                     {% if request.GET.order == 'asc_pending' %}
                                         (Pending First)
-                                    {% elif request.GET.order == 'asc_accepted' %}
+                                    {% elif request.GET.order == 'asc_approved' %}
                                         (Accepted First)
                                     {% elif request.GET.order == 'asc_rejected' %}
                                         (Rejected First)

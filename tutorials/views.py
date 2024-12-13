@@ -367,7 +367,7 @@ class ManageApplications(View):
                             output_field=IntegerField()
                         )
                     )
-                elif order == 'asc_accepted':
+                elif order == 'asc_approved':
                     requests = requests.order_by(
                         Case(
                             When(status='approved', then=Value(1)),
