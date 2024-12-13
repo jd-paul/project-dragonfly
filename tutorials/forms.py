@@ -191,25 +191,12 @@ class StudentRequestForm(forms.ModelForm):
 
 class TicketForm(forms.ModelForm):
     """Form for submitting and updating tickets."""
-  
     class Meta:
         model = Ticket
-        fields = ['ticket_type', 'description', 'enrollment']  # Include enrollment field explicitly
+        fields = ['ticket_type', 'description']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),
         }
         help_texts = {
             'description': 'Please explain in detail your desired modification.',
         }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if not self.instance.pk:
-            # Ensure enrollment is set in the case of new tickets (if enrollment is not provided, it should raise an error)
-            self.fields['enrollment'].required = True
-
-    def clean_enrollment(self):
-        enrollment = self.cleaned_data.get('enrollment')
-        if enrollment and not Enrollment.objects.filter(id=enrollment.id).exists():
-            raise forms.ValidationError('Invalid enrollment.')
-        return enrollment
