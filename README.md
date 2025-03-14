@@ -1,4 +1,4 @@
-# Team Dragonfly Small Group project
+# Coding Tutors – Django-powered multi-role management system
 
 ## Team members
 The members of the team are:
